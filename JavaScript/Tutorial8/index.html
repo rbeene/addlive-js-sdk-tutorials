@@ -32,41 +32,40 @@
 
   <h2 id="tutorialSubTitle">Screen sharing</h2>
 
-
-  <!-- Beginning of the user controls section -->
-  <div id="tut4CtrlWrapper" class="controls-wrapper">
-
-    <div class="controls-wrapper">
-
-      <!--Connect disconnect buttons -->
-      <div class="ctrl-wrapper">
-        <a id="connectBtn" href="javascript://nop"
-           class="btn btn-primary disabled">Connect</a>
-        <a id="disconnectBtn" href="javascript://nop"
-           class="btn btn-danger disabled">Disconnect</a>
-      </div>
-
-      <!--Screen capture source selection -->
-      <div class="ctrl-wrapper">
-        <div id="screenShareSources">Loading...</div>
-        <div class="clearer"></div>
-      </div>
-
-    </div>
-  </div>
-  <!-- End of the user controls section -->
-
   <!-- Beginning of the video feeds rendering section -->
   <div class="rendering-wrapper">
     <div class="render-widget">
       <div>
         Remote user screen (user id: <span id="remoteUserIdLbl">undefined</span>)
       </div>
-      <div id="renderRemoteUser" class="render-wrapper"></div>
+      <div id="renderRemoteUser" class="render-wrapper-big"></div>
     </div>
     <div class="clearer"></div>
   </div>
   <!-- End of the video feeds rendering section -->
+
+  <!-- Beginning of the user controls section -->
+  <div id="tut4CtrlWrapper" class="controls-wrapper">
+
+    <div class="controls-wrapper">
+  
+      <!-- Refresh button -->
+      <div class="ctrl-wrapper">
+        <a id="refreshBtn" href="javascript://nop"
+           class="btn btn-primary disabled">Refresh</a>
+      </div>
+
+      <!--Screen capture source selection -->
+      <div class="ctrl-wrapper">
+          <div class="scr-share-src-wrapper">
+              <ul class="scr-share-src-list" id="screenShareSources">Loading...</ul>
+          </div>
+        <div class="clearer"></div>
+      </div>
+
+    </div>
+  </div>
+  <!-- End of the user controls section -->
 
 </div>
 <div id="logsContainer"></div>

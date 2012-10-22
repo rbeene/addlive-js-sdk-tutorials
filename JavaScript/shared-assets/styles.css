@@ -186,3 +186,34 @@ h2#tutorialSubTitle {
 .msg-itm .direct-indicator.hidden {
     visibility: hidden;
 }
+
+.render-wrapper-big {
+    width: 640px;
+    height: 480px;
+    padding: 5px;
+    border: 1px solid #333;
+    background: #999;
+}
+
+.scr-share-src-wrapper {
+    height: 300px;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    white-space: nowrap;
+}
+
+ul.scr-share-src-list {
+    list-style-type: none;
+    white-space: nowrap;
+    margin-right: -999em;
+}
+
+li.scr-share-src-itm {
+    float: left;
+    list-style-type: none;
+    padding: 5px;
+}
+
+li.selected {
+    background: #DDD;
+}

@@ -44,6 +44,7 @@ CDOT.CONNECTION_CONFIGURATION = {
 };
 
 CDOT.isConnected = false;
+CDOT.sharedItemId = null;
 
 
 /**
@@ -58,7 +59,8 @@ CDOT.onDomReady = function () {
 CDOT.onPlatformReady = function () {
   log.debug('Cloudeo Platform ready.');
   CDOT.initServiceListener();
-  CDOT.initScreenShareSources();
+  CDOT.refreshScreenShareSources();
+  CDOT.connect();
 };
 
 CDOT.initServiceListener = function () {
@@ -88,21 +90,13 @@ CDOT.initServiceListener = function () {
   listener.onUserEvent = handlePublishEvent;
   listener.onMediaStreamEvent = handlePublishEvent;
 
-  // Define result handler that will enable the connect button
-  var onSucc = function () {
-    $('#connectBtn').click(CDOT.connect).removeClass('disabled');
-  };
-
   // Register the listener using created instance and prepared result handler.
-  CDO.getService().addServiceListener(CDO.createResponder(onSucc), listener);
+  CDO.getService().addServiceListener(CDO.createResponder(), listener);
 
 };
 
-CDOT.connect = function (successCallback) {
+CDOT.connect = function () {
   log.debug('Establishing a connection to the Cloudeo Streaming Server');
-
-  // Disable the connect button to avoid connects cascade
-  $('#connectBtn').unbind('click').addClass('disabled');
 
   // Prepare the connection descriptor by cloning the configuration and
   // updating the URL and the token.
@@ -112,18 +106,13 @@ CDOT.connect = function (successCallback) {
 
   // Define the result handler
   var onSucc = function () {
-    log.debug('Connected. Disabling connect button and enabling the disconnect');
     CDOT.isConnected = true;
-    $('#disconnectBtn').click(CDOT.disconnect).removeClass('disabled');
-    if(successCallback)
-        successCallback();
   };
 
   // Define the error handler
   var onErr = function (errCode, errMessage) {
     log.error('Failed to establish the connection due to: ' + errMessage +
                   '(err code: ' + errCode + ')');
-    $('#connectBtn').click(CDOT.connect).removeClass('disabled');
   };
 
   // Request the SDK to establish the connection
@@ -137,8 +126,6 @@ CDOT.disconnect = function () {
   var onSucc = function () {
     log.debug('Connection terminated');
     CDOT.isConnected = false;
-    $('#connectBtn').click(CDOT.connect).removeClass('disabled');
-    $('#disconnectBtn').unbind('click').addClass('disabled');
     $('#renderRemoteUser').empty();
     $('#remoteUserIdLbl').html('undefined');
   };
@@ -147,13 +134,14 @@ CDOT.disconnect = function () {
   CDO.getService().disconnect(CDO.createResponder(onSucc), CDOT.SCOPE_ID);
 };
 
-CDOT.initScreenShareSources = function() {
+CDOT.refreshScreenShareSources = function() {
+  $('#refreshBtn').unbind('click').addClass('disabled');
   CDO.getService().getScreenCaptureSources(CDO.createResponder(CDOT.showScreenShareSources), 320);
 };
 
-CDOT.publishShareItem = function(shareItem) {
+CDOT.publishShareItem = function(shareItemId) {
   if(CDOT.isConnected) {
-    log.debug('Publishing screen share: ' + shareItem.id);
+    log.debug('Publishing screen share: ' + shareItemId);
     var onSucc = function() {
       log.debug('Screen share source published');
     };
@@ -165,10 +153,27 @@ CDOT.publishShareItem = function(shareItem) {
     CDO.getService().publish(CDO.createResponder(onSucc, onErr),
                              CDOT.SCOPE_ID,
                              CDO.MediaType.SCREEN,
-                             {'windowId': shareItem.id});
+                             {'windowId': shareItemId});
   } else {
     log.error('Connection needed to share screen.');
   }
+};
+
+CDOT.unpublishShareItem = function(callback) {
+  log.debug('Unpublishing screen share');
+  var onSucc = function() {
+    log.debug('Screen share source unpublished');
+    if(callback)
+      callback();
+  };
+  var onErr = function() {
+    log.error('Screen share source unpublishing failed');
+  };
+
+  // Request the SDK to unpublish screen source
+  CDO.getService().unpublish(CDO.createResponder(onSucc, onErr),
+                             CDOT.SCOPE_ID,
+                             CDO.MediaType.SCREEN);
 };
 
 CDOT.showScreenShareSources = function(sources) {
@@ -179,12 +184,17 @@ CDOT.showScreenShareSources = function(sources) {
 
   // Iterate through all the screen sharing sources given
   for(var i = 0; i < sources.length; i++) {
-    // Create a <li> wrapper for each one
-    var srcWrapper = document.createElement('div');
-    srcWrapper.id = 'shareItm' + i;
-
     // Get the current share item
     var src = sources[i];
+
+    // Create a <li> wrapper for each one
+    var srcWrapper = document.createElement('li');
+    srcWrapper.classList.add('scr-share-src-itm');
+
+    // Mark as selected if was shared before
+    if(CDOT.sharedItemId == src.id)
+      srcWrapper.classList.add('selected');
+    srcWrapper.id = 'shareItm' + i;
 
     // Create image for showing the screen grab preview
     var image = document.createElement('img');
@@ -213,12 +223,39 @@ CDOT.showScreenShareSources = function(sources) {
     // Register click handler to publish the screen
     srcWrapper.shareItem = src;
     srcWrapper.onclick = function(){
-      CDOT.publishShareItem(this.shareItem);
+      if(this.classList.contains('selected')) {
+        // Unpublishing
+        this.classList.remove('selected');
+        CDOT.sharedItemId = null;
+        CDOT.unpublishShareItem();
+      } else {
+        // Publish
+        // Update selection status
+        $('.scr-share-src-itm').removeClass('selected');
+        this.classList.add('selected');
+
+        // Create callback for publishing
+        // It is run after successful CDO.unpublish
+        // of directly (if nothing is published)
+        var shareItemId = this.shareItem.id;
+        var publishCallback = function() {
+          CDOT.sharedItemId = shareItemId;
+          CDOT.publishShareItem(shareItemId);
+        }
+        
+        if(CDOT.sharedItemId !== null)
+          CDOT.unpublishShareItem(publishCallback);
+        else
+          publishCallback();
+      }
     };
 
     // Finally append the node
     srcsList.appendChild(srcWrapper);
   }
+
+  // Enable refresh button
+  $('#refreshBtn').click(CDOT.refreshScreenShareSources).removeClass('disabled');
 };
 
 
