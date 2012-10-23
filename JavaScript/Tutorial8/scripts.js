@@ -49,6 +49,8 @@ CDOT.SCREEN_SHARING_SRC_PRV_HEIGHT = 160;
 CDOT.isConnected = false;
 CDOT.sharedItemId = null;
 
+//  Create the list item renderer template
+CDOT.SCREEN_SHARING_ITM_WIDGET_TMPL = null;
 
 /**
  * Document ready callback - starts the Cloudeo platform initialization.
@@ -57,6 +59,11 @@ CDOT.onDomReady = function () {
   log.debug('DOM loaded');
   CDOT.initCloudeoLogging();
   CDOT.initializeCloudeoQuick(CDOT.onPlatformReady);
+  CDOT.SCREEN_SHARING_ITM_WIDGET_TMPL = $(
+      '<li class="scr-share-src-itm">' +
+          '<img src="/shared-assets/no_screenshot_available.png"/>' +
+          '<p><\/p>' +
+          '<\/li>');
 };
 
 CDOT.onPlatformReady = function () {
@@ -92,6 +99,9 @@ CDOT.initServiceListener = function () {
 
   listener.onUserEvent = handlePublishEvent;
   listener.onMediaStreamEvent = handlePublishEvent;
+
+//  Add handler for video frame size change, to ensure that the aspec ratio
+//  is being maintained
   listener.onVideoFrameSizeChanged = function (e) {
     $('#renderRemoteUser').css(CDOT.fitDims(e.width, e.height, 640, 480));
   };
@@ -125,7 +135,9 @@ CDOT.connect = function () {
   CDO.getService().connect(CDO.createResponder(onSucc, onErr), connDescriptor);
 };
 
-
+/**
+ * Reloads the list of sources possible to be shared
+ */
 CDOT.refreshScreenShareSources = function () {
   $('#refreshBtn').unbind('click').addClass('disabled');
   CDO.getService().getScreenCaptureSources(
@@ -133,9 +145,15 @@ CDOT.refreshScreenShareSources = function () {
       CDOT.SCREEN_SHARING_SRC_PRV_WIDTH);
 };
 
+/**
+ * Publishes selected screen sharing source
+ *
+ * @param shareItemId id of source to be shared
+ */
 CDOT.publishShareItem = function (shareItemId) {
   if (CDOT.isConnected) {
     log.debug('Publishing screen share: ' + shareItemId);
+
     var onSucc = function () {
       log.debug('Screen share source published');
     };
@@ -153,6 +171,11 @@ CDOT.publishShareItem = function (shareItemId) {
   }
 };
 
+/**
+ * Stops publishing screen sharing item.
+ *
+ * @param callback function to be called after successful unpublish
+ */
 CDOT.unpublishShareItem = function (callback) {
   log.debug('Unpublishing screen share');
   var onSucc = function () {
@@ -171,83 +194,20 @@ CDOT.unpublishShareItem = function (callback) {
                              CDO.MediaType.SCREEN);
 };
 
+/**
+ * Lists the screen sharing sources.
+ *
+ * @param sources array of sources to be listed
+ */
 CDOT.showScreenShareSources = function (sources) {
   var $srcsList = $('#screenShareSources');
 
-  // Clean "Loading..." message
+  // Remove the previous state
   $srcsList.html('');
 
-  var $srcWrapperTmpl = $(
-      '<li class="scr-share-src-itm">' +
-          '<img src="/shared-assets/no_screenshot_available.png"/>' +
-          '<p><\/p>' +
-          '<\/li>');
-  // Iterate through all the screen sharing sources given
-  for (var i = 0; i < sources.length; i++) {
-    // Get the current share item
-    var src = sources[i];
-
-    // Create a <li> wrapper for each one
-    var $srcWrapper = $srcWrapperTmpl.clone();
-
-    // Mark as selected if was shared before
-    if (CDOT.sharedItemId == src.id) {
-      $srcWrapper.addClass('selected');
-    }
-    $srcWrapper.attr('id', 'shareItm' + i);
-
-    // Check whether the Cloudeo Service managed to obtain the screen shot
-    if (src.image.base64) {
-
-      // Use the data URI scheme
-      // http://en.wikipedia.org/wiki/Data_URI_scheme
-      $srcWrapper.find('img').
-          attr('src', 'data:image/png;base64,' + src.image.base64).
-          css(
-          CDOT.fitDims(src.image.width, src.image.height,
-                       CDOT.SCREEN_SHARING_SRC_PRV_WIDTH,
-                       CDOT.SCREEN_SHARING_SRC_PRV_HEIGHT));
-    }
-    // Set the window title
-    $srcWrapper.find('p').text(src.title);
-
-    // Register click handler to publish the screen
-    $srcWrapper[0].shareItem = src;
-    var clickHandler = function () {
-      var $this = $(this);
-      if ($this.hasClass('selected')) {
-        // Unpublishing
-        $this.removeClass('selected');
-        CDOT.sharedItemId = null;
-        CDOT.unpublishShareItem();
-      } else {
-        // Publish
-        // Update selection status
-        $('.scr-share-src-itm').removeClass('selected');
-        $this.addClass('selected');
-
-        // Create function for publishing
-        // It is run after successful CDO.unpublish
-        // of directly (if nothing is published so far)
-        var shareItemId = $this[0].shareItem.id;
-        var publishFunction = function () {
-          CDOT.sharedItemId = shareItemId;
-          CDOT.publishShareItem(shareItemId);
-        };
-
-        if (CDOT.sharedItemId === null) {
-          publishFunction();
-        } else {
-          CDOT.unpublishShareItem(publishFunction);
-        }
-      }
-    };
-    $srcWrapper.click(clickHandler);
-
-    // Finally append the node
-    $srcWrapper.appendTo($srcsList);
-
-  }
+  // Iterate through all the screen sharing sources given and append a
+  // control widget to the list of screen sharing sources
+  $.each(sources, CDOT.screenSharingItemAppender);
 
   // Enable refresh button if not enabled yet
   var $refreshBtn = $('#refreshBtn');
@@ -255,6 +215,81 @@ CDOT.showScreenShareSources = function (sources) {
     $refreshBtn.click(CDOT.refreshScreenShareSources).removeClass('disabled');
   }
 };
+
+/**
+ *  Appends the screen sharing source widget to the screen sharing sources list.
+ */
+CDOT.screenSharingItemAppender = function (i, src) {
+// Create a <li> wrapper for each one
+  var $srcWrapper = CDOT.SCREEN_SHARING_ITM_WIDGET_TMPL.clone();
+
+  // Mark as selected if was shared before
+  if (CDOT.sharedItemId == src.id) {
+    $srcWrapper.addClass('selected');
+  }
+  $srcWrapper.attr('id', 'shareItm' + i);
+
+  // Check whether the Cloudeo Service managed to obtain the screen shot
+  if (src.image.base64) {
+
+    // Use the data URI scheme to fill the screen shot image
+    // http://en.wikipedia.org/wiki/Data_URI_scheme
+    $srcWrapper.find('img').
+        attr('src', 'data:image/png;base64,' + src.image.base64).
+        css(
+        CDOT.fitDims(src.image.width, src.image.height,
+                     CDOT.SCREEN_SHARING_SRC_PRV_WIDTH,
+                     CDOT.SCREEN_SHARING_SRC_PRV_HEIGHT));
+  }
+  // Set the window title
+  $srcWrapper.find('p').text(src.title);
+
+  // Store the id of item to be shared
+  $srcWrapper.attr('share-itm-id', src.id);
+
+
+  // Register the click handler
+  $srcWrapper.click(CDOT.screenSharingItmClickHandler);
+
+  // Finally append the node
+  $srcWrapper.appendTo($('#screenShareSources'));
+};
+
+/**
+ * Handler for the click event of the screen sharing item widget
+ */
+CDOT.screenSharingItmClickHandler = function () {
+  var $this = $(this);
+  if ($this.hasClass('selected')) {
+    // Unpublishing
+    $this.removeClass('selected');
+    CDOT.sharedItemId = null;
+    CDOT.unpublishShareItem();
+  } else {
+    // Publish
+    // Update selection status
+    $('.scr-share-src-itm').removeClass('selected');
+    $this.addClass('selected');
+
+    // Get the id of selected window
+    var shareItemId = $this.attr('share-itm-id');
+
+    // Create function for publishing
+    // It is run after successful CDO.unpublish
+    // of directly (if nothing is published so far)
+    var publishFunction = function () {
+      CDOT.sharedItemId = shareItemId;
+      CDOT.publishShareItem(shareItemId);
+    };
+
+    if (CDOT.sharedItemId === null) {
+      publishFunction();
+    } else {
+      CDOT.unpublishShareItem(publishFunction);
+    }
+  }
+};
+
 
 CDOT.fitDims = function (srcW, srcH, targetW, targetH) {
   var srcAR = srcW / srcH;
