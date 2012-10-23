@@ -90,6 +90,12 @@ h2#tutorialSubTitle {
     position: relative;
 }
 
+#tut8CtrlWrapper {
+    width: 830px;
+    margin: 0 auto 20px;
+    position: relative;
+}
+
 .main.wide .rendering-wrapper {
     width: 1026px;
 }
@@ -197,23 +203,37 @@ h2#tutorialSubTitle {
 
 .scr-share-src-wrapper {
     height: 300px;
-    overflow-x: scroll;
-    overflow-y: hidden;
-    white-space: nowrap;
+    overflow-y: auto;
+
 }
 
-ul.scr-share-src-list {
-    list-style-type: none;
-    white-space: nowrap;
-    margin-right: -999em;
+.scr-share-src-list {
+    height: 300px;
 }
 
-li.scr-share-src-itm {
+.scr-share-src-itm {
     float: left;
     list-style-type: none;
     padding: 5px;
+    margin: 5px;
+    width: 240px;
+    height: 175px;
 }
 
-li.selected {
+.scr-share-src-itm p {
+    text-overflow: ellipsis;
+    width: 100%;
+    overflow: hidden;
+    height: 15px;
+    line-height: 15px;
+    font-size: 13px;
+    text-align: center;
+}
+
+.scr-share-src-itm.selected {
+    background: #DDD;
+}
+
+.scr-share-src-itm:hover {
     background: #DDD;
 }
