@@ -10,6 +10,11 @@
  * Streams quality configuration
  * @type {Object}
  */
+
+CDOT.APPLICATION_ID = 1;
+
+CDOT.APP_SHARED_SECRET = 'CloudeoTestAccountSecret';
+
 CDOT.CONNECTION_CONFIGURATION = {
   lowVideoStream:{
     publish:true,
@@ -60,10 +65,16 @@ CDOT.initUI = function () {
 
 CDOT.onPlatformReady = function () {
   log.debug("Cloudeo SDK ready");
+  CDOT.setApplicationId();
   CDOT.populateDevicesQuick();
   CDOT.startLocalVideo();
   CDOT.initServiceListener();
 };
+
+CDOT.setApplicationId = function () {
+  CDO.getService().setApplicationId(CDO.createResponder(), CDOT.APPLICATION_ID);
+};
+
 
 /**
  * ==========================================================================
@@ -278,7 +289,7 @@ CDOT.connect = function () {
 
 //  3. Define the result handler - delegates the processing to the
 //     postConnectHandler
-  var connDescriptor = CDOT.genConnectionDescriptor();
+  var connDescriptor = CDOT.genConnectionDescriptor(CDOT.scopeId, CDOT.userId);
   var onSucc = function () {
     CDOT.postConnectHandler();
   };
@@ -346,16 +357,41 @@ CDOT.postConnectHandler = function () {
 
 };
 
-CDOT.genConnectionDescriptor = function () {
+CDOT.genConnectionDescriptor = function (scopeId, userId) {
 //  Clone the video streaming configuration and create a connection descriptor
 //  using settings provided by the user
   var connDescriptor = $.extend({}, CDOT.CONNECTION_CONFIGURATION);
-  connDescriptor.scopeId = CDOT.scopeId;
-  connDescriptor.token = CDOT.userId + '';
+  connDescriptor.scopeId = scopeId;
+  connDescriptor.authDetails = CDOT.genAuthDetails(scopeId, userId);
   connDescriptor.autopublishAudio = $('#publishAudioChckbx').is(':checked');
   connDescriptor.autopublishVideo = $('#publishVideoChckbx').is(':checked');
   return connDescriptor;
 };
+
+CDOT.genAuthDetails = function (scopeId, userId) {
+
+  // New Auth API
+  var dateNow = new Date();
+  var now = Math.floor((dateNow.getTime() / 1000) -
+                           dateNow.getTimezoneOffset() * 60);
+  var authDetails = {
+    // Token valid 5 mins
+    expires:now + (5 * 60),
+    userId:userId,
+    salt:CDOT.randomString(100)
+  };
+  var signatureBody =
+      CDOT.APPLICATION_ID +
+          scopeId +
+          userId +
+          authDetails.salt +
+          authDetails.expires +
+          CDOT.APP_SHARED_SECRET;
+  authDetails.signature =
+      CryptoJS.SHA256(signatureBody).toString(CryptoJS.enc.Hex).toUpperCase();
+  return authDetails;
+};
+
 
 /**
  * ==========================================================================

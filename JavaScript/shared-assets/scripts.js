@@ -115,3 +115,14 @@ CDOT.populateDevicesOfType = function (selectSelector, devType) {
 CDOT.genRandomUserId = function () {
   return Math.floor(Math.random() * 10000)
 };
+
+CDOT.randomString = function (len, charSet) {
+  charSet = charSet ||
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var str = '';
+  for (var i = 0; i < len; i++) {
+    var randomPoz = Math.floor(Math.random() * charSet.length);
+    str += charSet.substring(randomPoz, randomPoz + 1);
+  }
+  return str;
+};

@@ -13,6 +13,11 @@
  */
 CDOT.SCOPE_ID = 'Tutorial5';
 
+CDOT.APPLICATION_ID = 1;
+
+CDOT.APP_SHARED_SECRET = 'CloudeoTestAccountSecret';
+
+
 /**
  * Configuration of the streams to publish upon connection established
  * @type {Object}
@@ -66,10 +71,16 @@ CDOT.onDomReady = function () {
 
 CDOT.onPlatformReady = function () {
   log.debug("Cloudeo Platform ready.");
+  CDOT.setApplicationId();
   CDOT.populateDevicesQuick();
   CDOT.startLocalVideo();
   CDOT.initServiceListener();
 };
+
+CDOT.setApplicationId = function () {
+  CDO.getService().setApplicationId(CDO.createResponder(), CDOT.APPLICATION_ID);
+};
+
 
 CDOT.startLocalVideo = function () {
   log.debug("Starting local preview video feed");
@@ -133,7 +144,7 @@ CDOT.connect = function () {
 //     updating the URL and the token.
   var connDescriptor = $.extend({}, CDOT.CONNECTION_CONFIGURATION);
   connDescriptor.scopeId = CDOT.SCOPE_ID;
-  connDescriptor.token = CDOT.genRandomUserId() ;
+  connDescriptor.authDetails = CDOT.genAuthDetails(CDOT.genRandomUserId());
 
 //  3. Define the result handler
   var onSucc = function () {
@@ -169,6 +180,31 @@ CDOT.disconnect = function () {
 
 //  2. Request the SDK to terminate the connection.
   CDO.getService().disconnect(CDO.createResponder(onSucc), CDOT.SCOPE_ID);
+};
+
+
+CDOT.genAuthDetails = function (userId) {
+
+  // New Auth API
+  var dateNow = new Date();
+  var now = Math.floor((dateNow.getTime() / 1000) -
+                           dateNow.getTimezoneOffset() * 60);
+  var authDetails = {
+    // Token valid 5 mins
+    expires:now + (5 * 60),
+    userId:userId,
+    salt:CDOT.randomString(100)
+  };
+  var signatureBody =
+      CDOT.APPLICATION_ID +
+          CDOT.SCOPE_ID +
+          userId +
+          authDetails.salt +
+          authDetails.expires +
+          CDOT.APP_SHARED_SECRET;
+  authDetails.signature =
+      CryptoJS.SHA256(signatureBody).toString(CryptoJS.enc.Hex).toUpperCase();
+  return authDetails;
 };
 
 
