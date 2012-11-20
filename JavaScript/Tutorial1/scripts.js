@@ -81,9 +81,15 @@ CDOT.initializeCloudeo = function () {
         log.debug("Please restart your browser in order to complete platform auto-update");
         break;
 
+      case CDO.InitState.DEVICES_INIT_BEGIN:
+//      This state indicates that Cloudeo SDK performed auto-update and in order
+//      to accomplish this process, browser needs to be restarted.
+        log.debug("Devices initialization started");
+        break;
+
       default:
 //      Default handler, just for sanity
-        log.error("Got unsupported init state: " + e.state);
+        log.warn("Got unsupported init state: " + e.state);
     }
   };
 

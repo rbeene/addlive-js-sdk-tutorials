@@ -59,8 +59,11 @@ CDOT.initializeCloudeoQuick = function (completeHandler, options) {
       case CDO.InitState.INITIALIZED:
         completeHandler();
         break;
+      case CDO.InitState.DEVICES_INIT_BEGIN:
+        log.debug("Devices initialization started");
+        break;
       default:
-        log.error("Got unsupported init state: " + e.state);
+        log.warn("Got unsupported init state: " + e.state);
     }
   };
   CDO.initPlatform(initListener, options);
