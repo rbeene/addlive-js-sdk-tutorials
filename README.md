@@ -6,6 +6,8 @@ This sample project aims at flattening the learning curve of the AddLive SDK.
 Each tutorial provided showcases single area of features, using fully functional
 (but simple) web application. Read more at http://www.addlive.com.
 
+Please note that all the tutorials use the beta release channel.
+
 
 Tutorial 1
 ----------

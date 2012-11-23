@@ -18,45 +18,6 @@ ADLT.APPLICATION_ID = 1;
 ADLT.APP_SHARED_SECRET = 'CloudeoTestAccountSecret';
 
 
-/**
- * Configuration of the streams to publish upon connection established
- * @type {Object}
- */
-ADLT.CONNECTION_CONFIGURATION = {
-
-  /**
-   * Description of the base line video stream - the low layer. It's QVGA, with
-   * bitrate equal to 64kbps and 5 frames per second
-   */
-  lowVideoStream:{
-    publish:true,
-    receive:true,
-    maxWidth:320,
-    maxHeight:240,
-    maxBitRate:64,
-    maxFps:5
-  },
-
-  /**
-   * Description of the adaptive video stream - the high layer. It's QVGA, with
-   * 400kbps of bitrate and 15 frames per second
-   */
-  highVideoStream:{
-    publish:true,
-    receive:true,
-    maxWidth:320,
-    maxHeight:240,
-    maxBitRate:400,
-    maxFps:15
-  },
-
-  /**
-   * Flags defining that both streams should be automatically published upon
-   * connection.
-   */
-  autopublishVideo:true,
-  autopublishAudio:true
-};
 
 
 /**
@@ -66,20 +27,18 @@ ADLT.onDomReady = function () {
   log.debug('DOM loaded');
   ADLT.initAddLiveLogging();
   ADLT.initDevicesSelects();
-  ADLT.initializeAddLiveQuick(ADLT.onPlatformReady);
+  var initOptions = {applicationId: ADLT.APPLICATION_ID};
+  ADLT.initializeAddLiveQuick(ADLT.onPlatformReady, initOptions);
 };
 
 ADLT.onPlatformReady = function () {
   log.debug("AddLive Platform ready.");
-  ADLT.setApplicationId();
   ADLT.populateDevicesQuick();
   ADLT.startLocalVideo();
   ADLT.initServiceListener();
 };
 
-ADLT.setApplicationId = function () {
-  ADL.getService().setApplicationId(ADL.createResponder(), ADLT.APPLICATION_ID);
-};
+
 
 
 ADLT.startLocalVideo = function () {
@@ -142,7 +101,7 @@ ADLT.connect = function () {
 
 //  2. Prepare the connection descriptor by cloning the configuration and
 //     updating the URL and the token.
-  var connDescriptor = $.extend({}, ADLT.CONNECTION_CONFIGURATION);
+  var connDescriptor = {};
   connDescriptor.scopeId = ADLT.SCOPE_ID;
   connDescriptor.authDetails = ADLT.genAuthDetails(ADLT.genRandomUserId());
 
@@ -182,7 +141,14 @@ ADLT.disconnect = function () {
   ADL.getService().disconnect(ADL.createResponder(onSucc), ADLT.SCOPE_ID);
 };
 
-
+/**
+ * Generates sample authentication details. For more info about authentication,
+ * please refer to: http://www.addlive.com/docs.html#authentication
+ * @param userId
+ *        Id of user to authenticate connection for
+ * @return {Object}
+ *        Generated authentication details object.
+ */
 ADLT.genAuthDetails = function (userId) {
 
   // New Auth API
