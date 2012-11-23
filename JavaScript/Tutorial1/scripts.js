@@ -8,26 +8,26 @@
  */
 
 /**
- * Document ready callback - starts the Cloudeo platform initialization.
+ * Document ready callback - starts the AddLive platform initialization.
  */
-CDOT.onDomReady = function () {
+ADLT.onDomReady = function () {
   log.debug('DOM loaded');
   $("#initProgressBar").
       progressbar({
-                    value:0
-                  });
-  CDOT.initCloudeoLogging();
-  CDOT.initializeCloudeo();
+        value:0
+      });
+  ADLT.initAddLiveLogging();
+  ADLT.initializeAddLive();
 };
 
 /**
- * Initializes the Cloudeo SDK.
+ * Initializes the AddLive SDK.
  */
-CDOT.initializeCloudeo = function () {
-  log.debug("Initializing the Cloudeo SDK");
+ADLT.initializeAddLive = function () {
+  log.debug("Initializing the AddLive SDK");
 
 //  Step 1 - create the PlatformInitListener and overwrite it's methods.
-  var initListener = new CDO.PlatformInitListener();
+  var initListener = new ADL.PlatformInitListener();
 
 //  Define the handler for initialization progress changes
   initListener.onInitProgressChanged = function (e) {
@@ -39,50 +39,50 @@ CDOT.initializeCloudeo = function () {
   initListener.onInitStateChanged = function (e) {
     switch (e.state) {
 
-      case CDO.InitState.ERROR:
+      case ADL.InitState.ERROR:
 //      After receiving this status, the initialization is stopped as due to
 //      a failure.
-        log.error("Failed to initialize the Cloudeo SDK");
+        log.error("Failed to initialize the AddLive SDK");
         log.error("Reason: " + e.errMessage + ' (' + e.errCode + ')');
         break;
 
-      case CDO.InitState.INITIALIZED:
-//      This state flag indicates that the Cloudeo SDK is initialized and fully
+      case ADL.InitState.INITIALIZED:
+//      This state flag indicates that the AddLive SDK is initialized and fully
 //      functional. In this tutorial, we will just perform sample call to
 //      retrieve the current version of the SDK
         var getVersionResult = function (version) {
-          log.debug("Cloudeo service version: " + version);
+          log.debug("AddLive service version: " + version);
           $('#sdkVersion').html(version);
         };
 
-        var responder = CDO.createResponder(getVersionResult);
-        CDO.getService().getVersion(responder);
+        var responder = ADL.createResponder(getVersionResult);
+        ADL.getService().getVersion(responder);
         break;
 
-      case CDO.InitState.INSTALLATION_REQUIRED:
-//      Current user doesn't have the Cloudeo Plug-In installed and it is
+      case ADL.InitState.INSTALLATION_REQUIRED:
+//      Current user doesn't have the AddLive Plug-In installed and it is
 //      required - use provided URL to ask the user to install the Plug-in.
 //      Note that the initialization process is just frozen in this state -
 //      the SDK polls for plug-in availability and when it becomes available,
 //      continues with the initialization.
-        log.debug("Cloudeo Plug-in installation required");
+        log.debug("AddLive Plug-in installation required");
         $('#installBtn').
             attr('href', e.installerURL).
             css('display', 'block');
         break;
-      case CDO.InitState.INSTALLATION_COMPLETE:
-        log.debug("Cloudeo Plug-in installation complete");
+      case ADL.InitState.INSTALLATION_COMPLETE:
+        log.debug("AddLive Plug-in installation complete");
         $('#installBtn').hide();
         break;
 
-      case CDO.InitState.BROWSER_RESTART_REQUIRED:
-//      This state indicates that Cloudeo SDK performed auto-update and in order
+      case ADL.InitState.BROWSER_RESTART_REQUIRED:
+//      This state indicates that AddLive SDK performed auto-update and in order
 //      to accomplish this process, browser needs to be restarted.
         log.debug("Please restart your browser in order to complete platform auto-update");
         break;
 
-      case CDO.InitState.DEVICES_INIT_BEGIN:
-//      This state indicates that Cloudeo SDK performed auto-update and in order
+      case ADL.InitState.DEVICES_INIT_BEGIN:
+//      This state indicates that AddLive SDK performed auto-update and in order
 //      to accomplish this process, browser needs to be restarted.
         log.debug("Devices initialization started");
         break;
@@ -93,11 +93,11 @@ CDOT.initializeCloudeo = function () {
     }
   };
 
-//  Step 2. Actually trigger the asynchronous initialization of the Cloudeo SDK.
-  CDO.initPlatform(initListener);
+//  Step 2. Actually trigger the asynchronous initialization of the AddLive SDK.
+  ADL.initPlatform(initListener);
 };
 
 /**
  * Register the document ready handler.
  */
-$(CDOT.onDomReady);
+$(ADLT.onDomReady);

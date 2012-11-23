@@ -8,63 +8,63 @@
 
 
 /**
- * Document ready callback - starts the Cloudeo platform initialization.
+ * Document ready callback - starts the AddLive platform initialization.
  */
-CDOT.onDomReady = function () {
+ADLT.onDomReady = function () {
   log.debug('DOM loaded');
-  CDOT.initDevicesSelects();
-  CDOT.initUI();
-  CDOT.initCloudeoLogging();
-  CDOT.initializeCloudeoQuick(CDOT.onPlatformReady);
+  ADLT.initDevicesSelects();
+  ADLT.initUI();
+  ADLT.initAddLiveLogging();
+  ADLT.initializeAddLiveQuick(ADLT.onPlatformReady);
 };
 
 
-CDOT.initUI = function () {
+ADLT.initUI = function () {
   $('#volumeCtrlSlider').slider({
-                                  min:0,
-                                  max:255,
-                                  animate:true,
-                                  value:127,
-                                  slide:CDOT.onVolumeSlide
-                                });
+    min:0,
+    max:255,
+    animate:true,
+    value:127,
+    slide:ADLT.onVolumeSlide
+  });
   $('#micGainCtrlSlider').slider({
-                                   min:0,
-                                   max:255,
-                                   animate:true,
-                                   value:127,
-                                   slide:CDOT.onMicGainSlide
-                                 });
+    min:0,
+    max:255,
+    animate:true,
+    value:127,
+    slide:ADLT.onMicGainSlide
+  });
   $('#micActivityBar').progressbar({value:50});
-  $('#playTestSoundBtn').click(CDOT.onPlayTestSoundBtnClicked);
-  $('#micActivityEnabledChckbx').change(CDOT.onMicActivityEnabledChckbxChange);
+  $('#playTestSoundBtn').click(ADLT.onPlayTestSoundBtnClicked);
+  $('#micActivityEnabledChckbx').change(ADLT.onMicActivityEnabledChckbxChange);
 };
 
 
-CDOT.onPlatformReady = function () {
-  CDOT.initializeListener();
-  CDOT.populateDevicesQuick();
-  CDOT.populateVolume();
-  CDOT.populateMicGain();
+ADLT.onPlatformReady = function () {
+  ADLT.initializeListener();
+  ADLT.populateDevicesQuick();
+  ADLT.populateVolume();
+  ADLT.populateMicGain();
   $('#playTestSoundBtn').
-      click(CDOT.onPlayTestSoundBtnClicked).
+      click(ADLT.onPlayTestSoundBtnClicked).
       removeClass('disabled');
 };
 
-CDOT.initializeListener = function () {
-  var listener = new CDO.CloudeoServiceListener();
+ADLT.initializeListener = function () {
+  var listener = new ADL.AddLiveServiceListener();
   listener.onDeviceListChanged = function (e) {
     log.debug("Got devices list changed");
-    if(e.audioInChanged) {
+    if (e.audioInChanged) {
       log.debug("Got new microphone plugged in");
-      CDOT.populateDevicesOfType('#micSelect', 'AudioCapture');
+      ADLT.populateDevicesOfType('#micSelect', 'AudioCapture');
     }
-    if(e.audioOutChanged) {
+    if (e.audioOutChanged) {
       log.debug("Got new speakers plugged in");
-      CDOT.populateDevicesOfType('#spkSelect', 'AudioOutput');
+      ADLT.populateDevicesOfType('#spkSelect', 'AudioOutput');
     }
-    if(e.videoInChanged) {
+    if (e.videoInChanged) {
       log.debug("Got new camera plugged in");
-      CDOT.populateDevicesOfType('#camSelect', 'VideoCapture');
+      ADLT.populateDevicesOfType('#camSelect', 'VideoCapture');
     }
   };
 
@@ -72,41 +72,41 @@ CDOT.initializeListener = function () {
     log.debug("Got mic activity: " + e.activity);
     $('#micActivityBar').progressbar('value', e.activity / 255 * 100);
   };
-  CDO.getService().addServiceListener(CDO.createResponder(), listener);
+  ADL.getService().addServiceListener(ADL.createResponder(), listener);
 };
 
-CDOT.populateVolume = function () {
+ADLT.populateVolume = function () {
   var resultHandler = function (volume) {
     $('#volumeCtrlSlider').slider('value', volume);
   };
-  CDO.getService().getSpeakersVolume(CDO.createResponder(resultHandler));
+  ADL.getService().getSpeakersVolume(ADL.createResponder(resultHandler));
 };
 
-CDOT.populateMicGain = function () {
+ADLT.populateMicGain = function () {
   var resultHandler = function (volume) {
     $('#micGainCtrlSlider').slider('value', volume);
   };
-  CDO.getService().getMicrophoneVolume(CDO.createResponder(resultHandler));
+  ADL.getService().getMicrophoneVolume(ADL.createResponder(resultHandler));
 };
 
-CDOT.onVolumeSlide = function (e, ui) {
-  CDO.getService().setSpeakersVolume(CDO.createResponder(), ui.value);
+ADLT.onVolumeSlide = function (e, ui) {
+  ADL.getService().setSpeakersVolume(ADL.createResponder(), ui.value);
 };
 
-CDOT.onMicGainSlide = function (e, ui) {
-  CDO.getService().setMicrophoneVolume(CDO.createResponder(), ui.value);
+ADLT.onMicGainSlide = function (e, ui) {
+  ADL.getService().setMicrophoneVolume(ADL.createResponder(), ui.value);
 };
 
-CDOT.onPlayTestSoundBtnClicked = function () {
-  CDO.getService().startPlayingTestSound(CDO.createResponder());
+ADLT.onPlayTestSoundBtnClicked = function () {
+  ADL.getService().startPlayingTestSound(ADL.createResponder());
 };
 
-CDOT.onMicActivityEnabledChckbxChange = function () {
+ADLT.onMicActivityEnabledChckbxChange = function () {
   var enabled = $(this).is(':checked');
-  CDO.getService().monitorMicActivity(CDO.createResponder(), enabled);
+  ADL.getService().monitorMicActivity(ADL.createResponder(), enabled);
 };
 
 /**
  * Register the document ready handler.
  */
-$(CDOT.onDomReady);
+$(ADLT.onDomReady);

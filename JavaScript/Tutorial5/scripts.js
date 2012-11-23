@@ -11,18 +11,18 @@
  * Id of media scope to connect to upon user's request.
  * @type {String}
  */
-CDOT.SCOPE_ID = 'Tutorial5';
+ADLT.SCOPE_ID = 'Tutorial5';
 
-CDOT.APPLICATION_ID = 1;
+ADLT.APPLICATION_ID = 1;
 
-CDOT.APP_SHARED_SECRET = 'CloudeoTestAccountSecret';
+ADLT.APP_SHARED_SECRET = 'CloudeoTestAccountSecret';
 
 
 /**
  * Configuration of the streams to publish upon connection established
  * @type {Object}
  */
-CDOT.CONNECTION_CONFIGURATION = {
+ADLT.CONNECTION_CONFIGURATION = {
 
   /**
    * Description of the base line video stream - the low layer. It's QVGA, with
@@ -60,62 +60,62 @@ CDOT.CONNECTION_CONFIGURATION = {
 
 
 /**
- * Document ready callback - starts the Cloudeo platform initialization.
+ * Document ready callback - starts the AddLive platform initialization.
  */
-CDOT.onDomReady = function () {
+ADLT.onDomReady = function () {
   log.debug('DOM loaded');
-  CDOT.initCloudeoLogging();
-  CDOT.initDevicesSelects();
-  CDOT.initializeCloudeoQuick(CDOT.onPlatformReady);
+  ADLT.initAddLiveLogging();
+  ADLT.initDevicesSelects();
+  ADLT.initializeAddLiveQuick(ADLT.onPlatformReady);
 };
 
-CDOT.onPlatformReady = function () {
-  log.debug("Cloudeo Platform ready.");
-  CDOT.setApplicationId();
-  CDOT.populateDevicesQuick();
-  CDOT.startLocalVideo();
-  CDOT.initServiceListener();
+ADLT.onPlatformReady = function () {
+  log.debug("AddLive Platform ready.");
+  ADLT.setApplicationId();
+  ADLT.populateDevicesQuick();
+  ADLT.startLocalVideo();
+  ADLT.initServiceListener();
 };
 
-CDOT.setApplicationId = function () {
-  CDO.getService().setApplicationId(CDO.createResponder(), CDOT.APPLICATION_ID);
+ADLT.setApplicationId = function () {
+  ADL.getService().setApplicationId(ADL.createResponder(), ADLT.APPLICATION_ID);
 };
 
 
-CDOT.startLocalVideo = function () {
+ADLT.startLocalVideo = function () {
   log.debug("Starting local preview video feed");
 //  1. Prepare the result handler
   var resultHandler = function (sinkId) {
     log.debug("Local preview started. Rendering the sink with id: " + sinkId);
-    CDO.renderSink({
-                     sinkId:sinkId,
-                     containerId:'renderLocalPreview',
-                     mirror:true
-                   });
+    ADL.renderSink({
+      sinkId:sinkId,
+      containerId:'renderLocalPreview',
+      mirror:true
+    });
   };
 
 //  2. Request the platform to start local video.
-  CDO.getService().startLocalVideo(CDO.createResponder(resultHandler));
+  ADL.getService().startLocalVideo(ADL.createResponder(resultHandler));
 };
 
-CDOT.initServiceListener = function () {
-  log.debug("Initializing the Cloudeo Service Listener");
+ADLT.initServiceListener = function () {
+  log.debug("Initializing the AddLive Service Listener");
 
 //  1. Instantiate the listener
-  var listener = new CDO.CloudeoServiceListener();
+  var listener = new ADL.AddLiveServiceListener();
 
 //  2. Define the handler for user event
   /**
    * Handles new remote participant joined/left the scope.
-   * @param {CDO.UserStateChangedEvent} e
+   * @param {ADL.UserStateChangedEvent} e
    */
   listener.onUserEvent = function (e) {
     log.debug("Got new user event: " + e.userId);
     if (e.isConnected) {
-      CDO.renderSink({
-                       sinkId:e.videoSinkId,
-                       containerId:'renderRemoteUser'
-                     });
+      ADL.renderSink({
+        sinkId:e.videoSinkId,
+        containerId:'renderRemoteUser'
+      });
       $('#remoteUserIdLbl').html(e.userId);
     } else {
       $('#renderRemoteUser').empty();
@@ -126,52 +126,52 @@ CDOT.initServiceListener = function () {
 
 //  3. Define result handler that will enable the connect button
   var onSucc = function () {
-    $('#connectBtn').click(CDOT.connect).removeClass('disabled');
+    $('#connectBtn').click(ADLT.connect).removeClass('disabled');
   };
 
 //  4. Register the listener using created instance and prepared result handler.
-  CDO.getService().addServiceListener(CDO.createResponder(onSucc), listener);
+  ADL.getService().addServiceListener(ADL.createResponder(onSucc), listener);
 
 };
 
-CDOT.connect = function () {
-  log.debug("Establishing a connection to the Cloudeo Streaming Server");
+ADLT.connect = function () {
+  log.debug("Establishing a connection to the AddLive Streaming Server");
 
 //  1. Disable the connect button to avoid connects cascade
   $('#connectBtn').unbind('click').addClass('disabled');
 
 //  2. Prepare the connection descriptor by cloning the configuration and
 //     updating the URL and the token.
-  var connDescriptor = $.extend({}, CDOT.CONNECTION_CONFIGURATION);
-  connDescriptor.scopeId = CDOT.SCOPE_ID;
-  connDescriptor.authDetails = CDOT.genAuthDetails(CDOT.genRandomUserId());
+  var connDescriptor = $.extend({}, ADLT.CONNECTION_CONFIGURATION);
+  connDescriptor.scopeId = ADLT.SCOPE_ID;
+  connDescriptor.authDetails = ADLT.genAuthDetails(ADLT.genRandomUserId());
 
 //  3. Define the result handler
   var onSucc = function () {
     log.debug("Connected. Disabling connect button and enabling the disconnect");
-    $('#disconnectBtn').click(CDOT.disconnect).removeClass('disabled');
+    $('#disconnectBtn').click(ADLT.disconnect).removeClass('disabled');
     $('#localUserIdLbl').html(connDescriptor.token);
   };
 
 //  4. Define the error handler
   var onErr = function (errCode, errMessage) {
     log.error("Failed to establish the connection due to: " + errMessage +
-                  '(err code: ' + errCode + ')');
+        '(err code: ' + errCode + ')');
 //    Enable the connect button again
-    $('#connectBtn').click(CDOT.connect).removeClass('disabled');
+    $('#connectBtn').click(ADLT.connect).removeClass('disabled');
   };
 
 //  5. Request the SDK to establish the connection
-  CDO.getService().connect(CDO.createResponder(onSucc, onErr), connDescriptor);
+  ADL.getService().connect(ADL.createResponder(onSucc, onErr), connDescriptor);
 };
 
-CDOT.disconnect = function () {
+ADLT.disconnect = function () {
   log.debug("Terminating the connection");
 
 //  1. Define the result handler
   var onSucc = function () {
     log.debug("Connection terminated");
-    $('#connectBtn').click(CDOT.connect).removeClass('disabled');
+    $('#connectBtn').click(ADLT.connect).removeClass('disabled');
     $('#disconnectBtn').unbind('click').addClass('disabled');
     $('#renderRemoteUser').empty();
     $('#remoteUserIdLbl').html('undefined');
@@ -179,29 +179,29 @@ CDOT.disconnect = function () {
   };
 
 //  2. Request the SDK to terminate the connection.
-  CDO.getService().disconnect(CDO.createResponder(onSucc), CDOT.SCOPE_ID);
+  ADL.getService().disconnect(ADL.createResponder(onSucc), ADLT.SCOPE_ID);
 };
 
 
-CDOT.genAuthDetails = function (userId) {
+ADLT.genAuthDetails = function (userId) {
 
   // New Auth API
   var dateNow = new Date();
   var now = Math.floor((dateNow.getTime() / 1000) -
-                           dateNow.getTimezoneOffset() * 60);
+      dateNow.getTimezoneOffset() * 60);
   var authDetails = {
     // Token valid 5 mins
     expires:now + (5 * 60),
     userId:userId,
-    salt:CDOT.randomString(100)
+    salt:ADLT.randomString(100)
   };
   var signatureBody =
-      CDOT.APPLICATION_ID +
-          CDOT.SCOPE_ID +
+      ADLT.APPLICATION_ID +
+          ADLT.SCOPE_ID +
           userId +
           authDetails.salt +
           authDetails.expires +
-          CDOT.APP_SHARED_SECRET;
+          ADLT.APP_SHARED_SECRET;
   authDetails.signature =
       CryptoJS.SHA256(signatureBody).toString(CryptoJS.enc.Hex).toUpperCase();
   return authDetails;
@@ -211,4 +211,4 @@ CDOT.genAuthDetails = function (userId) {
 /**
  * Register the document ready handler.
  */
-$(CDOT.onDomReady);
+$(ADLT.onDomReady);

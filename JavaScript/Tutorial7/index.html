@@ -2,9 +2,9 @@
 <html>
 <head>
   <META http-equiv="Content-Type" Content="text/html; charset=UTF-8">
-  <title>Cloudeo SDK Tutorial 7 - sendMessage API</title>
+  <title>AddLive SDK Tutorial 7 - sendMessage API</title>
 
-  <!--Common scripts for all cloudeo tutorials -->
+  <!--Common scripts for all AddLive tutorials -->
   <script type="text/javascript"
           src="../shared-assets/log4javascript.js"></script>
   <script type="text/javascript"
@@ -16,7 +16,7 @@
   <script type="text/javascript" src="scripts.js"></script>
 
   <script type="text/javascript"
-          src="http://s3.amazonaws.com/api.cloudeo/beta/cloudeo-sdk.min.js"></script>
+          src="http://api.addlive.com/beta/addlive-sdk.js"></script>
 
   <!-- Shared stylesheet -->
   <link rel="stylesheet" type="text/css" href="../shared-assets/styles.css"/>
@@ -25,7 +25,7 @@
 </head>
 <body>
 <div class="main">
-  <h1>Cloudeo SDK Tutorial 7 - sendMessage API</h1>
+  <h1>AddLive SDK Tutorial 7 - sendMessage API</h1>
 
   <div class="chat-widget">
     <div id="msgsSink" class="messages-sink">
@@ -33,7 +33,9 @@
     </div>
 
     <div class="messages-input">
-      <textarea id="msgInput" placeholder="Type your message here..."></textarea>
+      <textarea id="msgInput"
+                placeholder="Type your message here..."></textarea>
+
       <div>
         <label for="targetSelect">
           Send message to:
@@ -42,7 +44,7 @@
           <option value="all">ALL</option>
         </select>
         <a id="sendBtn" class="btn btn-primary send-btn disabled"
-           href="javascript://nop" >
+           href="javascript://nop">
           Send
         </a>
       </div>

@@ -12,9 +12,7 @@ from BaseHTTPServer import BaseHTTPRequestHandler
 import os.path
 
 class myHandler(BaseHTTPRequestHandler):
-    
     def do_GET(self):
-
         if self.path == "/kill.html":
             exit(0)
 
@@ -25,26 +23,32 @@ class myHandler(BaseHTTPRequestHandler):
             truepath = truepath[:truepath.find("#")]
         if truepath[-1:] == "/":
             print "appending index.html to %s" % truepath
-            truepath = os.path.join(truepath,"index.html")
+            truepath = os.path.join(truepath, "index.html")
             print "truepath is now %s" % truepath
         if os.path.isfile(truepath):
-            mimetypes = {"css":"text/css","html":"text/html","js":"application/x-javascript",
-                "swf":"application/x-shockwave-flash","png":"image/png","application":"application/x-ms-application",
-                "manifest":"application/x-ms-manifest","deploy":"application/octet-stream", "crx": "application/x-chrome-extension"}
-            content_type = mimetypes.get(truepath[truepath.rfind(".")+1:],"text/html")
-            self.printCustomHTTPResponse(200, content_type) 
-            self.wfile.write(open(truepath,"rb").read()) 
+            mimetypes = {"css": "text/css", "html": "text/html",
+                         "js": "application/x-javascript",
+                         "swf": "application/x-shockwave-flash",
+                         "png": "image/png",
+                         "application": "application/x-ms-application",
+                         "manifest": "application/x-ms-manifest",
+                         "deploy": "application/octet-stream",
+                         "crx": "application/x-chrome-extension"}
+            content_type = mimetypes.get(truepath[truepath.rfind(".") + 1:],
+                "text/html")
+            self.printCustomHTTPResponse(200, content_type)
+            self.wfile.write(open(truepath, "rb").read())
         else:
-            self.printCustomHTTPResponse(404) 
+            self.printCustomHTTPResponse(404)
             self.wfile.write("<html>\n<body>\n")
             self.wfile.write("<h1>404 - File Not Found</h1>")
-            self.wfile.write("<p>GET string: " + self.path + "</p>" )
+            self.wfile.write("<p>GET string: " + self.path + "</p>")
             self.wfile.write("truepath: %s" % truepath)
             self.printBrowserHeaders()
             self.wfile.write("</body>\n</html>\n")
 
     def printBrowserHeaders(self):
-        keys = self.headers.dict.keys()                                   
+        keys = self.headers.dict.keys()
         self.wfile.write("\n<ul>")
         for key in keys:
             self.wfile.write("\n<li><b>" + key + "</b>: ")
@@ -61,7 +65,7 @@ class myHandler(BaseHTTPRequestHandler):
         pass
 
 if __name__ == "__main__":
-    server = HTTPServer(('',8080), myHandler)
+    server = HTTPServer(('', 8080), myHandler)
     while True:
         server.handle_request()
 

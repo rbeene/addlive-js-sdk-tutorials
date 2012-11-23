@@ -8,51 +8,51 @@
 
 
 /**
- * Document ready callback - starts the Cloudeo platform initialization.
+ * Document ready callback - starts the AddLive platform initialization.
  */
-CDOT.onDomReady = function () {
+ADLT.onDomReady = function () {
   log.debug('DOM loaded');
-  CDOT.initCloudeoLogging();
-  CDOT.initDevicesSelects();
-  CDOT.initializeCloudeoQuick(CDOT.onPlatformReady);
+  ADLT.initAddLiveLogging();
+  ADLT.initDevicesSelects();
+  ADLT.initializeAddLiveQuick(ADLT.onPlatformReady);
 };
 
-CDOT.onPlatformReady = function () {
-  CDOT.populateDevicesOfType('#camSelect', 'VideoCapture');
-  CDOT.startLocalVideo();
+ADLT.onPlatformReady = function () {
+  ADLT.populateDevicesOfType('#camSelect', 'VideoCapture');
+  ADLT.startLocalVideo();
 };
 
-CDOT.startLocalVideo = function () {
+ADLT.startLocalVideo = function () {
   var resultHandler = function (sinkId) {
     log.debug("Local preview started. Rendering the sink with id: " + sinkId);
-    CDO.renderSink({
-                     sinkId:sinkId,
-                     containerId:'renderContainer'
-                   });
+    ADL.renderSink({
+      sinkId:sinkId,
+      containerId:'renderContainer'
+    });
 
-    CDO.renderSink({
-                     sinkId:sinkId,
-                     containerId:'renderContainerWindowless',
-                     windowless:true
-                   });
+    ADL.renderSink({
+      sinkId:sinkId,
+      containerId:'renderContainerWindowed',
+      windowless:false
+    });
 
 
-    CDO.renderSink({
-                     sinkId:sinkId,
-                     containerId:'renderContainerMirror',
-                     mirror:true
-                   });
+    ADL.renderSink({
+      sinkId:sinkId,
+      containerId:'renderContainerMirror',
+      mirror:true
+    });
 
-    CDO.renderSink({
-                     sinkId:sinkId,
-                     containerId:'renderContainerBicubic',
-                     filterType:CDO.VideoScalingFilter.BICUBIC
-                   });
+    ADL.renderSink({
+      sinkId:sinkId,
+      containerId:'renderContainerBicubic',
+      filterType:ADL.VideoScalingFilter.BICUBIC
+    });
   };
-  CDO.getService().startLocalVideo(CDO.createResponder(resultHandler));
+  ADL.getService().startLocalVideo(ADL.createResponder(resultHandler));
 };
 
 /**
  * Register the document ready handler.
  */
-$(CDOT.onDomReady);
+$(ADLT.onDomReady);

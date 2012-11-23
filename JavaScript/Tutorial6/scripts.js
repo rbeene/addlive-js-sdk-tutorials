@@ -11,11 +11,11 @@
  * @type {Object}
  */
 
-CDOT.APPLICATION_ID = 1;
+ADLT.APPLICATION_ID = 1;
 
-CDOT.APP_SHARED_SECRET = 'CloudeoTestAccountSecret';
+ADLT.APP_SHARED_SECRET = 'CloudeoTestAccountSecret';
 
-CDOT.CONNECTION_CONFIGURATION = {
+ADLT.CONNECTION_CONFIGURATION = {
   lowVideoStream:{
     publish:true,
     receive:true,
@@ -34,67 +34,67 @@ CDOT.CONNECTION_CONFIGURATION = {
   }
 };
 
-CDOT.mediaConnType2Label = {};
-CDOT.mediaConnType2Label[CDO.ConnectionType.NOT_CONNECTED] =
+ADLT.mediaConnType2Label = {};
+ADLT.mediaConnType2Label[ADL.ConnectionType.NOT_CONNECTED] =
     'not connected';
-CDOT.mediaConnType2Label[CDO.ConnectionType.TCP_RELAY] =
+ADLT.mediaConnType2Label[ADL.ConnectionType.TCP_RELAY] =
     'RTP/TCP relayed';
-CDOT.mediaConnType2Label[CDO.ConnectionType.UDP_RELAY] =
+ADLT.mediaConnType2Label[ADL.ConnectionType.UDP_RELAY] =
     'RTP/UDP relayed';
-CDOT.mediaConnType2Label[CDO.ConnectionType.UDP_P2P] =
+ADLT.mediaConnType2Label[ADL.ConnectionType.UDP_P2P] =
     'RTP/UDP in P2P';
 
 
 /**
- * Document ready callback - starts the Cloudeo platform initialization.
+ * Document ready callback - starts the AddLive platform initialization.
  */
-CDOT.onDomReady = function () {
+ADLT.onDomReady = function () {
   log.debug('DOM loaded');
-  CDOT.initCloudeoLogging();
-  CDOT.initDevicesSelects();
-  CDOT.initUI();
-  CDOT.initializeCloudeoQuick(CDOT.onPlatformReady);
+  ADLT.initAddLiveLogging();
+  ADLT.initDevicesSelects();
+  ADLT.initUI();
+  ADLT.initializeAddLiveQuick(ADLT.onPlatformReady);
 };
 
-CDOT.initUI = function () {
+ADLT.initUI = function () {
   log.debug("Initializing the UI");
-  $('#publishAudioChckbx').change(CDOT.onPublishAudioChanged);
-  $('#publishVideoChckbx').change(CDOT.onPublishVideoChanged);
+  $('#publishAudioChckbx').change(ADLT.onPublishAudioChanged);
+  $('#publishVideoChckbx').change(ADLT.onPublishVideoChanged);
   log.debug("UI initialized");
 };
 
-CDOT.onPlatformReady = function () {
-  log.debug("Cloudeo SDK ready");
-  CDOT.setApplicationId();
-  CDOT.populateDevicesQuick();
-  CDOT.startLocalVideo();
-  CDOT.initServiceListener();
+ADLT.onPlatformReady = function () {
+  log.debug("AddLive SDK ready");
+  ADLT.setApplicationId();
+  ADLT.populateDevicesQuick();
+  ADLT.startLocalVideo();
+  ADLT.initServiceListener();
 };
 
-CDOT.setApplicationId = function () {
-  CDO.getService().setApplicationId(CDO.createResponder(), CDOT.APPLICATION_ID);
+ADLT.setApplicationId = function () {
+  ADL.getService().setApplicationId(ADL.createResponder(), ADLT.APPLICATION_ID);
 };
 
 
 /**
  * ==========================================================================
- * Beginning of the Cloudeo service events handling code
+ * Beginning of the AddLive service events handling code
  * ==========================================================================
  */
 
 
-CDOT.initServiceListener = function () {
-  log.debug("Initializing the Cloudeo Service Listener");
+ADLT.initServiceListener = function () {
+  log.debug("Initializing the AddLive Service Listener");
 
 //  1. Instantiate the listener
-  var listener = new CDO.CloudeoServiceListener();
+  var listener = new ADL.AddLiveServiceListener();
 
 
 //  2. Define the handler for the user event
   listener.onUserEvent = function (e) {
     log.debug("Got new user event: " + e.userId);
     if (e.isConnected) {
-      CDOT.onUserJoined(e);
+      ADLT.onUserJoined(e);
     } else {
       log.debug("User with id: " + e.userId + ' left the media scope');
       $('#renderingWidget' + e.userId).html('').remove();
@@ -105,47 +105,47 @@ CDOT.initServiceListener = function () {
   listener.onMediaStreamEvent = function (e) {
     log.debug("Got new media streaming status changed event");
     switch (e.mediaType) {
-      case CDO.MediaType.AUDIO:
-        CDOT.onRemoteAudioStreamStatusChanged(e);
+      case ADL.MediaType.AUDIO:
+        ADLT.onRemoteAudioStreamStatusChanged(e);
         break;
-      case CDO.MediaType.VIDEO:
-        CDOT.onRemoteVideoStreamStatusChanged(e);
+      case ADL.MediaType.VIDEO:
+        ADLT.onRemoteVideoStreamStatusChanged(e);
         break;
       default :
         log.warn('Got unsupported media type in media stream event: ' +
-                     e.mediaType);
+            e.mediaType);
     }
   };
 
 //  4. Define the handler for the media connection type changed event
   listener.onMediaConnTypeChanged = function (e) {
     log.debug("Got new media connection type: " + e.connectionType);
-    $('#connTypeLbl').html(CDOT.mediaConnType2Label[e.connectionType]);
+    $('#connTypeLbl').html(ADLT.mediaConnType2Label[e.connectionType]);
   };
 
 //  5. Define the handler for the connection lost event
   listener.onConnectionLost = function (e) {
     log.warn('Got connection lost notification');
-    CDOT.disconnectHandler();
-    if (e.errCode == CDO.ErrorCodes.Communication.COMM_REMOTE_END_DIED) {
+    ADLT.disconnectHandler();
+    if (e.errCode == ADL.ErrorCodes.Communication.COMM_REMOTE_END_DIED) {
       log.warn('Connection terminated due to internet connection issues. ' +
-                   'Trying to reconnect in 5 seconds');
-      CDOT.tryReconnect();
+          'Trying to reconnect in 5 seconds');
+      ADLT.tryReconnect();
     }
   };
 
 //  6. Prepare the success handler
   var onSucc = function () {
-    log.debug("Cloudeo service listener registered");
-    $('#connectBtn').click(CDOT.connect).removeClass('disabled');
+    log.debug("AddLive service listener registered");
+    $('#connectBtn').click(ADLT.connect).removeClass('disabled');
   };
 
-//  7. Finally register the Cloudeo Service Listener
-  CDO.getService().addServiceListener(CDO.createResponder(onSucc), listener);
+//  7. Finally register the AddLive Service Listener
+  ADL.getService().addServiceListener(ADL.createResponder(onSucc), listener);
 
 };
 
-CDOT.onUserJoined = function (e) {
+ADLT.onUserJoined = function (e) {
   log.debug("Got new user with id: " + e.userId);
 
 //  1. Prepare a rendering widget for the user.
@@ -158,10 +158,10 @@ CDOT.onUserJoined = function (e) {
   $('#renderingWrapper').append(renderer);
   if (e.videoPublished) {
 //    3a. Render the sink if the video stream is being published.
-    CDO.renderSink({
-                     sinkId:e.videoSinkId,
-                     containerId:'renderer' + e.userId
-                   });
+    ADL.renderSink({
+      sinkId:e.videoSinkId,
+      containerId:'renderer' + e.userId
+    });
   } else {
 //    3b. Just show the no video stream published indicator.
     renderer.find('.no-video-text').show();
@@ -174,21 +174,21 @@ CDOT.onUserJoined = function (e) {
 
 };
 
-CDOT.onRemoteVideoStreamStatusChanged = function (e) {
+ADLT.onRemoteVideoStreamStatusChanged = function (e) {
   log.debug("Got change in video streaming for user with id: " + e.userId +
-                ' user just ' +
-                (e.videoPublished ? 'published' : 'stopped publishing') +
-                ' the stream');
+      ' user just ' +
+      (e.videoPublished ? 'published' : 'stopped publishing') +
+      ' the stream');
 //  1. Grab the rendering widget corresponding to the user
   var renderingWidget = $('#renderingWidget' + e.userId);
 
   if (e.videoPublished) {
 //    2a. If video was just published - render it and hide the
 //        "No video from user" indicator
-    CDO.renderSink({
-                     sinkId:e.videoSinkId,
-                     containerId:'renderer' + e.userId
-                   });
+    ADL.renderSink({
+      sinkId:e.videoSinkId,
+      containerId:'renderer' + e.userId
+    });
     renderingWidget.find('.no-video-text').hide();
   } else {
 //    2b. If video was just unpublished - clear the renderer and show the
@@ -198,11 +198,11 @@ CDOT.onRemoteVideoStreamStatusChanged = function (e) {
   }
 };
 
-CDOT.onRemoteAudioStreamStatusChanged = function (e) {
+ADLT.onRemoteAudioStreamStatusChanged = function (e) {
   log.debug("Got change in audio streaming for user with id: " + e.userId +
-                ' user just ' +
-                (e.audioPublished ? 'published' : 'stopped publishing') +
-                ' the stream');
+      ' user just ' +
+      (e.audioPublished ? 'published' : 'stopped publishing') +
+      ' the stream');
 
 //  1. Find the "Audio is muted" indicator corresponding to the user
   var muteIndicator = $('#renderingWidget' + e.userId).
@@ -217,58 +217,58 @@ CDOT.onRemoteAudioStreamStatusChanged = function (e) {
 };
 
 /**
- * Tries to reestablish the connection to the Cloudeo Streaming Server in case
+ * Tries to reestablish the connection to the AddLive Streaming Server in case
  * of network-driven loss.
  *
  * It will retry the connect every 5 seconds.
  */
-CDOT.tryReconnect = function () {
+ADLT.tryReconnect = function () {
 
 //  Register the reconnect handler to be triggered after 5 seconds
   setTimeout(function () {
-    log.debug("Trying to reestablish the connection to the Cloudeo Streaming " +
-                  "Server");
+    log.debug("Trying to reestablish the connection to the AddLive Streaming " +
+        "Server");
 
 //    1. Define the result handler
     var succHandler = function () {
       log.debug("Connection successfully reestablished!");
-      CDOT.postConnectHandler(CDOT.currentConnDescriptor);
+      ADLT.postConnectHandler(ADLT.currentConnDescriptor);
     };
 
 //    2. Define the failure handler
     var errHandler = function () {
       log.warn("Failed to reconnect. Will try again in 5 secs");
-      CDOT.tryReconnect();
+      ADLT.tryReconnect();
     };
 //    3. Try to connect
-    var connDescriptor = CDOT.genConnectionDescriptor();
-    CDO.getService().connect(CDO.createResponder(succHandler, errHandler),
-                             connDescriptor);
+    var connDescriptor = ADLT.genConnectionDescriptor();
+    ADL.getService().connect(ADL.createResponder(succHandler, errHandler),
+        connDescriptor);
   }, 5000);
 
 };
 
 /**
  * ==========================================================================
- * End of the Cloudeo service events handling code
+ * End of the AddLive service events handling code
  * ==========================================================================
  */
 
 
-CDOT.startLocalVideo = function () {
+ADLT.startLocalVideo = function () {
   log.debug("Starting local preview of current user");
 //  1. Define the result handler
   var resultHandler = function (sinkId) {
     log.debug("Local preview started. Rendering the sink with id: " + sinkId);
-    CDO.renderSink({
-                     sinkId:sinkId,
-                     containerId:'renderLocalPreview',
-                     mirror:true
-                   });
+    ADL.renderSink({
+      sinkId:sinkId,
+      containerId:'renderLocalPreview',
+      mirror:true
+    });
   };
 
 //  2. Request the SDK to start capturing local user's preview
-  CDO.getService().startLocalVideo(CDO.createResponder(resultHandler));
+  ADL.getService().startLocalVideo(ADL.createResponder(resultHandler));
 };
 
 /**
@@ -277,45 +277,45 @@ CDOT.startLocalVideo = function () {
  * ==========================================================================
  */
 
-CDOT.connect = function () {
-  log.debug("Establishing a connection to the Cloudeo Streaming Server");
+ADLT.connect = function () {
+  log.debug("Establishing a connection to the AddLive Streaming Server");
 
 //  1. Disable the connect button to avoid a cascade of connect requests
   $('#connectBtn').unbind('click').addClass('disabled');
 
 //  2. Get the scope id and generate the user id.
-  CDOT.scopeId = $('#scopeIdTxtField').val();
-  CDOT.userId = CDOT.genRandomUserId();
+  ADLT.scopeId = $('#scopeIdTxtField').val();
+  ADLT.userId = ADLT.genRandomUserId();
 
 //  3. Define the result handler - delegates the processing to the
 //     postConnectHandler
-  var connDescriptor = CDOT.genConnectionDescriptor(CDOT.scopeId, CDOT.userId);
+  var connDescriptor = ADLT.genConnectionDescriptor(ADLT.scopeId, ADLT.userId);
   var onSucc = function () {
-    CDOT.postConnectHandler();
+    ADLT.postConnectHandler();
   };
 
 //  4. Define the error handler - enabled the connect button again
   var onErr = function () {
-    $('#connectBtn').click(CDOT.connect).removeClass('disabled');
+    $('#connectBtn').click(ADLT.connect).removeClass('disabled');
   };
 
 //  5. Request the SDK to establish a connection
-  CDO.getService().connect(CDO.createResponder(onSucc, onErr), connDescriptor);
+  ADL.getService().connect(ADL.createResponder(onSucc, onErr), connDescriptor);
 };
 
-CDOT.disconnect = function () {
-  log.debug("Terminating a connection to the Cloudeo Streaming Server");
+ADLT.disconnect = function () {
+  log.debug("Terminating a connection to the AddLive Streaming Server");
 
 //  1. Define the result handler
   function succHandler() {
-    CDOT.scopeId = undefined;
-    CDOT.userId = undefined;
-    CDOT.disconnectHandler();
+    ADLT.scopeId = undefined;
+    ADLT.userId = undefined;
+    ADLT.disconnectHandler();
   }
 
 //  2. Request the SDK to terminate the connection
-  CDO.getService().disconnect(CDO.createResponder(succHandler),
-                              CDOT.scopeId);
+  ADL.getService().disconnect(ADL.createResponder(succHandler),
+      ADLT.scopeId);
 };
 
 /**
@@ -324,10 +324,10 @@ CDOT.disconnect = function () {
  *
  * It just resets the UI to the default state.
  */
-CDOT.disconnectHandler = function () {
+ADLT.disconnectHandler = function () {
 
 //  1. Toggle the active state of the Connect/Disconnect buttons
-  $('#connectBtn').click(CDOT.connect).removeClass('disabled');
+  $('#connectBtn').click(ADLT.connect).removeClass('disabled');
   $('#disconnectBtn').unbind('click').addClass('disabled');
 
 //  2. Reset the connection type label
@@ -346,47 +346,47 @@ CDOT.disconnectHandler = function () {
  * Internet connectivity issues.
  * @param connDescriptor
  */
-CDOT.postConnectHandler = function () {
+ADLT.postConnectHandler = function () {
   log.debug("Connected. Disabling connect button and enabling the disconnect");
 
 //  1. Enable the disconnect button
-  $('#disconnectBtn').click(CDOT.disconnect).removeClass('disabled');
+  $('#disconnectBtn').click(ADLT.disconnect).removeClass('disabled');
 
 //  2. Update the local user id label
   $('#localUserIdLbl').html(connDescriptor.token);
 
 };
 
-CDOT.genConnectionDescriptor = function (scopeId, userId) {
+ADLT.genConnectionDescriptor = function (scopeId, userId) {
 //  Clone the video streaming configuration and create a connection descriptor
 //  using settings provided by the user
-  var connDescriptor = $.extend({}, CDOT.CONNECTION_CONFIGURATION);
+  var connDescriptor = $.extend({}, ADLT.CONNECTION_CONFIGURATION);
   connDescriptor.scopeId = scopeId;
-  connDescriptor.authDetails = CDOT.genAuthDetails(scopeId, userId);
+  connDescriptor.authDetails = ADLT.genAuthDetails(scopeId, userId);
   connDescriptor.autopublishAudio = $('#publishAudioChckbx').is(':checked');
   connDescriptor.autopublishVideo = $('#publishVideoChckbx').is(':checked');
   return connDescriptor;
 };
 
-CDOT.genAuthDetails = function (scopeId, userId) {
+ADLT.genAuthDetails = function (scopeId, userId) {
 
   // New Auth API
   var dateNow = new Date();
   var now = Math.floor((dateNow.getTime() / 1000) -
-                           dateNow.getTimezoneOffset() * 60);
+      dateNow.getTimezoneOffset() * 60);
   var authDetails = {
     // Token valid 5 mins
     expires:now + (5 * 60),
     userId:userId,
-    salt:CDOT.randomString(100)
+    salt:ADLT.randomString(100)
   };
   var signatureBody =
-      CDOT.APPLICATION_ID +
+      ADLT.APPLICATION_ID +
           scopeId +
           userId +
           authDetails.salt +
           authDetails.expires +
-          CDOT.APP_SHARED_SECRET;
+          ADLT.APP_SHARED_SECRET;
   authDetails.signature =
       CryptoJS.SHA256(signatureBody).toString(CryptoJS.enc.Hex).toUpperCase();
   return authDetails;
@@ -408,8 +408,8 @@ CDOT.genAuthDetails = function (scopeId, userId) {
 /**
  * Handles the change of the "Publish Audio" checkbox
  */
-CDOT.onPublishAudioChanged = function () {
-  if (!CDOT.scopeId) {
+ADLT.onPublishAudioChanged = function () {
+  if (!ADLT.scopeId) {
 //    If the scope id is not defined, it means that we're not connected and thus
 //    there is nothing to do here.
     return;
@@ -418,16 +418,16 @@ CDOT.onPublishAudioChanged = function () {
 //  Since we're connected we need to either start or stop publishing the audio
 // stream, depending on the new state of the checkbox
   if ($(this).is(':checked')) {
-    CDO.getService().publish(CDO.createResponder(), CDOT.scopeId,
-                             CDO.MediaType.AUDIO);
+    ADL.getService().publish(ADL.createResponder(), ADLT.scopeId,
+        ADL.MediaType.AUDIO);
   } else {
-    CDO.getService().unpublish(CDO.createResponder(), CDOT.scopeId,
-                               CDO.MediaType.AUDIO);
+    ADL.getService().unpublish(ADL.createResponder(), ADLT.scopeId,
+        ADL.MediaType.AUDIO);
   }
 
 };
-CDOT.onPublishVideoChanged = function () {
-  if (!CDOT.scopeId) {
+ADLT.onPublishVideoChanged = function () {
+  if (!ADLT.scopeId) {
 
 //    If the scope id is not defined, it means that we're not connected and thus
 //    there is nothing to do here.
@@ -437,11 +437,11 @@ CDOT.onPublishVideoChanged = function () {
 //  Since we're connected we need to either start or stop publishing the audio
 // stream, depending on the new state of the checkbox
   if ($(this).is(':checked')) {
-    CDO.getService().publish(CDO.createResponder(), CDOT.scopeId,
-                             CDO.MediaType.VIDEO);
+    ADL.getService().publish(ADL.createResponder(), ADLT.scopeId,
+        ADL.MediaType.VIDEO);
   } else {
-    CDO.getService().unpublish(CDO.createResponder(), CDOT.scopeId,
-                               CDO.MediaType.VIDEO);
+    ADL.getService().unpublish(ADL.createResponder(), ADLT.scopeId,
+        ADL.MediaType.VIDEO);
   }
 
 };
@@ -456,4 +456,4 @@ CDOT.onPublishVideoChanged = function () {
 /**
  * Register the document ready handler.
  */
-$(CDOT.onDomReady);
+$(ADLT.onDomReady);

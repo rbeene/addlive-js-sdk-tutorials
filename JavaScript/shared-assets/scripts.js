@@ -7,80 +7,80 @@
  */
 
 /**
- * @namespace Namespace for all Cloudeo tutorials definitions.
+ * @namespace Namespace for all AddLive tutorials definitions.
  */
-var CDOT = CDOT || {};
+var ADLT = ADLT || {};
 
 // Initialize the logging.
-CDOT.log = log4javascript.getLogger();
-window.log = CDOT.log;
-CDOT.inPageAppender = new log4javascript.InPageAppender("logsContainer");
-CDOT.inPageAppender.setHeight("500px");
-CDOT.log.addAppender(CDOT.inPageAppender);
+ADLT.log = log4javascript.getLogger();
+window.log = ADLT.log;
+ADLT.inPageAppender = new log4javascript.InPageAppender("logsContainer");
+ADLT.inPageAppender.setHeight("500px");
+ADLT.log.addAppender(ADLT.inPageAppender);
 
 /**
  * @const
  * @type {String}
  */
-CDOT.PLUGIN_CONTAINER_ID = 'pluginContainer';
+ADLT.PLUGIN_CONTAINER_ID = 'pluginContainer';
 
 
-CDOT.initCloudeoLogging = function () {
-  CDO.initLogging(function (lev, msg) {
+ADLT.initAddLiveLogging = function () {
+  ADL.initLogging(function (lev, msg) {
     switch (lev) {
-      case CDO.LogLevel.DEBUG:
-        CDOT.log.debug("[CDO] " + msg);
+      case ADL.LogLevel.DEBUG:
+        ADLT.log.debug("[ADL] " + msg);
         break;
-      case CDO.LogLevel.WARN:
-        CDOT.log.warn("[CDO] " + msg);
+      case ADL.LogLevel.WARN:
+        ADLT.log.warn("[ADL] " + msg);
         break;
-      case CDO.LogLevel.ERROR:
-        CDOT.log.error("[CDO] " + msg);
+      case ADL.LogLevel.ERROR:
+        ADLT.log.error("[ADL] " + msg);
         break;
       default:
-        CDOT.log.error("Got unsupported log level: " + lev + ". Message: " +
-                           msg);
+        ADLT.log.error("Got unsupported log level: " + lev + ". Message: " +
+            msg);
     }
   }, true);
 };
 
 /**
- * Initializes the Cloudeo SDK.
+ * Initializes the AddLive SDK.
  */
-CDOT.initializeCloudeoQuick = function (completeHandler, options) {
-  log.debug("Initializing the Cloudeo SDK");
-  var initListener = new CDO.PlatformInitListener();
+ADLT.initializeAddLiveQuick = function (completeHandler, options) {
+  log.debug("Initializing the AddLive SDK");
+  var initListener = new ADL.PlatformInitListener();
   initListener.onInitStateChanged = function (e) {
     switch (e.state) {
-      case CDO.InitState.ERROR:
-        log.error("Failed to initialize the Cloudeo SDK");
+      case ADL.InitState.ERROR:
+        log.error("Failed to initialize the AddLive SDK");
         log.error("Reason: " + e.errMessage + ' (' + e.errCode + ')');
         break;
-      case CDO.InitState.INITIALIZED:
+      case ADL.InitState.INITIALIZED:
         completeHandler();
         break;
-      case CDO.InitState.DEVICES_INIT_BEGIN:
+      case ADL.InitState.DEVICES_INIT_BEGIN:
         log.debug("Devices initialization started");
         break;
       default:
         log.warn("Got unsupported init state: " + e.state);
     }
   };
-  CDO.initPlatform(initListener, options);
+  ADL.initPlatform(initListener, options);
 };
 
 
-CDOT.initDevicesSelects = function () {
-  $('#camSelect').change(CDOT.getDevChangedHandler('VideoCapture'));
-  $('#micSelect').change(CDOT.getDevChangedHandler('AudioCapture'));
-  $('#spkSelect').change(CDOT.getDevChangedHandler('AudioOutput'));
+ADLT.initDevicesSelects = function () {
+  $('#camSelect').change(ADLT.getDevChangedHandler('VideoCapture'));
+  $('#micSelect').change(ADLT.getDevChangedHandler('AudioCapture'));
+  $('#spkSelect').change(ADLT.getDevChangedHandler('AudioOutput'));
 };
 
-CDOT.getDevChangedHandler = function (devType) {
+ADLT.getDevChangedHandler = function (devType) {
   return function () {
     var selectedDev = $(this).val();
-    CDO.getService()['set' + devType + 'Device'](
-        CDO.createResponder(),
+    ADL.getService()['set' + devType + 'Device'](
+        ADL.createResponder(),
         selectedDev);
   };
 };
@@ -88,16 +88,16 @@ CDOT.getDevChangedHandler = function (devType) {
 /**
  * Fills the selects with the currently plugged in devices.
  */
-CDOT.populateDevicesQuick = function () {
-  CDOT.populateDevicesOfType('#camSelect', 'VideoCapture');
-  CDOT.populateDevicesOfType('#micSelect', 'AudioCapture');
-  CDOT.populateDevicesOfType('#spkSelect', 'AudioOutput');
+ADLT.populateDevicesQuick = function () {
+  ADLT.populateDevicesOfType('#camSelect', 'VideoCapture');
+  ADLT.populateDevicesOfType('#micSelect', 'AudioCapture');
+  ADLT.populateDevicesOfType('#spkSelect', 'AudioOutput');
 };
 
 /**
  * Fills the audio output devices select.
  */
-CDOT.populateDevicesOfType = function (selectSelector, devType) {
+ADLT.populateDevicesOfType = function (selectSelector, devType) {
   var devsResultHandler = function (devs) {
     var $select = $(selectSelector);
     $select.empty();
@@ -108,18 +108,18 @@ CDOT.populateDevicesOfType = function (selectSelector, devType) {
     var getDeviceHandler = function (device) {
       $select.val(device);
     };
-    CDO.getService()['get' + devType + 'Device'](
-        CDO.createResponder(getDeviceHandler));
+    ADL.getService()['get' + devType + 'Device'](
+        ADL.createResponder(getDeviceHandler));
   };
-  CDO.getService()['get' + devType + 'DeviceNames'](
-      CDO.createResponder(devsResultHandler));
+  ADL.getService()['get' + devType + 'DeviceNames'](
+      ADL.createResponder(devsResultHandler));
 };
 
-CDOT.genRandomUserId = function () {
+ADLT.genRandomUserId = function () {
   return Math.floor(Math.random() * 10000)
 };
 
-CDOT.randomString = function (len, charSet) {
+ADLT.randomString = function (len, charSet) {
   charSet = charSet ||
       'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   var str = '';
