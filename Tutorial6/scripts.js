@@ -396,8 +396,7 @@ ADLT.genAuthDetails = function (scopeId, userId) {
 
   // New Auth API
   var dateNow = new Date();
-  var now = Math.floor((dateNow.getTime() / 1000) -
-      dateNow.getTimezoneOffset() * 60);
+  var now = Math.floor((dateNow.getTime() / 1000));
   var authDetails = {
     // Token valid 5 mins
     expires:now + (5 * 60),
