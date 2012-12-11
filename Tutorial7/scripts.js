@@ -14,31 +14,6 @@
    */
   ADLT.CONNECTION_CONFIGURATION = {
 
-    /**
-     * Description of the base line video stream - the low layer. It's QVGA, with
-     * bitrate equal to 64kbps and 5 frames per second
-     */
-    lowVideoStream:{
-      publish:true,
-      receive:true,
-      maxWidth:320,
-      maxHeight:240,
-      maxBitRate:64,
-      maxFps:5
-    },
-
-    /**
-     * Description of the adaptive video stream - the high layer. It's QVGA, with
-     * 400kbps of bitrate and 15 frames per second
-     */
-    highVideoStream:{
-      publish:true,
-      receive:true,
-      maxWidth:320,
-      maxHeight:240,
-      maxBitRate:400,
-      maxFps:15
-    },
 
     /**
      * Flags defining that both streams should be automatically published upon
@@ -48,6 +23,10 @@
     autopublishAudio:false,
     scopeId:'Tutorial7'
   };
+
+  ADLT.APPLICATION_ID = 1;
+
+  ADLT.APP_SHARED_SECRET = 'CloudeoTestAccountSecret';
 
 
   /**
@@ -60,7 +39,8 @@
 //  and do not update the plug-in
     ADLT.initializeAddLiveQuick(ADLT.onPlatformReady,
         {initDevices:false,
-          skipUpdate:true
+          skipUpdate:true,
+          applicationId: ADLT.APPLICATION_ID
         });
   };
 
@@ -96,7 +76,9 @@
   ADLT.onListenerAdded = function () {
     var connDescr = $.extend({}, ADLT.CONNECTION_CONFIGURATION);
     ADLT._ownUserId = ADLT.genRandomUserId();
-    connDescr.token = ADLT._ownUserId;
+    connDescr.authDetails = ADLT.genAuthDetails(connDescr.scopeId,
+        ADLT._ownUserId);
+
     ADL.getService().connect(ADL.createResponder(ADLT.onConnected), connDescr);
   };
 
@@ -142,5 +124,29 @@
   };
 
   $(ADLT.onDomReady);
+
+  ADLT.genAuthDetails = function (scopeId, userId) {
+
+    // New Auth API
+    var dateNow = new Date();
+    var now = Math.floor((dateNow.getTime() / 1000));
+    var authDetails = {
+      // Token valid 5 mins
+      expires:now + (5 * 60),
+      userId:userId,
+      salt:ADLT.randomString(100)
+    };
+    var signatureBody =
+        ADLT.APPLICATION_ID +
+            scopeId +
+            userId +
+            authDetails.salt +
+            authDetails.expires +
+            ADLT.APP_SHARED_SECRET;
+    authDetails.signature =
+        CryptoJS.SHA256(signatureBody).toString(CryptoJS.enc.Hex).toUpperCase();
+    return authDetails;
+  };
+
 
 })(jQuery);
