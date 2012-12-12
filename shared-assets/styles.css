@@ -235,3 +235,27 @@ h2#tutorialSubTitle {
 .scr-share-src-itm:hover {
     background: #DDD;
 }
+
+/**
+
+Tutorial 9 - user landing widget
+
+*/
+
+#accordion {
+    width:450px;
+    margin: 0 auto;
+}
+
+.next-wrapper {
+    padding-top: 20px;
+    text-align: right;
+}
+
+#platformInitStep {
+
+}
+
+#initializedLabel {
+    display: none;
+}
