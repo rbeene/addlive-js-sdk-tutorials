@@ -123,8 +123,6 @@
     msgClone.appendTo('#msgsSink');
   };
 
-  $(ADLT.onDomReady);
-
   ADLT.genAuthDetails = function (scopeId, userId) {
 
     // New Auth API
@@ -147,6 +145,8 @@
         CryptoJS.SHA256(signatureBody).toString(CryptoJS.enc.Hex).toUpperCase();
     return authDetails;
   };
+
+  $(ADLT.onDomReady);
 
 
 })(jQuery);

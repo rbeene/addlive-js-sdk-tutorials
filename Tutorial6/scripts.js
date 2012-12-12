@@ -369,7 +369,7 @@ ADLT.postConnectHandler = function () {
   $('#disconnectBtn').click(ADLT.disconnect).removeClass('disabled');
 
 //  2. Update the local user id label
-  $('#localUserIdLbl').html(connDescriptor.token);
+  $('#localUserIdLbl').html(connDescriptor.authDetails.userId);
 
 };
 

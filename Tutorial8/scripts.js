@@ -11,37 +11,16 @@ ADLT.SCOPE_ID = 'Tutorial8';
 ADLT.CONNECTION_CONFIGURATION = {
 
   /**
-   * Description of the base line video stream - the low layer. It's QVGA, with
-   * bitrate equal to 64kbps and 5 frames per second
-   */
-  lowVideoStream:{
-    publish:true,
-    receive:true,
-    maxWidth:320,
-    maxHeight:240,
-    maxBitRate:64,
-    maxFps:5
-  },
-
-  /**
-   * Description of the adaptive video stream - the high layer. It's QVGA, with
-   * 400kbps of bitrate and 15 frames per second
-   */
-  highVideoStream:{
-    publish:true,
-    receive:true,
-    maxWidth:320,
-    maxHeight:240,
-    maxBitRate:400,
-    maxFps:15
-  },
-
-  /**
    * Flags defining that streams shouldn't be automatically published upon connection.
    */
   autopublishVideo:false,
   autopublishAudio:false
 };
+
+ADLT.APPLICATION_ID = 1;
+
+ADLT.APP_SHARED_SECRET = 'CloudeoTestAccountSecret';
+
 
 ADLT.SCREEN_SHARING_SRC_PRV_WIDTH = 240;
 ADLT.SCREEN_SHARING_SRC_PRV_HEIGHT = 160;
@@ -58,7 +37,8 @@ ADLT.SCREEN_SHARING_ITM_WIDGET_TMPL = null;
 ADLT.onDomReady = function () {
   log.debug('DOM loaded');
   ADLT.initAddLiveLogging();
-  ADLT.initializeAddLiveQuick(ADLT.onPlatformReady);
+  var initOptions = {applicationId: ADLT.APPLICATION_ID};
+  ADLT.initializeAddLiveQuick(ADLT.onPlatformReady, initOptions);
   ADLT.SCREEN_SHARING_ITM_WIDGET_TMPL = $(
       '<li class="scr-share-src-itm">' +
           '<img src="/shared-assets/no_screenshot_available.png"/>' +
@@ -118,7 +98,9 @@ ADLT.connect = function () {
   // updating the URL and the token.
   var connDescriptor = $.extend({}, ADLT.CONNECTION_CONFIGURATION);
   connDescriptor.scopeId = ADLT.SCOPE_ID;
-  connDescriptor.token = ADLT.genRandomUserId();
+  var userId = ADLT.genRandomUserId();
+  connDescriptor.authDetails = ADLT.genAuthDetails(connDescriptor.scopeId,
+      userId);
 
   // Define the result handler
   var onSucc = function () {
@@ -335,6 +317,28 @@ ADLT.fitDims = function (srcW, srcH, targetW, targetH) {
   }
 };
 
+ADLT.genAuthDetails = function (scopeId, userId) {
+
+  // New Auth API
+  var dateNow = new Date();
+  var now = Math.floor((dateNow.getTime() / 1000));
+  var authDetails = {
+    // Token valid 5 mins
+    expires:now + (5 * 60),
+    userId:userId,
+    salt:ADLT.randomString(100)
+  };
+  var signatureBody =
+      ADLT.APPLICATION_ID +
+          scopeId +
+          userId +
+          authDetails.salt +
+          authDetails.expires +
+          ADLT.APP_SHARED_SECRET;
+  authDetails.signature =
+      CryptoJS.SHA256(signatureBody).toString(CryptoJS.enc.Hex).toUpperCase();
+  return authDetails;
+};
 
 /**
  * Register the document ready handler.
