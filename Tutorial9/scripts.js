@@ -9,7 +9,14 @@
 (function (window, $) {
 
   var log = window.log,
-      ADLT = window.ADLT;
+      ADLT = window.ADLT,
+      APPLICATION_ID = 1,
+      APP_SHARED_SECRET = 'CloudeoTestAccountSecret',
+      AVG_RTT_OK = 300,
+      MIC_TEST_DURATION = 2000,
+      MIC_TEST_MIN_ACTIVITY = 20,
+      CONNECTIVITY_TEST_DURATION = 10000;
+
 
   /**
    * Document ready callback - starts the AddLive platform initialization.
@@ -29,7 +36,10 @@
 
 //  Step 1 - create the PlatformInitListener and overwrite it's methods.
     var initListener = new ADL.PlatformInitListener(),
-        initOptions = {initDevices:false};
+        initOptions = {
+          initDevices:false,
+          applicationId:APPLICATION_ID
+        };
 
 //  Define the handler for initialization progress changes
     initListener.onInitProgressChanged = initProgressChangedHandler;
@@ -74,6 +84,8 @@
     var listener = new ADL.AddLiveServiceListener();
     listener.onDeviceListChanged = onDeviceListChanged;
     listener.onMicActivity = onMicActivity;
+    listener.onMediaConnTypeChanged = onMediaConnTypeChanged;
+    listener.onMediaStats = onMediaStats;
 
     var onAddListenerSucc = function () {
       var $platformInitStep = $('#platformInitStep');
@@ -111,7 +123,7 @@
           // Set the mic gain to half of the range avail
           ADL.getService().setMicrophoneVolume(ADL.r(), 125);
           ADL.getService().monitorMicActivity(ADL.r(), true);
-          setTimeout(micTestComplete, 5000);
+          setTimeout(micTestComplete, MIC_TEST_DURATION);
         },
         micSelectedErrHandler = function (errCode, errMsg) {
           $micSetupStepWrapper.find('.state-error-msg').show();
@@ -132,7 +144,7 @@
 
     var activityOk = false;
     $.each(micActivitySamples, function (i, value) {
-      if (value > 10) {
+      if (value > MIC_TEST_MIN_ACTIVITY) {
         activityOk = true;
       }
     });
@@ -275,11 +287,12 @@
 
   //============================================================================
 
-  var ConnHwItemStatus = {BAD:'ok', WARN:'warn', OK:'bad'};
+  var ConnHwItemStatus = {BAD:'bad', WARN:'warn', OK:'ok'};
 
 
   function setupConnAndHwTest() {
     testCpu();
+    initTestConn();
   }
 
   var CLOCK_MAP = {
@@ -296,9 +309,9 @@
     var onHostDetails = function (info) {
       var cpuStatus = ConnHwItemStatus.BAD;
       if (CLOCK_MAP[info.cores] !== undefined) {
-        if (CLOCK_MAP[info.cores].ok > info.clock) {
+        if (info.clock > CLOCK_MAP[info.cores].ok ) {
           cpuStatus = ConnHwItemStatus.OK;
-        } else if (CLOCK_MAP[info.cores].warn > info.clock) {
+        } else if (info.clock > CLOCK_MAP[info.cores].warn) {
           cpuStatus = ConnHwItemStatus.WARN;
         }
       } else if (info.cores > 4) {
@@ -314,6 +327,101 @@
       $cpuTest.find('.hw-conn-warn').show();
     };
     ADL.getService().getHostCpuDetails(ADL.r(onHostDetails, onHostDetailsErr))
+  }
+
+
+  var testScopeId;
+
+  function initTestConn() {
+    var userId = ADLT.genRandomUserId();
+    testScopeId = 'user_setup_scope_' + userId;
+    var authDetails = ADLT.genAuth(testScopeId, userId, APPLICATION_ID,
+        APP_SHARED_SECRET);
+
+    var connDescriptor = {
+      scopeId:testScopeId,
+      authDetails:authDetails
+    };
+    ADL.getService().connect(ADL.r(onConnected, onConnErr), connDescriptor);
+    setTimeout(hwConnTestComplete, CONNECTIVITY_TEST_DURATION);
+  }
+
+  function hwConnTestComplete() {
+    testRTT();
+    ADL.getService().disconnect(ADL.r(), testScopeId);
+  }
+
+  function testRTT() {
+    var avgRtt = 0, status, infoMsg = 'Average RTT: ';
+    $.each(rtts, function (i, rtt) {
+      avgRtt += parseInt(rtt);
+    });
+    avgRtt /= rtts.length;
+    infoMsg += avgRtt;
+
+    if(avgRtt > AVG_RTT_OK) {
+      status = ConnHwItemStatus.WARN
+    } else {
+      status = ConnHwItemStatus.OK;
+    }
+    var $infoContainer = $('#distanceTest');
+    $infoContainer.find('.info').
+        html(infoMsg).
+        show();
+    $infoContainer.find('.hw-conn-' + status).show();
+  }
+
+  function onConnected(mediaConn) {
+    var $connTest = $('#connTest');
+    $connTest.find('.info').html("Connection established").show();
+    $connTest.find('.hw-conn-ok').show();
+    ADL.getService().startMeasuringStatistics(ADL.r(), testScopeId, 2)
+  }
+
+  function onConnErr(errCode, errMsg) {
+    var $connTest = $('#connTest');
+    $connTest.find('.info').html("Failed to connect due to:<br/>" +
+        errMsg + ' (errCode: ' + errCode + ')').addClass('hw-conn-bad').show();
+    $('.conn-test-itm .hw-conn-bad').show();
+  }
+
+  /**
+   *
+   * @param {ADL.MediaConnTypeChangedEvent}e
+   */
+  function onMediaConnTypeChanged(e) {
+    log.debug("Got media connection type changed: " + JSON.stringify(e));
+    var $infoContainer, status, connTypeString;
+    if (e.mediaType == ADL.MediaType.AUDIO) {
+      $infoContainer = $('#connTypeAudioTest');
+    } else {
+      $infoContainer = $('#connTypeVideoTest');
+    }
+    switch (e.connectionType) {
+      case ADL.ConnectionType.UDP_RELAY:
+        status = ConnHwItemStatus.OK;
+        connTypeString = 'Got low latency UDP communication';
+        break;
+      case ADL.ConnectionType.TCP_RELAY:
+        status = ConnHwItemStatus.WARN;
+        connTypeString = 'Got variable latency TCP communication';
+        break;
+    }
+    $infoContainer.find('.info').html(connTypeString).show();
+    $infoContainer.find('.hw-conn-' + status).show();
+  }
+
+  var rtts = [];
+
+  /**
+   *
+   * @param {ADL.MediaStatsEvent} e
+   */
+  function onMediaStats(e) {
+    log.debug("Got Media Stats event");
+    if (e.mediaType == ADL.MediaType.AUDIO) {
+      rtts.push(e.stats.rtt);
+    }
   }
 
   function nextStep() {

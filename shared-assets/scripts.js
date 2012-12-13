@@ -129,3 +129,35 @@ ADLT.randomString = function (len, charSet) {
   }
   return str;
 };
+
+
+/**
+ * Generates sample authentication details. For more info about authentication,
+ * please refer to: http://www.addlive.com/docs.html#authentication
+ * @param userId
+ *        Id of user to authenticate connection for
+ * @return {Object}
+ *        Generated authentication details object.
+ */
+ADLT.genAuth = function (scopeId, userId, appId, appSecret) {
+
+  // New Auth API
+  var dateNow = new Date();
+  var now = Math.floor((dateNow.getTime() / 1000));
+  var authDetails = {
+    // Token valid 5 mins
+    expires:now + (5 * 60),
+    userId:userId,
+    salt:ADLT.randomString(100)
+  };
+  var signatureBody =
+      appId +
+          scopeId +
+          userId +
+          authDetails.salt +
+          authDetails.expires +
+          appSecret;
+  authDetails.signature =
+      CryptoJS.SHA256(signatureBody).toString(CryptoJS.enc.Hex).toUpperCase();
+  return authDetails;
+};

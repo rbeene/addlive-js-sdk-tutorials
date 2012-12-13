@@ -243,7 +243,7 @@ Tutorial 9 - user landing widget
 */
 
 #accordion {
-    width:450px;
+    width: 450px;
     margin: 0 auto;
 }
 
@@ -261,6 +261,26 @@ Tutorial 9 - user landing widget
     display: none;
 }
 
+.state-ok-msg {
+    color: #41b953;
+}
+
+.state-error-msg {
+    color: #E70C0C;
+}
+
+.hw-conn-ok {
+    color: #41b953;
+}
+
+.hw-conn-warn {
+    color: #ff9700;
+}
+
+.hw-conn-bad {
+    color: #E70C0C;
+}
+
 #platformInitStep {
 
 }
@@ -270,8 +290,22 @@ Tutorial 9 - user landing widget
 }
 
 #camPreviewRenderer {
-    width:160px;
+    width: 160px;
     height: 120px;
     background: #DDD;
     margin: 0 auto;
+}
+
+#connHwTestWrapper .hw-conn-status,
+#connHwTestWrapper .info {
+    display: none;
+}
+
+#connHwTestWrapper .hw-conn-status {
+    float: right;
+}
+
+
+#connHwTestWrapper .hw-conn-test-label {
+
 }
