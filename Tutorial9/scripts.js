@@ -51,10 +51,19 @@
         });
     $('#micActivityBar').progressbar({value:10});
 
+    $('#volumeCtrlSlider').slider({
+      min:0,
+      max:255,
+      animate:true,
+      value:127,
+      slide:onVolumeSlide
+    });
+
     $('#accordion').accordion({disabled:true});
     $('#platformInitNextBtn').click(platformInitStepComplete);
     $('#micTestAgainBtn').click(startMicTest);
     $('#micNextBtn').click(micSetupComplete);
+    $('#spkNextBtn').click(spkTestComplete);
     $('#playTestSoundBtn').button().click(onPlayTestSoundBtnClicked)
   }
 
@@ -81,6 +90,8 @@
     nextStep();
     startMicTest()
   }
+
+  //============================================================================
 
   var micActivitySamples = [];
 
@@ -144,20 +155,64 @@
 
   function micSetupComplete() {
     nextStep();
+    setupSpkTest();
+  }
+
+  //============================================================================
+
+  function setupSpkTest() {
+    populateVolume();
+  }
+
+  function populateVolume() {
+    var resultHandler = function (volume) {
+      $('#volumeCtrlSlider').slider('value', volume);
+    };
+    ADL.getService().getSpeakersVolume(ADL.r(resultHandler));
   }
 
   function onPlayTestSoundBtnClicked() {
-    ADL.getService().startPlayingTestSound(ADL.r());
+    var $spkSetupStep = $('#spkSetupStepWrapper');
+    var onSuccHandler = function () {
+      $spkSetupStep.find('.next-btn').show();
+      $spkSetupStep.find('.state-ok-msg').show();
+    };
+    var onErrHandler = function () {
+      $spkSetupStep.find('.state-error-msg').show();
+    };
+    ADL.getService().startPlayingTestSound(
+        ADL.r(onSuccHandler, onErrHandler));
   }
 
+  function onVolumeSlide(e, ui) {
+    ADL.getService().setSpeakersVolume(ADL.r(), ui.value);
+  }
 
-  /**
-   * Handles the change event of the audio output devices select.
-   */
   function onSpkSelected() {
     var selected = $(this).val();
-    ADL.getService().setAudioOutputDevice(ADL.createResponder(), selected);
+    var $spkSetupStep = $('#spkSetupStepWrapper');
+    $spkSetupStep.find('.next-btn').hide();
+    $spkSetupStep.find('.state-msg').hide();
+    var onSuccHandler = function () {
+      $spkSetupStep.find('.state-testing-msg').show();
+    };
+    var onErrHandler = function () {
+      $spkSetupStep.find('.state-error-msg').show();
+    };
+    ADL.getService().setAudioOutputDevice(ADL.r(onSuccHandler, onErrHandler), selected);
   }
+
+  function spkTestComplete() {
+    nextStep();
+    setupCamTest();
+  }
+
+  //============================================================================
+
+  function setupCamTest() {
+
+  }
+
   /**
    * Handles the change event of the video capture devices select.
    */

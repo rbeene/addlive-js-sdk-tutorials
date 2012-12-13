@@ -50,6 +50,7 @@
         AddLive Platform initialized! Platform version:
         <span id="sdkVersion">SDK not initialized...</span>
       </p>
+
       <p class="state-error-msg state-msg">
         Failed to initialize AddLive Platform.
       </p>
@@ -81,7 +82,8 @@
       <div class="ctrl-wrapper">
         <p class="state-ok-msg state-msg">Selected Mic works!</p>
 
-        <p class="state-testing-msg state-msg">Testing selected mic... Make some noise!</p>
+        <p class="state-testing-msg state-msg">Testing selected mic... Make some
+          noise!</p>
 
         <p class="state-error-msg state-msg">
           Selected Microphone doesn't work :(<br/>
@@ -95,9 +97,10 @@
         <a id="micNextBtn" class="next-btn" href="javascript://nop">Next -></a>
       </div>
     </div>
+
     <h3>Speakers</h3>
 
-    <div>
+    <div id="spkSetupStepWrapper">
       <!--Audio output device configuration -->
       <div class="ctrl-wrapper">
         <label for="spkSelect">Audio Output device:</label>
@@ -120,6 +123,16 @@
       <div class="ctrl-wrapper">
         <a id="playTestSoundBtn" href="javascript://nop">Play test sound</a>
       </div>
+      <p class="state-ok-msg state-msg">
+        If you could here the sound, you may proceed to next step...
+      </p>
+      <p class="state-testing-msg state-msg">
+        Click play test sound to check the device selected.
+      </p>
+      <p class="state-error-msg state-msg">
+        Selected device doesn't seem to be working.
+      </p>
+
 
       <div class="next-wrapper">
         <a id="spkNextBtn" class="next-btn" href="javascript://nop">Next -></a>
