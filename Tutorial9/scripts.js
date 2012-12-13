@@ -62,8 +62,10 @@
     $('#accordion').accordion({disabled:true});
     $('#platformInitNextBtn').click(platformInitStepComplete);
     $('#micTestAgainBtn').click(startMicTest);
+    $('#camTestAgainBtn').click(startCamTest);
     $('#micNextBtn').click(micSetupComplete);
     $('#spkNextBtn').click(spkTestComplete);
+    $('#camNextBtn').click(camTestComplete);
     $('#playTestSoundBtn').button().click(onPlayTestSoundBtnClicked)
   }
 
@@ -101,7 +103,7 @@
     var selectedMic = $('#micSelect').val();
     var $micSetupStepWrapper = $('#micSetupStepWrapper');
     $micSetupStepWrapper.find('.state-msg').hide();
-    $micSetupStepWrapper.find('.next').hide();
+    $micSetupStepWrapper.find('.next-btn').hide();
 
     var micSelectedSuccHandler = function () {
           $micSetupStepWrapper.find('.state-testing-msg').show();
@@ -120,7 +122,6 @@
 
     ADL.getService().setAudioCaptureDevice(
         ADL.r(micSelectedSuccHandler, micSelectedErrHandler), selectedMic);
-
   }
 
   function micTestComplete() {
@@ -210,17 +211,110 @@
   //============================================================================
 
   function setupCamTest() {
+    startCamTest();
+  }
 
+  function startCamTest() {
+    log.debug("Starting camera test");
+    var $camSetupStepWrapper = $('#camSetupStepWrapper');
+
+    var localPrevStarted = function (sinkId) {
+          $camSetupStepWrapper.find('.state-testing-msg').hide();
+          $camSetupStepWrapper.find('.state-ok-msg').show();
+          $camSetupStepWrapper.find('.next-btn').show();
+          ADL.renderSink({sinkId:sinkId, containerId:'camPreviewRenderer'});
+        },
+        localPrevStartError = function (errCode, errMsg) {
+          $camSetupStepWrapper.find('.state-testing-msg').hide();
+          $camSetupStepWrapper.find('.state-error-msg').show();
+          $('#camError').html('Reason: Failed to use given device - ' +
+              errMsg + ' (errCode ' + errCode + ')');
+          $('#accordion').accordion('refresh');
+        };
+
+//    Stop local video if was started previously
+    var localPrevStopped = function () {
+      var selectedMic = $('#camSelect').val();
+      $camSetupStepWrapper.find('.state-msg').hide();
+      $camSetupStepWrapper.find('.next-btn').hide();
+      $camSetupStepWrapper.find('.state-testing-msg').show();
+
+      var camSelectedSuccHandler = function () {
+            $('#accordion').accordion('refresh');
+
+            ADL.getService().startLocalVideo(
+                ADL.r(localPrevStarted, localPrevStartError));
+          },
+          camSelectedErrHandler = function (errCode, errMsg) {
+            $camSetupStepWrapper.find('.state-error-msg').show();
+            $('#camError').html('Reason: Failed to select given device - ' +
+                errMsg + ' (errCode ' + errCode + ')');
+            $('#accordion').accordion('refresh');
+          };
+
+      ADL.getService().setVideoCaptureDevice(
+          ADL.r(camSelectedSuccHandler, camSelectedErrHandler), selectedMic);
+
+    };
+
+    ADL.getService().stopLocalVideo(ADL.r(localPrevStopped, localPrevStopped));
   }
 
   /**
    * Handles the change event of the video capture devices select.
    */
   function onCamSelected() {
-    var selected = $(this).val();
-    ADL.getService().setVideoCaptureDevice(ADL.createResponder(), selected);
+    startCamTest();
   }
 
+  function camTestComplete() {
+    ADL.getService().stopLocalVideo(ADL.r());
+    nextStep();
+    setupConnAndHwTest();
+  }
+
+  //============================================================================
+
+  var ConnHwItemStatus = {BAD:'ok', WARN:'warn', OK:'bad'};
+
+
+  function setupConnAndHwTest() {
+    testCpu();
+  }
+
+  var CLOCK_MAP = {
+    1:{warn:2000, ok:Number.MAX_VALUE},
+    2:{warn:1700, ok:3000},
+    3:{warn:2500, ok:3000},
+    4:{ok:2000}
+
+  };
+
+
+  function testCpu() {
+    var $cpuTest = $('#cpuTest');
+    var onHostDetails = function (info) {
+      var cpuStatus = ConnHwItemStatus.BAD;
+      if (CLOCK_MAP[info.cores] !== undefined) {
+        if (CLOCK_MAP[info.cores].ok > info.clock) {
+          cpuStatus = ConnHwItemStatus.OK;
+        } else if (CLOCK_MAP[info.cores].warn > info.clock) {
+          cpuStatus = ConnHwItemStatus.WARN;
+        }
+      } else if (info.cores > 4) {
+        cpuStatus = ConnHwItemStatus.OK;
+      }
+      if (info.brand_string.match(/Atom/)) {
+        cpuStatus = ConnHwItemStatus.WARN;
+      }
+      $cpuTest.find('.info').html(info.brand_string).show();
+      $cpuTest.find('.hw-conn-' + cpuStatus).show();
+    }, onHostDetailsErr = function () {
+      $cpuTest.find('.info').html("Failed to identify CPU").show();
+      $cpuTest.find('.hw-conn-warn').show();
+    };
+    ADL.getService().getHostCpuDetails(ADL.r(onHostDetails, onHostDetailsErr))
+  }
 
   function nextStep() {
     var $accordion = $('#accordion');

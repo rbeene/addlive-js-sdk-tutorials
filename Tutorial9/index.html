@@ -67,7 +67,7 @@
       <div class="ctrl-wrapper">
         <label for="micSelect">Select microphone:</label>
         <select id="micSelect" class="ctrl">
-          <option value="-1">No Microphone found :(</option>
+          <option value="-1">No Microphone found</option>
         </select>
 
         <div class="clearer"></div>
@@ -86,7 +86,7 @@
           noise!</p>
 
         <p class="state-error-msg state-msg">
-          Selected Microphone doesn't work :(<br/>
+          Selected Microphone doesn't work <br/>
           <span id="micError"></span><br/>
           <a id="micTestAgainBtn" href="javascript://nop">Test again</a>
         </p>
@@ -105,7 +105,7 @@
       <div class="ctrl-wrapper">
         <label for="spkSelect">Audio Output device:</label>
         <select id="spkSelect" class="ctrl">
-          <option value="-1">No Microphone found :(</option>
+          <option value="-1">No Microphone found</option>
         </select>
 
         <div class="clearer"></div>
@@ -124,11 +124,13 @@
         <a id="playTestSoundBtn" href="javascript://nop">Play test sound</a>
       </div>
       <p class="state-ok-msg state-msg">
-        If you could here the sound, you may proceed to next step...
+        If you could hear the sound, you may proceed to next step...
       </p>
+
       <p class="state-testing-msg state-msg">
         Click play test sound to check the device selected.
       </p>
+
       <p class="state-error-msg state-msg">
         Selected device doesn't seem to be working.
       </p>
@@ -140,15 +142,66 @@
     </div>
     <h3>Camera</h3>
 
-    <div>
+    <div id="camSetupStepWrapper">
+      <div id="camPreviewRenderer"></div>
+
+      <div class="ctrl-wrapper">
+        <label for="camSelect">Video Capture device:</label>
+        <select id="camSelect" class="ctrl">
+          <option value="-1">Loading...</option>
+        </select>
+
+        <div class="clearer"></div>
+      </div>
+
+      <p class="state-ok-msg state-msg">
+        Selected Camera seem to be functional. You can proceed if you can see
+        yourself in the box above!
+      </p>
+
+      <p class="state-testing-msg state-msg">Testing selected Camera...</p>
+
+      <p class="state-error-msg state-msg">
+        Selected Camera doesn't work <br/>
+        <span id="camError"></span><br/>
+        <a id="camTestAgainBtn" href="javascript://nop">Test again</a>
+      </p>
 
       <div class="next-wrapper">
         <a id="camNextBtn" class="next-btn" href="javascript://nop">Next -></a>
       </div>
     </div>
-    <h3>Connectivity</h3>
 
-    <div>
+    <h3>Connectivity & Hardware</h3>
+
+    <div id="connHwTestWrapper">
+      <ul>
+        <li id="cpuTest">
+          Checking CPU type...<br/>
+          <span class="info"></span> &nbsp;&nbsp;&nbsp;
+          <span class="hw-conn-ok hw-conn-status">OK</span>
+          <span class="hw-conn-warn hw-conn-status">Possible issues</span>
+          <span class="hw-conn-bad hw-conn-status">To weak</span>
+        </li>
+        <li>
+          Testing Connection...
+          <span class="info"></span> &nbsp;&nbsp;&nbsp;
+          <span class="hw-conn-ok hw-conn-status">OK</span>
+          <span class="hw-conn-bad hw-conn-status">To weak</span>
+        </li>
+        <li>
+          Testing Connection Type...
+          <span class="info"></span> &nbsp;&nbsp;&nbsp;
+          <span class="hw-conn-ok hw-conn-status">OK</span>
+          <span class="hw-conn-warn hw-conn-status">To weak</span>
+        </li>
+        <li>
+          Testing distance to streaming server...
+          <span class="info"></span> &nbsp;&nbsp;&nbsp;
+          <span class="hw-conn-ok hw-conn-status">OK</span>
+          <span class="hw-conn-warn hw-conn-status">To weak</span>
+        </li>
+      </ul>
       <div class="next-wrapper">
         <a id="connNextBtn" class="next-btn" href="javascript://nop">Next -></a>
       </div>
