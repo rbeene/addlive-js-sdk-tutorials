@@ -16,12 +16,8 @@
    */
   function onDomReady() {
     log.debug('DOM loaded');
-    $("#initProgressBar").
-        progressbar({
-          value:0
-        });
-    $('#accordion').accordion({disabled:true});
     ADLT.initAddLiveLogging();
+    initUI();
     initializeAddLive();
   }
 
@@ -45,15 +41,172 @@
     ADL.initPlatform(initListener, initOptions);
   }
 
-  function platformInitComplete() {
-    $('#initializingLabel').fadeOut(500, function () {
-      $('#initializedLabel').fadeIn(500, function() {
+  function initUI() {
+    $('#camSelect').change(onCamSelected);
+    $('#micSelect').change(onMicSelected);
+    $('#spkSelect').change(onSpkSelected);
+    $("#initProgressBar").
+        progressbar({
+          value:0
+        });
+    $('#micActivityBar').progressbar({value:10});
 
-      })
+    $('#accordion').accordion({disabled:true});
+    $('#platformInitNextBtn').click(platformInitStepComplete);
+    $('#micTestAgainBtn').click(startMicTest);
+    $('#micNextBtn').click(micSetupComplete);
+    $('#playTestSoundBtn').button().click(onPlayTestSoundBtnClicked)
+  }
+
+  function platformInitComplete() {
+    ADLT.populateDevicesQuick();
+    var listener = new ADL.AddLiveServiceListener();
+    listener.onDeviceListChanged = onDeviceListChanged;
+    listener.onMicActivity = onMicActivity;
+
+    var onAddListenerSucc = function () {
+      var $platformInitStep = $('#platformInitStep');
+      $platformInitStep.find('.state-testing-msg').fadeOut(500, function () {
+        $platformInitStep.find('.state-ok-msg').fadeIn(500, function () {
+          $platformInitStep.find('.next-btn').show();
+          $('#accordion').accordion('refresh');
+        })
+      });
+    };
+    ADL.getService().addServiceListener(ADL.r(onAddListenerSucc), listener);
+
+  }
+
+  function platformInitStepComplete() {
+    nextStep();
+    startMicTest()
+  }
+
+  var micActivitySamples = [];
+
+  function startMicTest() {
+    log.debug("Starting microphone test");
+    micActivitySamples = [];
+    var selectedMic = $('#micSelect').val();
+    var $micSetupStepWrapper = $('#micSetupStepWrapper');
+    $micSetupStepWrapper.find('.state-msg').hide();
+    $micSetupStepWrapper.find('.next').hide();
+
+    var micSelectedSuccHandler = function () {
+          $micSetupStepWrapper.find('.state-testing-msg').show();
+          $('#accordion').accordion('refresh');
+          // Set the mic gain to half of the range avail
+          ADL.getService().setMicrophoneVolume(ADL.r(), 125);
+          ADL.getService().monitorMicActivity(ADL.r(), true);
+          setTimeout(micTestComplete, 5000);
+        },
+        micSelectedErrHandler = function (errCode, errMsg) {
+          $micSetupStepWrapper.find('.state-error-msg').show();
+          $('#micError').html('Reason: Failed to select given device - ' +
+              errMsg + '(' + errCode + ')');
+          $('#accordion').accordion('refresh');
+        };
+
+    ADL.getService().setAudioCaptureDevice(
+        ADL.r(micSelectedSuccHandler, micSelectedErrHandler), selectedMic);
+
+  }
+
+  function micTestComplete() {
+    var $micSetupStepWrapper = $('#micSetupStepWrapper');
+
+    ADL.getService().monitorMicActivity(ADL.r(), false);
+    $micSetupStepWrapper.find('.state-testing-msg').hide();
+
+    var activityOk = false;
+    $.each(micActivitySamples, function (i, value) {
+      if (value > 10) {
+        activityOk = true;
+      }
     });
+    if (activityOk) {
+      $micSetupStepWrapper.find('.state-ok-msg').show();
+      $micSetupStepWrapper.find('.next-btn').show();
+    } else {
+      $('#micError').html('Reason: No activity was detected from given device.');
+      $micSetupStepWrapper.find('.state-error-msg').show();
+    }
+    $('#accordion').accordion('refresh');
+  }
+
+  /**
+   * Handles the change event of the audio capture devices select.
+   */
+  function onMicSelected() {
+    startMicTest();
   }
 
 
+  function micSetupComplete() {
+    nextStep();
+  }
+
+  function onPlayTestSoundBtnClicked() {
+    ADL.getService().startPlayingTestSound(ADL.r());
+  }
+
+
+  /**
+   * Handles the change event of the audio output devices select.
+   */
+  function onSpkSelected() {
+    var selected = $(this).val();
+    ADL.getService().setAudioOutputDevice(ADL.createResponder(), selected);
+  }
+  /**
+   * Handles the change event of the video capture devices select.
+   */
+  function onCamSelected() {
+    var selected = $(this).val();
+    ADL.getService().setVideoCaptureDevice(ADL.createResponder(), selected);
+  }
+
+
+  function nextStep() {
+    var $accordion = $('#accordion');
+    var currentStep = $accordion.accordion('option', 'active');
+    $accordion.accordion('option', 'active', currentStep + 1);
+  }
+
+  /**
+   * ===========================================================================
+   * AddLiveService events handling
+   * ===========================================================================
+   */
+
+  function onDeviceListChanged(e) {
+    log.debug("Got devices list changed");
+    if (e.audioInChanged) {
+      log.debug("Got new microphone plugged in");
+      ADLT.populateDevicesOfType('#micSelect', 'AudioCapture');
+    }
+    if (e.audioOutChanged) {
+      log.debug("Got new speakers plugged in");
+      ADLT.populateDevicesOfType('#spkSelect', 'AudioOutput');
+    }
+    if (e.videoInChanged) {
+      log.debug("Got new camera plugged in");
+      ADLT.populateDevicesOfType('#camSelect', 'VideoCapture');
+    }
+  }
+
+  function onMicActivity(e) {
+    log.debug("Got mic activity: " + e.activity);
+    $('#micActivityBar').progressbar('value', e.activity / 255 * 100);
+    micActivitySamples.push(e.activity);
+  }
+
+
+  /**
+   * ===========================================================================
+   * Initialization events handling
+   * ===========================================================================
+   */
   function initProgressChangedHandler(e) {
     log.debug("Platform init progress: " + e.progress);
     $("#initProgressBar").progressbar('value', e.progress);

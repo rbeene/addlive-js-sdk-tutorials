@@ -252,10 +252,20 @@ Tutorial 9 - user landing widget
     text-align: right;
 }
 
+.next-btn {
+    display: none;
+}
+
+/* Hide those items initially */
+.state-ok-msg, .state-testing-msg, .state-error-msg {
+    display: none;
+}
+
 #platformInitStep {
 
 }
 
-#initializedLabel {
-    display: none;
+#platformInitStep .state-testing-msg {
+    display: block;
 }
+

@@ -44,23 +44,102 @@
         Plug-in</a>
 
       <div id="initProgressBar"></div>
-      <p id="initializingLabel">Initializing AddLive Platform</p>
-      <p id="initializedLabel">
+      <p class="state-testing-msg state-msg">Initializing AddLive Platform</p>
+
+      <p class="state-ok-msg state-msg">
         AddLive Platform initialized! Platform version:
         <span id="sdkVersion">SDK not initialized...</span>
       </p>
+      <p class="state-error-msg state-msg">
+        Failed to initialize AddLive Platform.
+      </p>
+
       <div class="next-wrapper">
-        <a href="javascript://nop">Next -></a>
+        <a id="platformInitNextBtn" class="next-btn" href="javascript://nop">Next
+          -></a>
       </div>
     </div>
-    <h3>Mic</h3>
-    <div></div>
+    <h3>Microphone</h3>
+
+    <div id="micSetupStepWrapper">
+
+      <div class="ctrl-wrapper">
+        <label for="micSelect">Select microphone:</label>
+        <select id="micSelect" class="ctrl">
+          <option value="-1">No Microphone found :(</option>
+        </select>
+
+        <div class="clearer"></div>
+      </div>
+
+      <div class="ctrl-wrapper">
+        <div class="ctrl">
+          <div id="micActivityBar"></div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+      <div class="ctrl-wrapper">
+        <p class="state-ok-msg state-msg">Selected Mic works!</p>
+
+        <p class="state-testing-msg state-msg">Testing selected mic... Make some noise!</p>
+
+        <p class="state-error-msg state-msg">
+          Selected Microphone doesn't work :(<br/>
+          <span id="micError"></span><br/>
+          <a id="micTestAgainBtn" href="javascript://nop">Test again</a>
+        </p>
+      </div>
+
+
+      <div class="next-wrapper">
+        <a id="micNextBtn" class="next-btn" href="javascript://nop">Next -></a>
+      </div>
+    </div>
     <h3>Speakers</h3>
-    <div></div>
+
+    <div>
+      <!--Audio output device configuration -->
+      <div class="ctrl-wrapper">
+        <label for="spkSelect">Audio Output device:</label>
+        <select id="spkSelect" class="ctrl">
+          <option value="-1">No Microphone found :(</option>
+        </select>
+
+        <div class="clearer"></div>
+      </div>
+
+      <!--Volume  configuration -->
+      <div class="ctrl-wrapper">
+        <label for="volumeCtrlSlider">Volume Control:</label>
+
+        <div class="ctrl" id="volumeCtrlSlider"></div>
+        <div class="clearer"></div>
+      </div>
+
+      <!-- Playing of the test sound -->
+      <div class="ctrl-wrapper">
+        <a id="playTestSoundBtn" href="javascript://nop">Play test sound</a>
+      </div>
+
+      <div class="next-wrapper">
+        <a id="spkNextBtn" class="next-btn" href="javascript://nop">Next -></a>
+      </div>
+    </div>
     <h3>Camera</h3>
-    <div></div>
+
+    <div>
+
+      <div class="next-wrapper">
+        <a id="camNextBtn" class="next-btn" href="javascript://nop">Next -></a>
+      </div>
+    </div>
     <h3>Connectivity</h3>
-    <div></div>
+
+    <div>
+      <div class="next-wrapper">
+        <a id="connNextBtn" class="next-btn" href="javascript://nop">Next -></a>
+      </div>
+    </div>
 
   </div>
 

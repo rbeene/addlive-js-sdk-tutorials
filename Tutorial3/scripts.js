@@ -51,28 +51,7 @@ ADLT.onPlatformReady = function () {
 };
 
 ADLT.initializeListener = function () {
-  var listener = new ADL.AddLiveServiceListener();
-  listener.onDeviceListChanged = function (e) {
-    log.debug("Got devices list changed");
-    if (e.audioInChanged) {
-      log.debug("Got new microphone plugged in");
-      ADLT.populateDevicesOfType('#micSelect', 'AudioCapture');
-    }
-    if (e.audioOutChanged) {
-      log.debug("Got new speakers plugged in");
-      ADLT.populateDevicesOfType('#spkSelect', 'AudioOutput');
-    }
-    if (e.videoInChanged) {
-      log.debug("Got new camera plugged in");
-      ADLT.populateDevicesOfType('#camSelect', 'VideoCapture');
-    }
-  };
 
-  listener.onMicActivity = function (e) {
-    log.debug("Got mic activity: " + e.activity);
-    $('#micActivityBar').progressbar('value', e.activity / 255 * 100);
-  };
-  ADL.getService().addServiceListener(ADL.createResponder(), listener);
 };
 
 ADLT.populateVolume = function () {
