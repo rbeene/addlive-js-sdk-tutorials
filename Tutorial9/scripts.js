@@ -13,7 +13,7 @@
       APPLICATION_ID = 1,
       APP_SHARED_SECRET = 'CloudeoTestAccountSecret',
       AVG_RTT_OK = 300,
-      MIC_TEST_DURATION = 2000,
+      MIC_TEST_DURATION = 4000,
       MIC_TEST_MIN_ACTIVITY = 20,
       CONNECTIVITY_TEST_DURATION = 10000;
 
@@ -76,7 +76,9 @@
     $('#micNextBtn').click(micSetupComplete);
     $('#spkNextBtn').click(spkTestComplete);
     $('#camNextBtn').click(camTestComplete);
-    $('#playTestSoundBtn').button().click(onPlayTestSoundBtnClicked)
+    $('a').button();
+    $('.next-btn').hide();
+    $('#playTestSoundBtn').click(onPlayTestSoundBtnClicked);
   }
 
   function platformInitComplete() {
@@ -92,7 +94,6 @@
       $platformInitStep.find('.state-testing-msg').fadeOut(500, function () {
         $platformInitStep.find('.state-ok-msg').fadeIn(500, function () {
           $platformInitStep.find('.next-btn').show();
-          $('#accordion').accordion('refresh');
         })
       });
     };
@@ -119,7 +120,6 @@
 
     var micSelectedSuccHandler = function () {
           $micSetupStepWrapper.find('.state-testing-msg').show();
-          $('#accordion').accordion('refresh');
           // Set the mic gain to half of the range avail
           ADL.getService().setMicrophoneVolume(ADL.r(), 125);
           ADL.getService().monitorMicActivity(ADL.r(), true);
@@ -129,7 +129,7 @@
           $micSetupStepWrapper.find('.state-error-msg').show();
           $('#micError').html('Reason: Failed to select given device - ' +
               errMsg + '(' + errCode + ')');
-          $('#accordion').accordion('refresh');
+
         };
 
     ADL.getService().setAudioCaptureDevice(
@@ -155,7 +155,6 @@
       $('#micError').html('Reason: No activity was detected from given device.');
       $micSetupStepWrapper.find('.state-error-msg').show();
     }
-    $('#accordion').accordion('refresh');
   }
 
   /**
@@ -241,7 +240,7 @@
           $camSetupStepWrapper.find('.state-error-msg').show();
           $('#camError').html('Reason: Failed to use given device - ' +
               errMsg + ' (errCode ' + errCode + ')');
-          $('#accordion').accordion('refresh');
+
         };
 
 //    Stop local video if was started previously
@@ -252,7 +251,7 @@
       $camSetupStepWrapper.find('.state-testing-msg').show();
 
       var camSelectedSuccHandler = function () {
-            $('#accordion').accordion('refresh');
+
 
             ADL.getService().startLocalVideo(
                 ADL.r(localPrevStarted, localPrevStartError));
@@ -261,7 +260,7 @@
             $camSetupStepWrapper.find('.state-error-msg').show();
             $('#camError').html('Reason: Failed to select given device - ' +
                 errMsg + ' (errCode ' + errCode + ')');
-            $('#accordion').accordion('refresh');
+
           };
 
       ADL.getService().setVideoCaptureDevice(
@@ -289,6 +288,17 @@
 
   var ConnHwItemStatus = {BAD:'bad', WARN:'warn', OK:'ok'};
 
+  var connHwTestOverallResult = ConnHwItemStatus.OK;
+
+  function setConnHwTestStatus(newStatus) {
+    if (connHwTestOverallResult === ConnHwItemStatus.BAD) {
+      return;
+    }
+    if (newStatus === ConnHwItemStatus.OK) {
+      return;
+    }
+    connHwTestOverallResult = newStatus;
+  }
 
   function setupConnAndHwTest() {
     testCpu();
@@ -296,12 +306,21 @@
   }
 
   var CLOCK_MAP = {
-    1:{warn:2000, ok:Number.MAX_VALUE},
-    2:{warn:1700, ok:3000},
-    3:{warn:2500, ok:3000},
-    4:{ok:2000}
-
+    1:{warn:2500, ok:Number.MAX_VALUE},
+    2:{warn:1700, ok:2500},
+    3:{warn:1700, ok:2500},
+//    Any 4 cores CPU will do the job
+    4:{ok:0}
   };
+
+  var WARN_CPU_PATTERNS = [
+    /Atom/, /Celeron/
+  ];
+
+  var BAD_CPU_PATTERNS = [
+    /Pentium III/,
+    /Pentium II/
+  ];
 
 
   function testCpu() {
@@ -309,7 +328,7 @@
     var onHostDetails = function (info) {
       var cpuStatus = ConnHwItemStatus.BAD;
       if (CLOCK_MAP[info.cores] !== undefined) {
-        if (info.clock > CLOCK_MAP[info.cores].ok ) {
+        if (info.clock > CLOCK_MAP[info.cores].ok) {
           cpuStatus = ConnHwItemStatus.OK;
         } else if (info.clock > CLOCK_MAP[info.cores].warn) {
           cpuStatus = ConnHwItemStatus.WARN;
@@ -317,14 +336,25 @@
       } else if (info.cores > 4) {
         cpuStatus = ConnHwItemStatus.OK;
       }
-      if (info.brand_string.match(/Atom/)) {
-        cpuStatus = ConnHwItemStatus.WARN;
-      }
+      $.each(WARN_CPU_PATTERNS, function (i, pattern) {
+        if (info.brand_string.match(pattern)) {
+          cpuStatus = ConnHwItemStatus.WARN;
+        }
+      });
+
+      $.each(BAD_CPU_PATTERNS, function (i, pattern) {
+        if (info.brand_string.match(pattern)) {
+          cpuStatus = ConnHwItemStatus.BAD;
+        }
+      });
+
       $cpuTest.find('.info').html(info.brand_string).show();
       $cpuTest.find('.hw-conn-' + cpuStatus).show();
+      setConnHwTestStatus(cpuStatus);
     }, onHostDetailsErr = function () {
       $cpuTest.find('.info').html("Failed to identify CPU").show();
       $cpuTest.find('.hw-conn-warn').show();
+      setConnHwTestStatus(ConnHwItemStatus.WARN);
     };
     ADL.getService().getHostCpuDetails(ADL.r(onHostDetails, onHostDetailsErr))
   }
@@ -349,6 +379,8 @@
   function hwConnTestComplete() {
     testRTT();
     ADL.getService().disconnect(ADL.r(), testScopeId);
+    $('.summary-wrapper').find('.hw-conn-' + connHwTestOverallResult).show();
+
   }
 
   function testRTT() {
@@ -359,7 +391,7 @@
     avgRtt /= rtts.length;
     infoMsg += avgRtt;
 
-    if(avgRtt > AVG_RTT_OK) {
+    if (avgRtt > AVG_RTT_OK) {
       status = ConnHwItemStatus.WARN
     } else {
       status = ConnHwItemStatus.OK;
@@ -369,6 +401,7 @@
         html(infoMsg).
         show();
     $infoContainer.find('.hw-conn-' + status).show();
+    setConnHwTestStatus(status)
   }
 
   function onConnected(mediaConn) {
@@ -383,6 +416,7 @@
     $connTest.find('.info').html("Failed to connect due to:<br/>" +
         errMsg + ' (errCode: ' + errCode + ')').addClass('hw-conn-bad').show();
     $('.conn-test-itm .hw-conn-bad').show();
+    setConnHwTestStatus(ConnHwItemStatus.BAD);
   }
 
   /**
@@ -407,8 +441,10 @@
         connTypeString = 'Got variable latency TCP communication';
         break;
     }
+
     $infoContainer.find('.info').html(connTypeString).show();
     $infoContainer.find('.hw-conn-' + status).show();
+    setConnHwTestStatus(status);
   }
 
   var rtts = [];
@@ -427,7 +463,9 @@
   function nextStep() {
     var $accordion = $('#accordion');
     var currentStep = $accordion.accordion('option', 'active');
-    $accordion.accordion('option', 'active', currentStep + 1);
+    $accordion.
+        accordion('option', 'active', currentStep + 1).
+        accordion('refresh');
   }
 
   /**

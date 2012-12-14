@@ -34,7 +34,8 @@ h2#tutorialSubTitle {
 #installBtn {
     margin: 10px auto;
     display: none;
-    width: 150px;
+    width: 200px;
+    height: 31px;
 }
 
 #initProgressBar {
@@ -247,6 +248,10 @@ Tutorial 9 - user landing widget
     margin: 0 auto;
 }
 
+#accordion .ui-accordion-header {
+    cursor: default;
+}
+
 .next-wrapper {
     padding-top: 20px;
     text-align: right;
@@ -282,12 +287,33 @@ Tutorial 9 - user landing widget
 }
 
 #platformInitStep {
-
+    height: 150px;
 }
 
 #platformInitStep .state-testing-msg {
     display: block;
 }
+#platformInitStep .btn-wrapper {
+    height: 40px;
+}
+
+#micSetupStepWrapper {
+    height: 170px;
+}
+
+
+#spkSetupStepWrapper {
+    height: 170px;
+}
+
+#camSetupStepWrapper {
+    height: 310px;
+}
+
+#connHwTestWrapper {
+    height: 150px;
+}
+
 
 #camPreviewRenderer {
     width: 160px;
@@ -308,4 +334,8 @@ Tutorial 9 - user landing widget
 
 #connHwTestWrapper .hw-conn-test-label {
 
+}
+
+#connHwTestWrapper li {
+    margin-bottom: 10px;
 }
