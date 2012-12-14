@@ -8,15 +8,53 @@
  */
 (function (window, $) {
 
+  /**
+   * ===========================================================================
+   * Consts and imports
+   * ===========================================================================
+   */
+
   var log = window.log,
       ADLT = window.ADLT,
-      APPLICATION_ID = 1,
-      APP_SHARED_SECRET = 'CloudeoTestAccountSecret',
-      AVG_RTT_OK = 300,
-      MIC_TEST_DURATION = 4000,
-      MIC_TEST_MIN_ACTIVITY = 20,
-      CONNECTIVITY_TEST_DURATION = 10000;
 
+      /**
+       * ID of an application - to be used with initialization
+       */
+          APPLICATION_ID = 1,
+
+      /**
+       * Shared secret to be used with authentication
+       */
+          APP_SHARED_SECRET = 'CloudeoTestAccountSecret',
+
+      /**
+       * Minimal average round trip time to streaming server that makes the
+       * connection fine.
+       */
+          AVG_RTT_OK = 300,
+
+      /**
+       * How long the microphone test should last.
+       */
+          MIC_TEST_DURATION = 4000,
+
+      /**
+       * Minimal mic activity to assume that the sample contained proper mic
+       * input.
+       */
+          MIC_TEST_MIN_ACTIVITY = 20,
+
+      /**
+       * How long the sample connection should last.
+       */
+          CONNECTIVITY_TEST_DURATION = 10000;
+
+
+  /**
+   * ===========================================================================
+   * Initialization
+   * ===========================================================================
+   */
 
   /**
    * Document ready callback - starts the AddLive platform initialization.
@@ -34,7 +72,7 @@
   function initializeAddLive() {
     log.debug("Initializing the AddLive SDK");
 
-//  Step 1 - create the PlatformInitListener and overwrite it's methods.
+//  Step 1 - create the PlatformInitListener and init options.
     var initListener = new ADL.PlatformInitListener(),
         initOptions = {
           initDevices:false,
@@ -52,15 +90,21 @@
   }
 
   function initUI() {
+//  Define handlers for the devices selection change
     $('#camSelect').change(onCamSelected);
     $('#micSelect').change(onMicSelected);
     $('#spkSelect').change(onSpkSelected);
+
+//    Create the platform init progress bar
     $("#initProgressBar").
         progressbar({
           value:0
         });
+
+//    Create the mic ativity indicator progress bar
     $('#micActivityBar').progressbar({value:10});
 
+//    Create volume control slider
     $('#volumeCtrlSlider').slider({
       min:0,
       max:255,
@@ -69,20 +113,88 @@
       slide:onVolumeSlide
     });
 
+//    Create accordion
     $('#accordion').accordion({disabled:true});
+
+//    Bind all the button actions
     $('#platformInitNextBtn').click(platformInitStepComplete);
     $('#micTestAgainBtn').click(startMicTest);
     $('#camTestAgainBtn').click(startCamTest);
     $('#micNextBtn').click(micSetupComplete);
     $('#spkNextBtn').click(spkTestComplete);
     $('#camNextBtn').click(camTestComplete);
-    $('a').button();
-    $('.next-btn').hide();
     $('#playTestSoundBtn').click(onPlayTestSoundBtnClicked);
+
+//    Use the jQuery UI's style for buttons
+    $('a').button();
+
+//    And hide all the next buttons.
+    $('.next-btn').hide();
   }
 
+  function initProgressChangedHandler(e) {
+    log.debug("Platform init progress: " + e.progress);
+    $("#initProgressBar").progressbar('value', e.progress);
+  }
+
+  function initStateChangedHandler(e) {
+    switch (e.state) {
+
+      case ADL.InitState.ERROR:
+        log.error("Failed to initialize the AddLive SDK");
+        log.error("Reason: " + e.errMessage + ' (' + e.errCode + ')');
+        break;
+
+      case ADL.InitState.INITIALIZED:
+        var getVersionResult = function (version) {
+          log.debug("AddLive service version: " + version);
+          $('#sdkVersion').html(version);
+          platformInitComplete();
+        };
+
+        var responder = ADL.createResponder(getVersionResult);
+        ADL.getService().getVersion(responder);
+        break;
+
+      case ADL.InitState.INSTALLATION_REQUIRED:
+        log.debug("AddLive Plug-in installation required");
+        $('#installBtn').
+            attr('href', e.installerURL).
+            css('display', 'block');
+        break;
+      case ADL.InitState.INSTALLATION_COMPLETE:
+        log.debug("AddLive Plug-in installation complete");
+        $('#installBtn').hide();
+        break;
+
+      case ADL.InitState.BROWSER_RESTART_REQUIRED:
+        log.debug("Please restart your browser in order to complete platform auto-update");
+        break;
+
+      case ADL.InitState.DEVICES_INIT_BEGIN:
+        log.debug("Devices initialization started");
+        break;
+
+      default:
+        log.warn("Got unsupported init state: " + e.state);
+    }
+
+  }
+
+  /**
+   * ===========================================================================
+   * Step 1. Platform init
+   * ===========================================================================
+   */
+
+
+  /**
+   * Called upon platform initialization.
+   */
   function platformInitComplete() {
     ADLT.populateDevicesQuick();
+
+//    Define the AddLiveServiceListener
     var listener = new ADL.AddLiveServiceListener();
     listener.onDeviceListChanged = onDeviceListChanged;
     listener.onMicActivity = onMicActivity;
@@ -97,8 +209,9 @@
         })
       });
     };
-    ADL.getService().addServiceListener(ADL.r(onAddListenerSucc), listener);
 
+//    Register the listener
+    ADL.getService().addServiceListener(ADL.r(onAddListenerSucc), listener);
   }
 
   function platformInitStepComplete() {
@@ -106,7 +219,11 @@
     startMicTest()
   }
 
-  //============================================================================
+  /**
+   * ===========================================================================
+   * Step 2. Microphone
+   * ===========================================================================
+   */
 
   var micActivitySamples = [];
 
@@ -164,13 +281,23 @@
     startMicTest();
   }
 
+  function onMicActivity(e) {
+    log.debug("Got mic activity: " + e.activity);
+    $('#micActivityBar').progressbar('value', e.activity / 255 * 100);
+    micActivitySamples.push(e.activity);
+  }
+
 
   function micSetupComplete() {
     nextStep();
     setupSpkTest();
   }
 
-  //============================================================================
+  /**
+   * ===========================================================================
+   * Step 3. Speakers.
+   * ===========================================================================
+   */
 
   function setupSpkTest() {
     populateVolume();
@@ -219,7 +346,11 @@
     setupCamTest();
   }
 
-  //============================================================================
+  /**
+   * ===========================================================================
+   * Step 4. Camera.
+   * ===========================================================================
+   */
 
   function setupCamTest() {
     startCamTest();
@@ -284,7 +415,11 @@
     setupConnAndHwTest();
   }
 
-  //============================================================================
+  /**
+   * ===========================================================================
+   * Step 5. Hardware and Connectivity.
+   * ===========================================================================
+   */
 
   var ConnHwItemStatus = {BAD:'bad', WARN:'warn', OK:'ok'};
 
@@ -470,7 +605,7 @@
 
   /**
    * ===========================================================================
-   * AddLiveService events handling
+   * AddLiveService events common for more steps then 1
    * ===========================================================================
    */
 
@@ -488,67 +623,6 @@
       log.debug("Got new camera plugged in");
       ADLT.populateDevicesOfType('#camSelect', 'VideoCapture');
     }
-  }
-
-  function onMicActivity(e) {
-    log.debug("Got mic activity: " + e.activity);
-    $('#micActivityBar').progressbar('value', e.activity / 255 * 100);
-    micActivitySamples.push(e.activity);
-  }
-
-
-  /**
-   * ===========================================================================
-   * Initialization events handling
-   * ===========================================================================
-   */
-  function initProgressChangedHandler(e) {
-    log.debug("Platform init progress: " + e.progress);
-    $("#initProgressBar").progressbar('value', e.progress);
-  }
-
-  function initStateChangedHandler(e) {
-    switch (e.state) {
-
-      case ADL.InitState.ERROR:
-        log.error("Failed to initialize the AddLive SDK");
-        log.error("Reason: " + e.errMessage + ' (' + e.errCode + ')');
-        break;
-
-      case ADL.InitState.INITIALIZED:
-        var getVersionResult = function (version) {
-          log.debug("AddLive service version: " + version);
-          $('#sdkVersion').html(version);
-          platformInitComplete();
-        };
-
-        var responder = ADL.createResponder(getVersionResult);
-        ADL.getService().getVersion(responder);
-        break;
-
-      case ADL.InitState.INSTALLATION_REQUIRED:
-        log.debug("AddLive Plug-in installation required");
-        $('#installBtn').
-            attr('href', e.installerURL).
-            css('display', 'block');
-        break;
-      case ADL.InitState.INSTALLATION_COMPLETE:
-        log.debug("AddLive Plug-in installation complete");
-        $('#installBtn').hide();
-        break;
-
-      case ADL.InitState.BROWSER_RESTART_REQUIRED:
-        log.debug("Please restart your browser in order to complete platform auto-update");
-        break;
-
-      case ADL.InitState.DEVICES_INIT_BEGIN:
-        log.debug("Devices initialization started");
-        break;
-
-      default:
-        log.warn("Got unsupported init state: " + e.state);
-    }
-
   }
 
   /**
