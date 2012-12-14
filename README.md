@@ -182,3 +182,12 @@ Within this tutorial we've create an application that:
 - publishes selected screen (click to select)
 - allows one to change the screen (window) shared (again click to select
   different source)
+
+
+Tutorial 9
+----------
+
+In Tutorial 9 we'll be focusing on user landing process. It provides an example
+implementation of a widget that takes the users through all the steps required
+to setup the AddLive platform in the browser and also to make sure that the
+environment in which user operates allows the platform to function properly.
