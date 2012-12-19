@@ -73,12 +73,6 @@ ADLT.initializeListener = function () {
     $('#micActivityBar').progressbar('value', e.activity / 255 * 100);
   };
 
-  var listener2 = new ADL.AddLiveServiceListener();
-  listener2.onMicActivity = function (e) {
-    log.debug("Got mic activity on 2nd listener: " + e.activity);
-  };
-
-  ADL.getService().addServiceListener(ADL.createResponder(), listener2);
   ADL.getService().addServiceListener(ADL.createResponder(), listener);
 };
 
