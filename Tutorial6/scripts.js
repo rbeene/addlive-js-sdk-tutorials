@@ -74,7 +74,7 @@ ADLT.onDomReady = function () {
   ADLT.initAddLiveLogging();
   ADLT.initDevicesSelects();
   ADLT.initUI();
-  var initOptions = {applicationId: ADLT.APPLICATION_ID};
+  var initOptions = {applicationId:ADLT.APPLICATION_ID};
   ADLT.initializeAddLiveQuick(ADLT.onPlatformReady, initOptions);
 };
 
@@ -385,7 +385,6 @@ ADLT.genConnectionDescriptor = function (scopeId, userId) {
 };
 
 
-
 /**
  * ==========================================================================
  * End of the connection management code
@@ -437,6 +436,29 @@ ADLT.onPublishVideoChanged = function () {
         ADL.MediaType.VIDEO);
   }
 
+};
+
+ADLT.genAuthDetails = function (scopeId, userId) {
+
+  // New Auth API
+  var dateNow = new Date();
+  var now = Math.floor((dateNow.getTime() / 1000));
+  var authDetails = {
+    // Token valid 5 mins
+    expires:now + (5 * 60),
+    userId:userId,
+    salt:ADLT.randomString(100)
+  };
+  var signatureBody =
+      ADLT.APPLICATION_ID +
+          scopeId +
+          userId +
+          authDetails.salt +
+          authDetails.expires +
+          ADLT.APP_SHARED_SECRET;
+  authDetails.signature =
+      CryptoJS.SHA256(signatureBody).toString(CryptoJS.enc.Hex).toUpperCase();
+  return authDetails;
 };
 
 /**
