@@ -9,8 +9,8 @@ Each tutorial provided showcases single area of features, using fully functional
 Please note that all the tutorials use the beta release channel.
 
 
-Tutorial 1
-----------
+Tutorial 1  - Initializing the platform
+---------------------------------------
 
 This tutorial covers the very first step that needs to be done to create AddLive
 powered web application - initialization of the AddLive Platform. Within this
@@ -24,8 +24,8 @@ tutorial, we will create a sample application that:
 - Has simple UI showing the initialization progress bar, installation button (if
 required) and Platform SDK version.
 
-Tutorial 2
-----------
+Tutorial 2 - Devices configuration
+----------------------------------
 
 This tutorial covers the basics of multimedia devices configuration - getting the installed devices, getting the device currerntly used by the platform and finally choosing a device.
 Within this tutorial, we will create a sample application that:
@@ -36,8 +36,8 @@ Within this tutorial, we will create a sample application that:
 - Requests list of multimedia devices plugged in to user's computer.
 - Allows the user to select a device which should be used by the platform.
 
-Tutorial 3
-----------
+Tutorial 3 - Advanced devices handling
+--------------------------------------
 
 This tutorial covers more advanced devices configuration. We will learn how to control the speakers volume or microphone gain; how to play a sample audio file to check whether the volume level is fine and finally and finally how to render speech level indicator to verify the microphone gain.
 Within this tutorial, we will create a sample application that:
@@ -55,8 +55,8 @@ Within this tutorial, we will create a sample application that:
 - Monitors for changes in devices plugged in to user's computer.
 - Refreshes the devices select when change in devices list is detected.
 
-Tutorial 4
-----------
+Tutorial 4 - Video sinks rendering
+----------------------------------
 
 This tutorial covers one of the core AddLive SDK features - video rendering. In
 order to understand this tutorial completely, one need to know basic rendering
@@ -105,8 +105,8 @@ Within this tutorial, we will create a sample application that:
 - Fetches the list of plugged in video capture devices.
 - Allows a user to select a video capture device.
 
-Tutorial 5
-----------
+Tutorial 5 - Basic connectivity
+-------------------------------
 
 About the tutorial
 
@@ -127,8 +127,8 @@ Within this tutorial, we will create a sample application that:
 - Allows the user to terminate previously established connection to the AddLive Streaming Server.
 - Renders single remote participants.
 
-Tutorial 6
-----------
+Tutorial 6 - Conference app
+---------------------------
 
 This tutorial covers implementation of more advanced video conferencing
 application and employs all of the connectivity-related features of the AddLive
@@ -151,8 +151,8 @@ Within this tutorial, we will create a sample application that:
 - Shows the streaming state of every remote participant.
 - Tries to reconnect a user in case of connection lost due to Internet connectivity issues.
 
-Tutorial 7
-----------
+Tutorial 7 - sendMessage API
+----------------------------
 
 This tutorial shows basics of the sendMessage API, using simple text chat widget
 as an example.
@@ -165,8 +165,8 @@ Within this tutorial, we will create a sample application that:
 - provides simple widget allowing one to send message to selected remote peer
   or to broadcast it to all remote peers connected to the same scope
 
-Tutorial 8
-----------
+Tutorial 8 - Screen sharing
+---------------------------
 
 The 8th AddLive SDK tutorial provides sample implementation of screen sharing
 functionality.
@@ -184,8 +184,8 @@ Within this tutorial we've create an application that:
   different source)
 
 
-Tutorial 9
-----------
+Tutorial 9 - User boarding
+--------------------------
 
 In Tutorial 9 we'll be focusing on user landing process. It provides an example
 implementation of a widget that takes the users through all the steps required
