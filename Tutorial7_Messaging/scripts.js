@@ -83,7 +83,7 @@
   };
 
   ADLT.onConnected = function (connection) {
-    $('#sendbtn').removeClass('disabled').click(ADLT.sendMsg);
+    $('#sendBtn').removeClass('disabled').click(ADLT.sendMsg);
     var welcomeMessage = "You've just joined the text chat. You're personal id: "
         + ADLT._ownUserId;
     ADLT.appendMessage(ADLT._ownUserId, welcomeMessage);
