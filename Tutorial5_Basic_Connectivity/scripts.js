@@ -183,4 +183,4 @@ ADLT.genAuthDetails = function (userId) {
  * Register the document ready handler.
  */
 $(ADLT.onDomReady);
-})();
+})(window);

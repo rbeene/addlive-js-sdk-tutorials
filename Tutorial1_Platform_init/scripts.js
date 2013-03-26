@@ -7,6 +7,7 @@
  * @date 26-06-2012 10:37
  */
 
+
 (function (w) {
   'use strict';
   var ADLT = w.ADLT,
@@ -99,7 +100,7 @@
     };
 
 //  Step 2. Actually trigger the asynchronous initialization of the AddLive SDK.
-    ADL.initPlatform(initListener);
+    ADL.initPlatform(initListener, {bugReportingEndpoint:'//localhost:5000/reliability'});
   };
 
   /**
@@ -107,4 +108,4 @@
    */
   $(ADLT.onDomReady);
 
-})();
+})(window);

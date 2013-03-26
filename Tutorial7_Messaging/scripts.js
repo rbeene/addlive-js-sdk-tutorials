@@ -82,7 +82,8 @@
   ADLT.onListenerAdded = function () {
     var connDescr = $.extend({}, ADLT.CONNECTION_CONFIGURATION);
     ADLT._ownUserId = ADLT.genRandomUserId();
-    connDescr.authDetails = {};
+    connDescr.authDetails = ADLT.genAuthDetails(connDescr.scopeId,
+        ADLT._ownUserId);
 
     ADL.getService().connect(ADL.createResponder(ADLT.onConnected), connDescr);
   };

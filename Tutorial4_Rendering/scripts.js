@@ -63,4 +63,4 @@
    */
   $(ADLT.onDomReady);
 
-})();
+})(window);

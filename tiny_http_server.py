@@ -10,6 +10,7 @@
 from BaseHTTPServer import HTTPServer
 from BaseHTTPServer import BaseHTTPRequestHandler
 import os.path
+import sys
 
 class myHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -68,9 +69,12 @@ class myHandler(BaseHTTPRequestHandler):
         pass
 
 if __name__ == "__main__":
-    server = HTTPServer(('', 8080), myHandler)
+    port = 8080
+    if len(sys.argv) > 1:
+        port = int(sys.argv[1])
+    server = HTTPServer(('', port), myHandler)
     print "AddLive JavaScript Tutorials local server started"
-    print "Go to http://localhost:8080/ to start using the tutorials."
+    print "Go to http://localhost:{0}/ to start using the tutorials.".format(port)
     while True:
         server.handle_request()
 

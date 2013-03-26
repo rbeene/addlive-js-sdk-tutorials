@@ -480,4 +480,4 @@
    */
   $(ADLT.onDomReady);
 
-})();
+})(window);

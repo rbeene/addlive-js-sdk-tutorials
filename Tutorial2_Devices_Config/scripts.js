@@ -143,4 +143,4 @@
    * Register the document ready handler.
    */
   $(ADLT.onDomReady);
-})();
+})(window);

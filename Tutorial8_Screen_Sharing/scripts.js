@@ -353,4 +353,4 @@ ADLT.genAuthDetails = function (scopeId, userId) {
  */
 $(ADLT.onDomReady);
 
-})();
+})(window);
