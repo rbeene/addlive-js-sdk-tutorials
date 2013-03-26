@@ -33,7 +33,7 @@ ADLT.onDomReady = function () {
   log.debug('DOM loaded');
   ADLT.initAddLiveLogging();
   ADLT.initDevicesSelects();
-  var initOptions = {applicationId: ADLT.APPLICATION_ID, initDevices:false,skipUpdate:true};
+  var initOptions = {applicationId: ADLT.APPLICATION_ID};
   ADLT.initializeAddLiveQuick(ADLT.onPlatformReady, initOptions);
 };
 

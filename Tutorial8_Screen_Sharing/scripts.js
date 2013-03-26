@@ -155,7 +155,7 @@ ADLT.publishShareItem = function (shareItemId) {
     ADL.getService().publish(ADL.createResponder(onSucc, onErr),
         ADLT.SCOPE_ID,
         ADL.MediaType.SCREEN,
-        {windowId:shareItemId, nativeWidth: 1650});
+        {windowId:shareItemId, nativeWidth: 960});
   } else {
     log.error('Connection needed to share screen.');
   }
