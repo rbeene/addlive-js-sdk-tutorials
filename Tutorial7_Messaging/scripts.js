@@ -6,7 +6,12 @@
  * @date 26-06-2012 10:37
  */
 
-(function ($) {
+
+(function (w) {
+  'use strict';
+
+  var ADLT = w.ADLT,
+      log = ADLT.log;
 
   /**
    * Configuration of the streams to publish upon connection established
@@ -34,6 +39,7 @@
    */
   ADLT.onDomReady = function () {
     log.debug('DOM loaded');
+    ADL.initStdLogging(true);
     ADLT.initAddLiveLogging();
 //  Additional options for quick initialization - do not initialize the devices
 //  and do not update the plug-in
@@ -51,8 +57,8 @@
       if (e.isConnected) {
         $('<option id="user' + e.userId + 'Opt" value="' + e.userId + '">User ' +
             e.userId + '</option>').appendTo($('#targetSelect'));
-        ADLT.appendMessage(e.userId, 'User with id ' + e.userId + ' just joined '
-            + 'the chat');
+        ADLT.appendMessage(e.userId, 'User with id ' + e.userId +
+            ' just joined ' + 'the chat');
       } else {
         $('#user' + e.userId + 'Opt').remove();
         ADLT.appendMessage(e.userId, 'User with id ' + e.userId + ' just left ' +
@@ -76,16 +82,14 @@
   ADLT.onListenerAdded = function () {
     var connDescr = $.extend({}, ADLT.CONNECTION_CONFIGURATION);
     ADLT._ownUserId = ADLT.genRandomUserId();
-    connDescr.authDetails = ADLT.genAuthDetails(connDescr.scopeId,
-        ADLT._ownUserId);
+    connDescr.authDetails = {};
 
     ADL.getService().connect(ADL.createResponder(ADLT.onConnected), connDescr);
   };
 
   ADLT.onConnected = function (connection) {
-    $('#sendBtn').removeClass('disabled').click(ADLT.sendMsg);
-    var welcomeMessage = "You've just joined the text chat. You're personal id: "
-        + ADLT._ownUserId;
+    var welcomeMessage = "You've just joined the text chat. " +
+        "You're personal id: " + ADLT._ownUserId;
     ADLT.appendMessage(ADLT._ownUserId, welcomeMessage);
     $('#sendBtn').removeClass('disabled').click(ADLT.sendMsg);
     /**
@@ -142,11 +146,11 @@
             authDetails.expires +
             ADLT.APP_SHARED_SECRET;
     authDetails.signature =
-        CryptoJS.SHA256(signatureBody).toString(CryptoJS.enc.Hex).toUpperCase();
+        w.CryptoJS.SHA256(signatureBody).toString(w.CryptoJS.enc.Hex).toUpperCase();
     return authDetails;
   };
 
   $(ADLT.onDomReady);
 
 
-})(jQuery);
+})(window);

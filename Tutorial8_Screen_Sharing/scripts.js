@@ -1,3 +1,11 @@
+
+
+(function (w) {
+  'use strict';
+
+  var ADLT = w.ADLT,
+      log = ADLT.log;
+
 /**
  * Id of media scope to connect to upon user's request.
  * @type {String}
@@ -147,7 +155,7 @@ ADLT.publishShareItem = function (shareItemId) {
     ADL.getService().publish(ADL.createResponder(onSucc, onErr),
         ADLT.SCOPE_ID,
         ADL.MediaType.SCREEN,
-        {windowId:shareItemId, nativeWidth: 960});
+        {windowId:shareItemId, nativeWidth: 1650});
   } else {
     log.error('Connection needed to share screen.');
   }
@@ -206,7 +214,7 @@ ADLT.screenSharingItemAppender = function (i, src) {
   var $srcWrapper = ADLT.SCREEN_SHARING_ITM_WIDGET_TMPL.clone();
 
   // Mark as selected if was shared before
-  if (ADLT.sharedItemId == src.id) {
+  if (ADLT.sharedItemId === src.id) {
     $srcWrapper.addClass('selected');
   }
   $srcWrapper.attr('id', 'shareItm' + i);
@@ -336,7 +344,7 @@ ADLT.genAuthDetails = function (scopeId, userId) {
           authDetails.expires +
           ADLT.APP_SHARED_SECRET;
   authDetails.signature =
-      CryptoJS.SHA256(signatureBody).toString(CryptoJS.enc.Hex).toUpperCase();
+      w.CryptoJS.SHA256(signatureBody).toString(w.CryptoJS.enc.Hex).toUpperCase();
   return authDetails;
 };
 
@@ -344,3 +352,5 @@ ADLT.genAuthDetails = function (scopeId, userId) {
  * Register the document ready handler.
  */
 $(ADLT.onDomReady);
+
+})();

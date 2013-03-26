@@ -6,8 +6,18 @@ This sample project aims at flattening the learning curve of the AddLive SDK.
 Each tutorial provided showcases single area of features, using fully functional
 (but simple) web application. Read more at http://www.addlive.com.
 
-Please note that all the tutorials use the beta release channel.
+It is strongly advised not to access those tutorials using the file:// protocol.
+For your convenience we have provided a tiny http server written in python that
+can act as bundled application server. It does not have any dependencies other
+then core python.
 
+To start the server just use following command:
+
+```
+python tiny_http_server.py
+```
+
+And access the tutorials using localhost: http://localhost:8080
 
 Tutorial 1  - Initializing the platform
 ---------------------------------------

@@ -16,7 +16,10 @@ class myHandler(BaseHTTPRequestHandler):
         if self.path == "/kill.html":
             exit(0)
 
+
         truepath = os.path.join(os.path.dirname(__file__), self.path[1:])
+        if self.path.endswith('/'):
+            truepath += 'index.html'
         if truepath.find("?") != -1:
             truepath = truepath[:truepath.find("?")]
         if truepath.find("#") != -1:
@@ -66,6 +69,8 @@ class myHandler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     server = HTTPServer(('', 8080), myHandler)
+    print "AddLive JavaScript Tutorials local server started"
+    print "Go to http://localhost:8080/ to start using the tutorials."
     while True:
         server.handle_request()
 

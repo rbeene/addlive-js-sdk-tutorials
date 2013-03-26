@@ -6,17 +6,19 @@
  * @author Tadeusz Kozak
  * @date 26-06-2012 10:37
  */
-(function (window, $) {
+
+(function (w) {
+  'use strict';
+
+  var ADLT = w.ADLT,
+      log = ADLT.log;
 
   /**
    * ===========================================================================
-   * Consts and imports
+   * Consts
    * ===========================================================================
    */
-
-  var log = window.log,
-      ADLT = window.ADLT,
-
+  var
       /**
        * ID of an application - to be used with initialization
        */
@@ -206,7 +208,7 @@
       $platformInitStep.find('.state-testing-msg').fadeOut(500, function () {
         $platformInitStep.find('.state-ok-msg').fadeIn(500, function () {
           $platformInitStep.find('.next-btn').show();
-        })
+        });
       });
     };
 
@@ -216,7 +218,7 @@
 
   function platformInitStepComplete() {
     nextStep();
-    startMicTest()
+    startMicTest();
   }
 
   /**
@@ -491,7 +493,7 @@
       $cpuTest.find('.hw-conn-warn').show();
       setConnHwTestStatus(ConnHwItemStatus.WARN);
     };
-    ADL.getService().getHostCpuDetails(ADL.r(onHostDetails, onHostDetailsErr))
+    ADL.getService().getHostCpuDetails(ADL.r(onHostDetails, onHostDetailsErr));
   }
 
 
@@ -521,13 +523,13 @@
   function testRTT() {
     var avgRtt = 0, status, infoMsg = 'Average RTT: ';
     $.each(rtts, function (i, rtt) {
-      avgRtt += parseInt(rtt);
+      avgRtt += parseInt(rtt, 10);
     });
     avgRtt /= rtts.length;
     infoMsg += avgRtt;
 
     if (avgRtt > AVG_RTT_OK) {
-      status = ConnHwItemStatus.WARN
+      status = ConnHwItemStatus.WARN;
     } else {
       status = ConnHwItemStatus.OK;
     }
@@ -536,14 +538,14 @@
         html(infoMsg).
         show();
     $infoContainer.find('.hw-conn-' + status).show();
-    setConnHwTestStatus(status)
+    setConnHwTestStatus(status);
   }
 
   function onConnected(mediaConn) {
     var $connTest = $('#connTest');
     $connTest.find('.info').html("Connection established").show();
     $connTest.find('.hw-conn-ok').show();
-    ADL.getService().startMeasuringStatistics(ADL.r(), testScopeId, 2)
+    ADL.getService().startMeasuringStatistics(ADL.r(), testScopeId, 2);
   }
 
   function onConnErr(errCode, errMsg) {
@@ -561,7 +563,7 @@
   function onMediaConnTypeChanged(e) {
     log.debug("Got media connection type changed: " + JSON.stringify(e));
     var $infoContainer, status, connTypeString;
-    if (e.mediaType == ADL.MediaType.AUDIO) {
+    if (e.mediaType === ADL.MediaType.AUDIO) {
       $infoContainer = $('#connTypeAudioTest');
     } else {
       $infoContainer = $('#connTypeVideoTest');
@@ -590,7 +592,7 @@
    */
   function onMediaStats(e) {
     log.debug("Got Media Stats event");
-    if (e.mediaType == ADL.MediaType.AUDIO) {
+    if (e.mediaType === ADL.MediaType.AUDIO) {
       rtts.push(e.stats.rtt);
     }
   }

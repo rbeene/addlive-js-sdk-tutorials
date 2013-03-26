@@ -6,6 +6,12 @@
  * @date 26-06-2012 10:37
  */
 
+(function (w) {
+  'use strict';
+
+  var ADLT = w.ADLT,
+      log = ADLT.log;
+
 
 /**
  * Id of media scope to connect to upon user's request.
@@ -27,7 +33,7 @@ ADLT.onDomReady = function () {
   log.debug('DOM loaded');
   ADLT.initAddLiveLogging();
   ADLT.initDevicesSelects();
-  var initOptions = {applicationId: ADLT.APPLICATION_ID};
+  var initOptions = {applicationId: ADLT.APPLICATION_ID, initDevices:false,skipUpdate:true};
   ADLT.initializeAddLiveQuick(ADLT.onPlatformReady, initOptions);
 };
 
@@ -168,7 +174,7 @@ ADLT.genAuthDetails = function (userId) {
           authDetails.expires +
           ADLT.APP_SHARED_SECRET;
   authDetails.signature =
-      CryptoJS.SHA256(signatureBody).toString(CryptoJS.enc.Hex).toUpperCase();
+      w.CryptoJS.SHA256(signatureBody).toString(w.CryptoJS.enc.Hex).toUpperCase();
   return authDetails;
 };
 
@@ -177,3 +183,4 @@ ADLT.genAuthDetails = function (userId) {
  * Register the document ready handler.
  */
 $(ADLT.onDomReady);
+})();
