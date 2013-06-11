@@ -100,7 +100,7 @@
     };
 
 //  Step 2. Actually trigger the asynchronous initialization of the AddLive SDK.
-    ADL.initPlatform(initListener, {bugReportingEndpoint:'//localhost:5000/reliability'});
+    ADL.initPlatform(initListener, {applicationId:1});
   };
 
   /**
