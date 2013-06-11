@@ -14,14 +14,21 @@ var ADLT = ADLT || {};
 (function (w) {
   'use strict';
 // Initialize the logging.
-  ADLT.log = w.log4javascript.getLogger();
-  window.log = ADLT.log;
-  ADLT.inPageAppender = new w.log4javascript.InPageAppender("logsContainer");
-  ADLT.inPageAppender.setHeight("500px");
-  ADLT.log.addAppender(ADLT.inPageAppender);
+
+  function _nop() {
+  }
+
+
+  if (w.console === undefined) {
+    ADLT.log = w.log4javascript.getLogger();
+    window.log = ADLT.log;
+    ADLT.logsAppender = new w.log4javascript.PopUpAppender();
+    ADLT.log.addAppender(ADLT.logsAppender);
+  } else {
+    ADLT.log = w.console;
+  }
 
   var log = ADLT.log;
-
   /**
    * @const
    * @type {String}
@@ -33,20 +40,19 @@ var ADLT = ADLT || {};
     ADL.initLogging(function (lev, msg) {
       switch (lev) {
         case ADL.LogLevel.DEBUG:
-          ADLT.log.debug("[ADL] " + msg);
+          log.debug("[ADL] " + msg);
           break;
         case ADL.LogLevel.WARN:
-          ADLT.log.warn("[ADL] " + msg);
+          log.warn("[ADL] " + msg);
           break;
         case ADL.LogLevel.ERROR:
-          ADLT.log.error("[ADL] " + msg);
+          log.error("[ADL] " + msg);
           break;
         case ADL.LogLevel.INFO:
-          ADLT.log.debug("[ADL] " + msg);
+          log.debug("[ADL] " + msg);
           break;
-
         default:
-          ADLT.log.warn("Got unsupported log level: " + lev + ". Message: " +
+          log.warn("Got unsupported log level: " + lev + ". Message: " +
               msg);
       }
     }, true);
@@ -56,6 +62,7 @@ var ADLT = ADLT || {};
    * Initializes the AddLive SDK.
    */
   ADLT.initializeAddLiveQuick = function (completeHandler, options) {
+    ADLT.initAddLiveLogging();
     log.debug("Initializing the AddLive SDK");
     var initListener = new ADL.PlatformInitListener();
     initListener.onInitStateChanged = function (e) {

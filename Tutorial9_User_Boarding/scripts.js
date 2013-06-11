@@ -22,12 +22,13 @@
       /**
        * ID of an application - to be used with initialization
        */
-          APPLICATION_ID = 1,
+          APPLICATION_ID = NaN, // Put your app Id here;
+
 
       /**
        * Shared secret to be used with authentication
        */
-          APP_SHARED_SECRET = 'CloudeoTestAccountSecret',
+          APP_SHARED_SECRET = '', // Put your API key here;
 
       /**
        * Minimal average round trip time to streaming server that makes the

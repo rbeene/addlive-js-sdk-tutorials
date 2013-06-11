@@ -25,9 +25,9 @@ ADLT.CONNECTION_CONFIGURATION = {
   autopublishAudio:false
 };
 
-ADLT.APPLICATION_ID = 1;
+  ADLT.APPLICATION_ID = NaN; // Put your app Id here;
 
-ADLT.APP_SHARED_SECRET = 'CloudeoTestAccountSecret';
+  ADLT.APP_SHARED_SECRET = ''; // Put your API key here;
 
 
 ADLT.SCREEN_SHARING_SRC_PRV_WIDTH = 240;

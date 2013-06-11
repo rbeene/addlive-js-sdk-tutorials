@@ -19,9 +19,9 @@
  */
 ADLT.SCOPE_ID = 'Tutorial5';
 
-ADLT.APPLICATION_ID = 1;
+ADLT.APPLICATION_ID = NaN; // Put your app Id here;
 
-ADLT.APP_SHARED_SECRET = 'CloudeoTestAccountSecret';
+ADLT.APP_SHARED_SECRET = ''; // Put your API key here;
 
 
 
