@@ -17,8 +17,8 @@
 
   // Consts
 
-  var APPLICATION_ID = 1,
-      APP_SHARED_SECRET = 'CloudeoTestAccountSecret',
+  var APPLICATION_ID = NaN, // Put your app Id here;
+      APP_SHARED_SECRET = '', // Put your API key here;
       TEST_SCOPE_ID_PFX = 'connSetup-';
 
 
