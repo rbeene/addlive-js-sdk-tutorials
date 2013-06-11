@@ -128,6 +128,7 @@
       linkQualityConnDescr:linkQualityConnDescr,
       label:'VideoService',
       labelUrl:'http://www.example.com'
+//      , templateURL:'http://www.example.com'
     };
 //  Step 2. Actually trigger the asynchronous initialization of the AddLive SDK.
     ADL.initPlatform(initListener, {
