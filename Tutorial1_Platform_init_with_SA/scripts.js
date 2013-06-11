@@ -21,6 +21,8 @@
       APP_SHARED_SECRET = '', // Put your API key here;
       TEST_SCOPE_ID_PFX = 'connSetup-';
 
+  APPLICATION_ID = 1;
+  APP_SHARED_SECRET = 'CloudeoTestAccountSecret';
 
   /**
    * Document ready callback - starts the AddLive platform initialization.
@@ -123,7 +125,9 @@
         APPLICATION_ID, APP_SHARED_SECRET);
     var saOptions = {
       testConnDescr:testConnDescr,
-      linkQualityConnDescr:linkQualityConnDescr
+      linkQualityConnDescr:linkQualityConnDescr,
+      label:'VideoService',
+      labelUrl:'http://www.example.com'
     };
 //  Step 2. Actually trigger the asynchronous initialization of the AddLive SDK.
     ADL.initPlatform(initListener, {
