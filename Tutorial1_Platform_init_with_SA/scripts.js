@@ -131,12 +131,15 @@
 //      , templateURL:'http://www.example.com'
     };
 //  Step 2. Actually trigger the asynchronous initialization of the AddLive SDK.
-    ADL.initPlatform(initListener, {
-      applicationId:1,
-      useSetupAssistant:true,
-      forceSetupAssistant:true,
-      saOptions:saOptions
-    });
+    var initOptions = {
+      platformOptions:{
+        applicationId:1
+
+      },
+      testConnDescr:testConnDescr,
+      linkQualityConnDescr:linkQualityConnDescr
+    };
+    ADL.UI.SetupAssistant.initPlatform(initListener, initOptions);
   };
 
   /**
