@@ -26,6 +26,11 @@ var ADLT = ADLT || {};
     ADLT.log.addAppender(ADLT.logsAppender);
   } else {
     ADLT.log = w.console;
+    if(ADLT.log.debug === undefined) {
+      ADLT.log.debug = function(msg){
+        ADLT.log.log(msg);
+      };
+    }
   }
 
   var log = ADLT.log;
@@ -149,10 +154,6 @@ var ADLT = ADLT || {};
   /**
    * Generates sample authentication details. For more info about authentication,
    * please refer to: http://www.addlive.com/docs.html#authentication
-   * @param userId
-   *        Id of user to authenticate connection for
-   * @return {Object}
-   *        Generated authentication details object.
    */
   ADLT.genAuth = function (scopeId, userId, appId, appSecret) {
 
