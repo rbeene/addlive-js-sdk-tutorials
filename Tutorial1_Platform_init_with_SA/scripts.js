@@ -113,28 +113,40 @@
 
     var userId = ADLT.genRandomUserId(),
         testConnDescr = {scopeId:TEST_SCOPE_ID_PFX + userId};
+
+    // The test connection descriptor is used to determine the RTT between the
+    // client and AddLive infrastructure. It should use a different scope id,
+    // preferably associated with current user (e.g. conn-test-user-XXX)
+    // to make sure that there won't be any interference between users testing.
     testConnDescr.authDetails = ADLT.genAuth(testConnDescr.scopeId,
         userId, APPLICATION_ID, APP_SHARED_SECRET);
 
 
+    // The link quality connection descriptor will be passed by the
+    // SetupAssistant to the ADL.AddLiveService#networkTest. Thus the empty
+    // scope id.
     var linkQualityConnDescr = {
       scopeId:'',
       highVideoStream:{maxBitRate:1024}
     };
     linkQualityConnDescr.authDetails = ADLT.genAuth('', userId,
         APPLICATION_ID, APP_SHARED_SECRET);
-    var saOptions = {
-      testConnDescr:testConnDescr,
-      linkQualityConnDescr:linkQualityConnDescr,
-      label:'VideoService',
-      labelUrl:'http://www.example.com'
-//      , templateURL:'http://www.example.com'
-    };
 //  Step 2. Actually trigger the asynchronous initialization of the AddLive SDK.
     var initOptions = {
       platformOptions:{
-        applicationId:1
+        applicationId:1,
 
+        // All the AddLive mentions will be replaced with this string, if
+        // specified
+        label:'VideoService',
+
+        // All the URLs pointing to http://www.addlive.com will be replaced with
+        // this URL
+        labelUrl:'http://www.example.com'
+
+        // In case your application prefers to use custom template - specify it
+        // here
+//      , templateURL:'http://www.example.com'
       },
       testConnDescr:testConnDescr,
       linkQualityConnDescr:linkQualityConnDescr
