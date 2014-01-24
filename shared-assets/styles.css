@@ -47,8 +47,21 @@ h2#tutorialSubTitle {
   clear: both;
 }
 
+.allowed-senders-wrapper{
+  margin-top: 10px;
+  display: inline-flex;
+}
+
 .ctrl-wrapper {
+  margin-left: 10px;
   margin-bottom: 10px;
+}
+
+.ctrl-wrapper input {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  -webkit-transition: none;
+  transition: none;
 }
 
 .ctrl-wrapper label, .ctrl-wrapper .ctrl {
@@ -72,7 +85,7 @@ h2#tutorialSubTitle {
 }
 
 .render-widget {
-  margin: 0 5px 10px;
+  margin: 0 10px 10px;
   float: left;
   width: 332px;
 }
@@ -125,6 +138,24 @@ h2#tutorialSubTitle {
 
 .muted-indicator {
   display: none;
+}
+
+/**
+
+Tutorial 6.2
+
+*/
+
+.monitor-speech-wrapper{
+  position: relative;
+  right: 75px;
+  bottom: 75px;
+}
+
+.vertical-progress{
+  -webkit-transform: rotate(-90deg);
+  -moz-transform: rotate(-90deg);
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=-1);
 }
 
 /* Tutorial 7 stuff */

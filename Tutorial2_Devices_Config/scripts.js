@@ -6,44 +6,43 @@
  * @date 26-06-2012 10:37
  */
 
-(function (w) {
+(function () {
   'use strict';
-  var ADLT = w.ADLT,
-      log = ADLT.log;
 
   /**
    * Document ready callback - starts the AddLive platform initialization.
    */
-  ADLT.onDomReady = function () {
-    log.debug('DOM loaded');
-    ADLT.initUI();
+  function onDomReady() {
+    console.log('DOM loaded');
+    initUI();
+    // assuming the initAddLiveLogging and initializeAddLiveQuick are exposed via ADLT namespace.
     ADLT.initAddLiveLogging();
-    ADLT.initializeAddLiveQuick(ADLT.populateDevices);
+    ADLT.initializeAddLiveQuick(populateDevices);
   };
 
   /**
    * Initializes the UI components, by binding to the change events of the selects
    * provided by the UI.
    */
-  ADLT.initUI = function () {
-    $('#camSelect').change(ADLT.onCamSelected);
-    $('#micSelect').change(ADLT.onMicSelected);
-    $('#spkSelect').change(ADLT.onSpkSelected);
+  function initUI () {
+    $('#camSelect').change(onCamSelected);
+    $('#micSelect').change(onMicSelected);
+    $('#spkSelect').change(onSpkSelected);
   };
 
   /**
    * Fills the selects with the currently plugged in devices.
    */
-  ADLT.populateDevices = function () {
-    ADLT.populateVideoCaptureDevices();
-    ADLT.populateAudioCaptureDevices();
-    ADLT.populateAudioOutputDevices();
+  function populateDevices () {
+    populateVideoCaptureDevices();
+    populateAudioCaptureDevices();
+    populateAudioOutputDevices();
   };
 
   /**
    * Fills the audio output devices select.
    */
-  ADLT.populateAudioOutputDevices = function () {
+  function populateAudioOutputDevices () {
 //  Step 1. Define the speakers list result handler
     var spkrsResultHandler = function (devs) {
       var $select = $('#spkSelect');
@@ -75,7 +74,7 @@
   /**
    * Fills the audio capture devices select.
    */
-  ADLT.populateAudioCaptureDevices = function () {
+  function populateAudioCaptureDevices () {
     var micsResultHandler = function (devs) {
       var $select = $('#micSelect');
       $select.empty();
@@ -96,7 +95,7 @@
   /**
    * Fills the video capture devices select.
    */
-  ADLT.populateVideoCaptureDevices = function () {
+  function populateVideoCaptureDevices () {
     var webcamsResultHandler = function (devs) {
       var $select = $('#camSelect');
       $select.empty();
@@ -117,7 +116,7 @@
   /**
    * Handles the change event of the video capture devices select.
    */
-  ADLT.onCamSelected = function () {
+  function onCamSelected () {
     var selected = $(this).val();
     ADL.getService().setVideoCaptureDevice(ADL.createResponder(), selected);
   };
@@ -125,7 +124,7 @@
   /**
    * Handles the change event of the audio capture devices select.
    */
-  ADLT.onMicSelected = function () {
+  function onMicSelected () {
     var selected = $(this).val();
     ADL.getService().setAudioCaptureDevice(ADL.createResponder(), selected);
   };
@@ -133,7 +132,7 @@
   /**
    * Handles the change event of the audio output devices select.
    */
-  ADLT.onSpkSelected = function () {
+  function onSpkSelected () {
     var selected = $(this).val();
     ADL.getService().setAudioOutputDevice(ADL.createResponder(), selected);
   };
@@ -142,5 +141,5 @@
   /**
    * Register the document ready handler.
    */
-  $(ADLT.onDomReady);
-})(window);
+  $(onDomReady);
+})();

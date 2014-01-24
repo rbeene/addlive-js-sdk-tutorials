@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>AddLive SDK Tutorial 6 - Conference app</title>
+  <title>AddLive SDK Tutorial 5 - Basic connectivity</title>
 
   <!--Common scripts for all AddLive tutorials -->
   <script type="text/javascript"
@@ -25,50 +25,48 @@
 
 </head>
 <body>
-<div class="main wide">
-  <h1 id="tutorialTitle">AddLive SDK Tutorial 6</h1>
+<div class="main">
+  <h1 id="tutorialTitle">AddLive SDK Tutorial 5</h1>
 
-  <h2 id="tutorialSubTitle">Conference app</h2>
+  <h2 id="tutorialSubTitle">Basic connectivity</h2>
 
   <!-- Beginning of the video feeds rendering section -->
-  <div id="renderingWrapper" class="rendering-wrapper">
-
+  <div class="rendering-wrapper">
     <div class="render-widget">
-      <div>Local preview (user id: <span id="localUserIdLbl">undefined</span>)
+      <div>
+        Local preview (user id: <span id="localUserIdLbl">undefined</span>)
       </div>
       <div id="renderLocalPreview" class="render-wrapper"></div>
     </div>
+
+    <div class="render-widget">
+      <div>
+        Remote user (user id: <span id="remoteUserIdLbl">undefined</span>)
+      </div>
+      <div id="renderRemoteUser" class="render-wrapper"></div>
+    </div>
+    <div class="clearer"></div>
   </div>
   <!-- End of the video feeds rendering section -->
 
-  <!-- Clearer to clear the floating state of the renderers -->
-  <div class="clearer"></div>
 
-  <!-- Connection type label. -->
-  <p>Connection type: <span id="connTypeLbl">none</span>.</p>
-
-  <!-- Beginning of the user's controls section -->
+  <!-- Beginning of the user controls section -->
   <div id="tut4CtrlWrapper" class="controls-wrapper">
 
     <div class="controls-wrapper">
 
       <!--Connect disconnect buttons -->
       <div class="ctrl-wrapper">
-        <input id="scopeIdTxtField" type="text" placeholder="Scope ID">
         <a id="connectBtn" href="javascript://nop"
            class="btn btn-primary disabled">Connect</a>
         <a id="disconnectBtn" href="javascript://nop"
            class="btn btn-danger disabled">Disconnect</a>
       </div>
 
-      <!-- Publish/unpublish section -->
+      <!--Video reconfiguration slider -->
       <div class="ctrl-wrapper">
-        <input id="publishVideoChckbx" type="checkbox" checked/> Publish video
-        stream
-      </div>
-      <div class="ctrl-wrapper">
-        <input id="publishAudioChckbx" type="checkbox" checked/> Publish audio
-        stream
+        <label>Video reconfiguration:</label>
+        <input class="slider" type="range" min="0" max="2" value="0" step="1" disabled/>
       </div>
 
       <!--Video capture device configuration -->
@@ -103,28 +101,10 @@
 
     </div>
   </div>
-  <!-- End of the user's controls section -->
+  <!-- End of the user controls section -->
+
 
 </div>
 <div id="logsContainer"></div>
-
-<!--
-     Beginning of the templates section. There is only one template -  remote
-     video feed renderer
--->
-<div id="templatesContainer">
-  <div id="rendererTmpl" class="render-widget remote-renderer">
-    <div>Remote user (user id: <span class="user-id-wrapper">undefined</span>).
-      <span class="muted-indicator">Audio is muted</span>
-    </div>
-    <div class="render-wrapper"></div>
-    <div class="no-video-text">
-      No video from user
-    </div>
-  </div>
-</div>
-
-<!-- End of the templates section. -->
-
 </body>
 </html>

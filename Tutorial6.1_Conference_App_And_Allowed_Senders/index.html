@@ -4,15 +4,12 @@
   <title>AddLive SDK Tutorial 6 - Conference app</title>
 
   <!--Common scripts for all AddLive tutorials -->
-  <script type="text/javascript"
-          src="../shared-assets/log4javascript.js"></script>
-  <script type="text/javascript"
-          src="http://code.jquery.com/jquery-1.8.3.js"></script>
+  <script type="text/javascript" src="../shared-assets/log4javascript.js"></script>
+  <script type="text/javascript" src="http://code.jquery.com/jquery-1.8.3.js"></script>
   <script type="text/javascript" src="../shared-assets/scripts.js"></script>
   <script type="text/javascript" src="../shared-assets/sha256.js"></script>
 
-  <script type="text/javascript"
-          src="http://api.addlive.com/stable/addlive-sdk.js"></script>
+  <script type="text/javascript" src="http://api.addlive.com/stable/addlive-sdk.js"></script>
 
   <!-- Tutorial - specific script file -->
   <script type="text/javascript" src="scripts.js"></script>
@@ -120,6 +117,14 @@
     <div class="render-wrapper"></div>
     <div class="no-video-text">
       No video from user
+    </div>
+    <div class="allowed-senders-wrapper">
+      <div class="ctrl-wrapper">
+        <input class="allowReceiveVideoChckbx" type="checkbox" checked/> Receive video
+      </div>
+      <div class="ctrl-wrapper">
+        <input class="allowReceiveAudioChckbx" type="checkbox" checked/> Receive audio
+      </div>
     </div>
   </div>
 </div>

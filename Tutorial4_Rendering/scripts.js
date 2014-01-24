@@ -6,31 +6,30 @@
  * @date 26-06-2012 10:37
  */
 
-(function (w) {
+(function () {
   'use strict';
-
-  var ADLT = w.ADLT,
-      log = ADLT.log;
-
 
   /**
    * Document ready callback - starts the AddLive platform initialization.
    */
-  ADLT.onDomReady = function () {
-    log.debug('DOM loaded');
+  function onDomReady () {
+    console.log('DOM loaded');
+
+    // assuming the initAddLiveLogging, initDevicesSelects and initializeAddLiveQuick are exposed via ADLT namespace. (check shared-assets/scripts.js)
     ADLT.initAddLiveLogging();
     ADLT.initDevicesSelects();
-    ADLT.initializeAddLiveQuick(ADLT.onPlatformReady);
+    ADLT.initializeAddLiveQuick(onPlatformReady);
   };
 
-  ADLT.onPlatformReady = function () {
+  function onPlatformReady () {
+    // assuming the populateDevicesOfType is exposed via ADLT namespace. (check shared-assets/scripts.js)
     ADLT.populateDevicesOfType('#camSelect', 'VideoCapture');
-    ADLT.startLocalVideo();
+    startLocalVideo();
   };
 
-  ADLT.startLocalVideo = function () {
+  function startLocalVideo () {
     var resultHandler = function (sinkId) {
-      log.debug("Local preview started. Rendering the sink with id: " + sinkId);
+      console.log("Local preview started. Rendering the sink with id: " + sinkId);
       ADL.renderSink({
         sinkId:sinkId,
         containerId:'renderContainer'
@@ -61,6 +60,6 @@
   /**
    * Register the document ready handler.
    */
-  $(ADLT.onDomReady);
+  $(onDomReady);
 
-})(window);
+})();

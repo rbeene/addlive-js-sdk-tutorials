@@ -3,20 +3,17 @@
 (function (w) {
   'use strict';
 
-  var ADLT = w.ADLT,
-      log = ADLT.log;
-
 /**
  * Id of media scope to connect to upon user's request.
  * @type {String}
  */
-ADLT.SCOPE_ID = 'Tutorial8';
+var SCOPE_ID = '';
 
 /**
  * Configuration of the streams to publish upon connection established
  * @type {Object}
  */
-ADLT.CONNECTION_CONFIGURATION = {
+var CONNECTION_CONFIGURATION = {
 
   /**
    * Flags defining that streams shouldn't be automatically published upon connection.
@@ -25,44 +22,46 @@ ADLT.CONNECTION_CONFIGURATION = {
   autopublishAudio:false
 };
 
-  ADLT.APPLICATION_ID = NaN; // Put your app Id here;
+var APPLICATION_ID = NaN; // Put your app Id here;
 
-  ADLT.APP_SHARED_SECRET = ''; // Put your API key here;
+var APP_SHARED_SECRET = ''; // Put your API key here;
 
 
-ADLT.SCREEN_SHARING_SRC_PRV_WIDTH = 240;
-ADLT.SCREEN_SHARING_SRC_PRV_HEIGHT = 160;
+var SCREEN_SHARING_SRC_PRV_WIDTH = 240;
+var SCREEN_SHARING_SRC_PRV_HEIGHT = 160;
 
-ADLT.isConnected = false;
-ADLT.sharedItemId = null;
+var isConnected = false;
+var sharedItemId = null;
 
 //  Create the list item renderer template
-ADLT.SCREEN_SHARING_ITM_WIDGET_TMPL = null;
+var SCREEN_SHARING_ITM_WIDGET_TMPL = null;
 
 /**
  * Document ready callback - starts the AddLive platform initialization.
  */
-ADLT.onDomReady = function () {
-  log.debug('DOM loaded');
+function onDomReady () {
+  console.log('DOM loaded');
+
+  // assuming the initAddLiveLogging and initializeAddLiveQuick are exposed via ADLT namespace. (check shared-assets/scripts.js)
   ADLT.initAddLiveLogging();
-  var initOptions = {applicationId: ADLT.APPLICATION_ID};
-  ADLT.initializeAddLiveQuick(ADLT.onPlatformReady, initOptions);
-  ADLT.SCREEN_SHARING_ITM_WIDGET_TMPL = $(
+  var initOptions = {applicationId: APPLICATION_ID};
+  ADLT.initializeAddLiveQuick(onPlatformReady, initOptions);
+  SCREEN_SHARING_ITM_WIDGET_TMPL = $(
       '<li class="scr-share-src-itm">' +
-          '<img src="/shared-assets/no_screenshot_available.png"/>' +
-          '<p><\/p>' +
-          '<\/li>');
+      '<img src="/shared-assets/no_screenshot_available.png"/>' +
+      '<p><\/p>' +
+      '<\/li>');
 };
 
-ADLT.onPlatformReady = function () {
-  log.debug('AddLive Platform ready.');
-  ADLT.initServiceListener();
-  ADLT.refreshScreenShareSources();
-  ADLT.connect();
+function onPlatformReady () {
+  console.log('AddLive Platform ready.');
+  initServiceListener();
+  refreshScreenShareSources();
+  connect();
 };
 
-ADLT.initServiceListener = function () {
-  log.debug('Initializing the AddLive Service Listener');
+function initServiceListener () {
+  console.log('Initializing the AddLive Service Listener');
 
   // Instantiate the listener
   var listener = new ADL.AddLiveServiceListener();
@@ -74,10 +73,9 @@ ADLT.initServiceListener = function () {
    * @param {ADL.UserStateChangedEvent} e
    */
   var handlePublishEvent = function (e) {
-    log.debug('Got new user event: ' + e.userId);
+    console.log('Got new user event: ' + e.userId);
     if (e.screenPublished) {
-      ADL.renderSink({sinkId:e.screenSinkId,
-        containerId:'renderRemoteUser'});
+      ADL.renderSink({sinkId:e.screenSinkId, containerId:'renderRemoteUser'});
       $('#remoteUserIdLbl').html(e.userId);
     } else {
       $('#renderRemoteUser').empty();
@@ -91,7 +89,7 @@ ADLT.initServiceListener = function () {
 //  Add handler for video frame size change, to ensure that the aspec ratio
 //  is being maintained
   listener.onVideoFrameSizeChanged = function (e) {
-    $('#renderRemoteUser').css(ADLT.fitDims(e.width, e.height, 640, 480));
+    $('#renderRemoteUser').css(fitDims(e.width, e.height, 640, 480));
   };
 
   // Register the listener using created instance and prepared result handler.
@@ -99,26 +97,24 @@ ADLT.initServiceListener = function () {
 
 };
 
-ADLT.connect = function () {
-  log.debug('Establishing a connection to the AddLive Streaming Server');
+function connect () {
+  console.log('Establishing a connection to the AddLive Streaming Server');
 
   // Prepare the connection descriptor by cloning the configuration and
   // updating the URL and the token.
-  var connDescriptor = $.extend({}, ADLT.CONNECTION_CONFIGURATION);
-  connDescriptor.scopeId = ADLT.SCOPE_ID;
+  var connDescriptor = $.extend({}, CONNECTION_CONFIGURATION);
+  connDescriptor.scopeId = SCOPE_ID;
   var userId = ADLT.genRandomUserId();
-  connDescriptor.authDetails = ADLT.genAuthDetails(connDescriptor.scopeId,
-      userId);
+  connDescriptor.authDetails = genAuthDetails(connDescriptor.scopeId, userId);
 
   // Define the result handler
   var onSucc = function () {
-    ADLT.isConnected = true;
+    isConnected = true;
   };
 
   // Define the error handler
   var onErr = function (errCode, errMessage) {
-    log.error('Failed to establish the connection due to: ' + errMessage +
-        '(err code: ' + errCode + ')');
+    console.error('Failed to establish the connection due to: ' + errMessage + '(err code: ' + errCode + ')');
   };
 
   // Request the SDK to establish the connection
@@ -128,11 +124,10 @@ ADLT.connect = function () {
 /**
  * Reloads the list of sources possible to be shared
  */
-ADLT.refreshScreenShareSources = function () {
+function refreshScreenShareSources () {
   $('#refreshBtn').unbind('click').addClass('disabled');
   ADL.getService().getScreenCaptureSources(
-      ADL.createResponder(ADLT.showScreenShareSources),
-      ADLT.SCREEN_SHARING_SRC_PRV_WIDTH);
+      ADL.createResponder(showScreenShareSources), SCREEN_SHARING_SRC_PRV_WIDTH);
 };
 
 /**
@@ -140,24 +135,24 @@ ADLT.refreshScreenShareSources = function () {
  *
  * @param shareItemId id of source to be shared
  */
-ADLT.publishShareItem = function (shareItemId) {
-  if (ADLT.isConnected) {
-    log.debug('Publishing screen share: ' + shareItemId);
+function publishShareItem (shareItemId) {
+  if (isConnected) {
+    console.log('Publishing screen share: ' + shareItemId);
 
     var onSucc = function () {
-      log.debug('Screen share source published');
+      console.log('Screen share source published');
     };
     var onErr = function () {
-      log.error('Screen share source publishing failed');
+      console.error('Screen share source publishing failed');
     };
 
     // Request the SDK to publish screen source
     ADL.getService().publish(ADL.createResponder(onSucc, onErr),
-        ADLT.SCOPE_ID,
+        SCOPE_ID,
         ADL.MediaType.SCREEN,
         {windowId:shareItemId, nativeWidth: 960});
   } else {
-    log.error('Connection needed to share screen.');
+    console.error('Connection needed to share screen.');
   }
 };
 
@@ -166,21 +161,21 @@ ADLT.publishShareItem = function (shareItemId) {
  *
  * @param callback function to be called after successful unpublish
  */
-ADLT.unpublishShareItem = function (callback) {
-  log.debug('Unpublishing screen share');
+function unpublishShareItem (callback) {
+  console.log('Unpublishing screen share');
   var onSucc = function () {
-    log.debug('Screen share source unpublished');
+    console.log('Screen share source unpublished');
     if (callback) {
       callback();
     }
   };
   var onErr = function () {
-    log.error('Screen share source unpublishing failed');
+    console.error('Screen share source unpublishing failed');
   };
 
   // Request the SDK to unpublish screen source
   ADL.getService().unpublish(ADL.createResponder(onSucc, onErr),
-      ADLT.SCOPE_ID,
+      SCOPE_ID,
       ADL.MediaType.SCREEN);
 };
 
@@ -189,7 +184,7 @@ ADLT.unpublishShareItem = function (callback) {
  *
  * @param sources array of sources to be listed
  */
-ADLT.showScreenShareSources = function (sources) {
+function showScreenShareSources (sources) {
   var $srcsList = $('#screenShareSources');
 
   // Remove the previous state
@@ -197,24 +192,24 @@ ADLT.showScreenShareSources = function (sources) {
 
   // Iterate through all the screen sharing sources given and append a
   // control widget to the list of screen sharing sources
-  $.each(sources, ADLT.screenSharingItemAppender);
+  $.each(sources, screenSharingItemAppender);
 
   // Enable refresh button if not enabled yet
   var $refreshBtn = $('#refreshBtn');
   if ($refreshBtn.hasClass('disabled')) {
-    $refreshBtn.click(ADLT.refreshScreenShareSources).removeClass('disabled');
+    $refreshBtn.click(refreshScreenShareSources).removeClass('disabled');
   }
 };
 
 /**
  *  Appends the screen sharing source widget to the screen sharing sources list.
  */
-ADLT.screenSharingItemAppender = function (i, src) {
+function screenSharingItemAppender (i, src) {
 // Create a <li> wrapper for each one
-  var $srcWrapper = ADLT.SCREEN_SHARING_ITM_WIDGET_TMPL.clone();
+  var $srcWrapper = SCREEN_SHARING_ITM_WIDGET_TMPL.clone();
 
   // Mark as selected if was shared before
-  if (ADLT.sharedItemId === src.id) {
+  if (sharedItemId === src.id) {
     $srcWrapper.addClass('selected');
   }
   $srcWrapper.attr('id', 'shareItm' + i);
@@ -226,10 +221,9 @@ ADLT.screenSharingItemAppender = function (i, src) {
     // http://en.wikipedia.org/wiki/Data_URI_scheme
     $srcWrapper.find('img').
         attr('src', 'data:image/png;base64,' + src.image.base64).
-        css(
-        ADLT.fitDims(src.image.width, src.image.height,
-            ADLT.SCREEN_SHARING_SRC_PRV_WIDTH,
-            ADLT.SCREEN_SHARING_SRC_PRV_HEIGHT));
+        css(fitDims(src.image.width, src.image.height,
+            SCREEN_SHARING_SRC_PRV_WIDTH,
+            SCREEN_SHARING_SRC_PRV_HEIGHT));
   }
   // Set the window title
   $srcWrapper.find('p').text(src.title);
@@ -239,7 +233,7 @@ ADLT.screenSharingItemAppender = function (i, src) {
 
 
   // Register the click handler
-  $srcWrapper.click(ADLT.screenSharingItmClickHandler);
+  $srcWrapper.click(screenSharingItmClickHandler);
 
   // Finally append the node
   $srcWrapper.appendTo($('#screenShareSources'));
@@ -248,13 +242,13 @@ ADLT.screenSharingItemAppender = function (i, src) {
 /**
  * Handler for the click event of the screen sharing item widget
  */
-ADLT.screenSharingItmClickHandler = function () {
+function screenSharingItmClickHandler () {
   var $this = $(this);
   if ($this.hasClass('selected')) {
     // Unpublishing
     $this.removeClass('selected');
-    ADLT.sharedItemId = null;
-    ADLT.unpublishShareItem();
+    sharedItemId = null;
+    unpublishShareItem();
   } else {
     // Publish
     // Update selection status
@@ -268,20 +262,20 @@ ADLT.screenSharingItmClickHandler = function () {
     // It is run after successful ADL.unpublish
     // of directly (if nothing is published so far)
     var publishFunction = function () {
-      ADLT.sharedItemId = shareItemId;
-      ADLT.publishShareItem(shareItemId);
+      sharedItemId = shareItemId;
+      publishShareItem(shareItemId);
     };
 
-    if (ADLT.sharedItemId === null) {
+    if (sharedItemId === null) {
       publishFunction();
     } else {
-      ADLT.unpublishShareItem(publishFunction);
+      unpublishShareItem(publishFunction);
     }
   }
 };
 
 
-ADLT.fitDims = function (srcW, srcH, targetW, targetH) {
+function fitDims (srcW, srcH, targetW, targetH) {
   var srcAR = srcW / srcH;
   var targetAR = targetW / targetH;
   var width, height, padding;
@@ -296,7 +290,7 @@ ADLT.fitDims = function (srcW, srcH, targetW, targetH) {
     };
   }
   if (srcAR < targetAR) {
-//      match height
+    // match height
     height = targetH;
     width = srcW * targetH / srcH;
     padding = (targetW - width) / 2;
@@ -309,7 +303,7 @@ ADLT.fitDims = function (srcW, srcH, targetW, targetH) {
       'margin-bottom':0
     };
   } else {
-    //    match width
+    // match width
     width = targetW;
     height = targetW * srcH / srcW;
     padding = (targetH - height) / 2;
@@ -325,7 +319,7 @@ ADLT.fitDims = function (srcW, srcH, targetW, targetH) {
   }
 };
 
-ADLT.genAuthDetails = function (scopeId, userId) {
+function genAuthDetails (scopeId, userId) {
 
   // New Auth API
   var dateNow = new Date();
@@ -337,12 +331,12 @@ ADLT.genAuthDetails = function (scopeId, userId) {
     salt:ADLT.randomString(100)
   };
   var signatureBody =
-      ADLT.APPLICATION_ID +
+          APPLICATION_ID +
           scopeId +
           userId +
           authDetails.salt +
           authDetails.expires +
-          ADLT.APP_SHARED_SECRET;
+          APP_SHARED_SECRET;
   authDetails.signature =
       w.CryptoJS.SHA256(signatureBody).toString(w.CryptoJS.enc.Hex).toUpperCase();
   return authDetails;
@@ -351,6 +345,6 @@ ADLT.genAuthDetails = function (scopeId, userId) {
 /**
  * Register the document ready handler.
  */
-$(ADLT.onDomReady);
+$(onDomReady);
 
 })(window);

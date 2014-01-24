@@ -62,6 +62,12 @@
   mediaConnType2Label[ADL.ConnectionType.UDP_RELAY] = 'RTP/UDP relayed';
   mediaConnType2Label[ADL.ConnectionType.UDP_P2P] = 'RTP/UDP in P2P';
 
+  //User ID's array to allow video input
+  var allowedVideoSenders = new Array();
+
+  //User ID's array to allow video input
+  var allowedAudioSenders = new Array();
+
   // Scope variables
   var scopeId, userId, localVideoStarted = false;
 
@@ -201,6 +207,19 @@
       renderer.find('.muted-indicator').show();
       renderer.find('.allowReceiveAudioChckbx').hide();
     }
+
+    // Add the new user id to the arrays of allowed input of audio and video
+    allowedAudioSenders.push(parseInt(e.userId));
+    allowedVideoSenders.push(parseInt(e.userId));
+
+    // Add the new user id to the pool of user allowed to send audio and video
+    ADL.getService().setAllowedSenders(ADL.createResponder(onSilenced), scopeId, ADL.MediaType.AUDIO, allowedAudioSenders);
+    ADL.getService().setAllowedSenders(ADL.createResponder(onSilenced), scopeId, ADL.MediaType.VIDEO, allowedVideoSenders);
+
+    renderer.find('.allowReceiveAudioChckbx').attr('id', 'allowReceiveAudio' + e.userId);
+    renderer.find('.allowReceiveVideoChckbx').attr('id', 'allowReceiveVideo' + e.userId);
+    $('#allowReceiveAudio' + e.userId).change({rend: renderer},onAllowedAudioChanged);
+    $('#allowReceiveVideo' + e.userId).change({rend: renderer},onAllowedVideoChanged);
   }
 
   function onRemoteVideoStreamStatusChanged(e) {
@@ -443,6 +462,55 @@
       ADL.getService().unpublish(ADL.r(), scopeId, ADL.MediaType.VIDEO);
     }
 
+  }
+
+  /**
+   * Prepare the handler when using setAllowedSenders
+   */
+  var onSilenced = function (e) {
+    console.warn('Got setAllowedSenders notification: ' + JSON.stringify(e));
+  };
+
+  /**
+   * Handles the change of the "Allowed Audio" checkbox
+   */
+  function onAllowedAudioChanged(e) {
+    userId = parseInt(e.data.rend.find('.user-id-wrapper').html());
+
+    // Since we're connected we need to either start or stop publishing the audio stream, depending on the new state of the checkbox
+    if ($('#allowReceiveAudio'+userId).is(':checked')) {
+      //Add the User ID to the array of users allowed to send audio
+      allowedAudioSenders.push(userId);
+      ADL.getService().setAllowedSenders(ADL.createResponder(onSilenced), scopeId, ADL.MediaType.AUDIO, allowedAudioSenders);
+    } else {
+      //Remove the User ID to the array of users allowed to send audio
+      var index = allowedAudioSenders.indexOf(userId);
+      if(index != -1) {
+        allowedAudioSenders.splice(index, 1);
+      }
+      ADL.getService().setAllowedSenders(ADL.createResponder(onSilenced), scopeId, ADL.MediaType.AUDIO, allowedAudioSenders);
+    }
+  }
+
+  /**
+   * Handles the change of the "Allowed Audio" checkbox
+   */
+  function onAllowedVideoChanged(e) {
+    userId = parseInt(e.data.rend.find('.user-id-wrapper').html());
+
+    // Since we're connected we need to either start or stop publishing the audio stream, depending on the new state of the checkbox
+    if ($('#allowReceiveVideo'+userId).is(':checked')) {
+      //Add the User ID to the array of users allowed to send video
+      allowedVideoSenders.push(userId);
+      ADL.getService().setAllowedSenders(ADL.createResponder(onSilenced), scopeId, ADL.MediaType.VIDEO, allowedVideoSenders);
+    } else {
+      //Remove the User ID to the array of users allowed to send video
+      var index = allowedVideoSenders.indexOf(userId);
+      if(index != -1) {
+        allowedVideoSenders.splice(index, 1);
+      }
+      ADL.getService().setAllowedSenders(ADL.createResponder(onSilenced), scopeId, ADL.MediaType.VIDEO, allowedVideoSenders);
+    }
   }
 
   function genAuthDetails(scopeId, userId) {

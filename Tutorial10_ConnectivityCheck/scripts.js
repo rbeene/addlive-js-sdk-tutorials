@@ -8,12 +8,8 @@
  */
 
 
-(function (w) {
+(function () {
   'use strict';
-
-  // Imports
-  var ADLT = w.ADLT,
-      log = ADLT.log;
 
   // Consts
   var APPLICATION_ID = NaN, // Put your app Id here;
@@ -23,7 +19,7 @@
    * Document ready callback - starts the AddLive platform initialization.
    */
   function onDomReady() {
-    log.debug('DOM loaded');
+    console.log('DOM loaded');
     ADLT.initializeAddLiveQuick(_platformReady, {applicationId:APPLICATION_ID});
   }
 
@@ -31,12 +27,13 @@
     ADL.getService().getVersion((ADL.r(function (version) {
       $('#sdkVersionLbl').text(version);
     })));
+    // assuming the genRandomUserId is exposed via ADLT namespace. (check shared-assets/scripts.js)
     var userId = ADLT.genRandomUserId();
     var connDescr = {
       scope:''
     };
-    connDescr.authDetails = ADLT.genAuth('', userId,
-        APPLICATION_ID, APP_SHARED_SECRET);
+    // assuming the genAuth is exposed via ADLT namespace. (check shared-assets/scripts.js)
+    connDescr.authDetails = ADLT.genAuth('', userId, APPLICATION_ID, APP_SHARED_SECRET);
     connDescr.highVideoStream = {maxBitRate:1024};
     $('#connQualityLbl').text('Testing...');
     ADL.getService().networkTest(ADL.r(_onNetworkTestResults), connDescr);
@@ -62,6 +59,7 @@
 
 
   function _platformReady() {
+    // assuming the genRandomUserId and genAuth are exposed via ADLT namespace. (check shared-assets/scripts.js)
     var userId = ADLT.genRandomUserId();
     var connDescr = {
       scopeId:'',
@@ -95,4 +93,4 @@
    */
   $(onDomReady);
 
-})(window);
+})();

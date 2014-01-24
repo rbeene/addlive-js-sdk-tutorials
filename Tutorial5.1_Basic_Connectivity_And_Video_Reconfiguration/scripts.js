@@ -19,6 +19,12 @@ var APPLICATION_ID = NaN; // Put your app Id here;
 
 var APP_SHARED_SECRET = ''; // Put your API key here;
 
+var VIDEO_QUALITY_PROFILES = {
+        0:{maxWidth:160, maxHeight:120, maxFps:5, useAdaptation:true},
+        1:{maxWidth:320, maxHeight:240, maxFps:10, useAdaptation:true},
+        2:{maxWidth:640, maxHeight:480, maxFps:24, useAdaptation:true}
+      };
+
 /**
  * Document ready callback - starts the AddLive platform initialization.
  */
@@ -60,10 +66,10 @@ function startLocalVideo () {
 function initServiceListener () {
   console.log("Initializing the AddLive Service Listener");
 
-  //1. Instantiate the listener
+  // 1. Instantiate the listener
   var listener = new ADL.AddLiveServiceListener();
 
-  //2. Define the handler for user event
+  // 2. Define the handler for user event
   /**
    * Handles new remote participant joined/left the scope.
    * @param {ADL.UserStateChangedEvent} e
@@ -83,35 +89,52 @@ function initServiceListener () {
 
   };
 
-  //3. Define result handler that will enable the connect button
+  // 3. Define result handler that will enable the connect button
   var onSucc = function () {
     $('#connectBtn').click(connect).removeClass('disabled');
   };
 
-  //4. Register the listener using created instance and prepared result handler.
+  // 4. Register the listener using created instance and prepared result handler.
   ADL.getService().addServiceListener(ADL.createResponder(onSucc), listener);
 
+};
+
+function initReconfigurationVideo () {
+
+  // 1. Enable the slider
+  $(".slider").removeAttr('disabled');
+
+  // 2. Define the result handler
+  var onSucc = function () {
+    console.log("Video reconfigured");
+  };
+
+  // 3. Set the slider listener
+  $(".slider").change(function(){
+    ADL.getService().reconfigureVideo(ADL.createResponder(onSucc), SCOPE_ID, VIDEO_QUALITY_PROFILES[$(this).val()]);
+  });
 };
 
 function connect () {
   console.log("Establishing a connection to the AddLive Streaming Server");
 
-  //1. Disable the connect button to avoid connects cascade
+  // 1. Disable the connect button to avoid connects cascade
   $('#connectBtn').unbind('click').addClass('disabled');
 
-  //2. Prepare the connection descriptor by cloning the configuration and updating the URL and the token.
+  // 2. Prepare the connection descriptor by cloning the configuration and updating the URL and the token.
   var connDescriptor = {};
   connDescriptor.scopeId = SCOPE_ID;
   connDescriptor.authDetails = genAuthDetails(ADLT.genRandomUserId());
 
-  //3. Define the result handler
+  // 3. Define the result handler
   var onSucc = function () {
     console.log("Connected. Disabling connect button and enabling the disconnect");
     $('#disconnectBtn').click(disconnect).removeClass('disabled');
     $('#localUserIdLbl').html(connDescriptor.token);
+    initReconfigurationVideo();
   };
 
-  //4. Define the error handler
+  // 4. Define the error handler
   var onErr = function (errCode, errMessage) {
     console.error("Failed to establish the connection due to: " + errMessage +
         '(err code: ' + errCode + ')');
@@ -119,7 +142,7 @@ function connect () {
     $('#connectBtn').click(connect).removeClass('disabled');
   };
 
-  //5. Request the SDK to establish the connection
+  // 5. Request the SDK to establish the connection
   ADL.getService().connect(ADL.createResponder(onSucc, onErr), connDescriptor);
 };
 
@@ -136,7 +159,7 @@ function disconnect () {
     $('#localUserIdLbl').html('undefined');
   };
 
-  //2. Request the SDK to terminate the connection.
+  // 2. Request the SDK to terminate the connection.
   ADL.getService().disconnect(ADL.createResponder(onSucc), SCOPE_ID);
 };
 

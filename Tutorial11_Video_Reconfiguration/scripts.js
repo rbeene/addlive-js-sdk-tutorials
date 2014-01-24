@@ -8,13 +8,9 @@
 (function (w) {
   'use strict';
 
-  // Imports
-  var ADLT = w.ADLT,
-      log = ADLT.log;
-
 
   // Constants
-  var SCOPE_ID = 'Tutorial10',
+  var SCOPE_ID = '',
       VIDEO_MODES = {
         0:{maxWidth:1280, maxHeight:720, maxFps:24, useAdaptation:true},
         1:{maxWidth:800, maxHeight:600, maxFps:24, useAdaptation:true},
@@ -46,7 +42,9 @@
    * Document ready callback - starts the AddLive platform initialization.
    */
   function onDomReady() {
-    log.debug('DOM loaded');
+    console.log('DOM loaded');
+
+    // assuming the initAddLiveLogging and initDevicesSelects are exposed via ADLT namespace. (check shared-assets/scripts.js)
     ADLT.initAddLiveLogging();
     ADLT.initDevicesSelects();
     var initOptions = {applicationId:APPLICATION_ID, skipUpdate:true};
@@ -56,7 +54,7 @@
   }
 
   function onPlatformReady() {
-    log.debug("AddLive Platform ready.");
+    console.log("AddLive Platform ready.");
     ADLT.populateDevicesQuick();
     startLocalVideo();
     initServiceListener();
@@ -64,10 +62,10 @@
 
 
   function startLocalVideo() {
-    log.debug("Starting local preview video feed");
-//  1. Prepare the result handler
+    console.log("Starting local preview video feed");
+    // 1. Prepare the result handler
     var resultHandler = function (sinkId) {
-      log.debug("Local preview started. Rendering the sink with id: " + sinkId);
+      console.log("Local preview started. Rendering the sink with id: " + sinkId);
       ADL.renderSink({
         sinkId:sinkId,
         containerId:'renderLocalPreview',
@@ -75,23 +73,24 @@
       });
     };
 
-//  2. Request the platform to start local video.
+    // 2. Request the platform to start local video.
     ADL.getService().startLocalVideo(ADL.createResponder(resultHandler));
   }
 
   function initServiceListener() {
-    log.debug("Initializing the AddLive Service Listener");
+    console.log("Initializing the AddLive Service Listener");
 
-//  1. Instantiate the listener
+    // 1. Instantiate the listener
     var listener = new ADL.AddLiveServiceListener();
 
-//  2. Define the handler for user event
+    // 2. Define the handler for user event
+
     /**
      * Handles new remote participant joined/left the scope.
      * @param {ADL.UserStateChangedEvent} e
-     */
+    */
     listener.onUserEvent = function (e) {
-      log.debug("Got new user event: " + e.userId);
+      console.log("Got new user event: " + e.userId);
       if (e.isConnected) {
         ADL.renderSink({
           sinkId:e.videoSinkId,
@@ -112,19 +111,19 @@
      * @param {ADL.VideoFrameSizeChangedEvent}e
      */
     listener.onVideoFrameSizeChanged = function(e) {
-      log.debug('Got video frame size changed notification: ' +
+      console.log('Got video frame size changed notification: ' +
           JSON.stringify(e));
       if(e.sinkId === remotePeerSink) {
         $('#renderRemoteUser').css({width:e.width, height:e.height});
       }
     };
 
-//  3. Define result handler that will enable the connect button
+    // 3. Define result handler that will enable the connect button
     var onSucc = function () {
       $('#connectBtn').click(connect).removeClass('disabled');
     };
 
-//  4. Register the listener using created instance and prepared result handler.
+    // 4. Register the listener using created instance and prepared result handler.
     ADL.getService().addServiceListener(ADL.createResponder(onSucc), listener);
 
   }
@@ -134,7 +133,7 @@
         mode = VIDEO_MODES[modeId],
         previewMode = VIDEO_MODES_PREVIEW[modeId];
     $('#renderLocalPreview').css({width:previewMode.maxWidth,height:previewMode.maxHeight});
-    log.debug('Changing resolution of video feed to: ' +
+    console.log('Changing resolution of video feed to: ' +
         JSON.stringify(mode));
     if(connected) {
       ADL.getService().reconfigureVideo(ADL.r(), SCOPE_ID, mode);
@@ -142,13 +141,12 @@
   }
 
   function connect() {
-    log.debug("Establishing a connection to the AddLive Streaming Server");
+    console.log("Establishing a connection to the AddLive Streaming Server");
 
-//  1. Disable the connect button to avoid connects cascade
+    // 1. Disable the connect button to avoid connects cascade
     $('#connectBtn').unbind('click').addClass('disabled');
 
-//  2. Prepare the connection descriptor by cloning the configuration and
-//     updating the URL and the token.
+    // 2. Prepare the connection descriptor by cloning the configuration and updating the URL and the token.
     var connDescriptor = {
       videoStream:{
         maxWidth:1280,
@@ -158,36 +156,37 @@
       }
     };
     connDescriptor.scopeId = SCOPE_ID;
-    var userId = ADLT.genRandomUserId();
-    connDescriptor.authDetails =
-        ADLT.genAuth(SCOPE_ID, userId, APPLICATION_ID, APP_SHARED_SECRET);
 
-//  3. Define the result handler
+    // assuming the genRandomUserId is exposed via ADLT namespace. (check shared-assets/scripts.js)
+    var userId = ADLT.genRandomUserId();
+    connDescriptor.authDetails = ADLT.genAuth(SCOPE_ID, userId, APPLICATION_ID, APP_SHARED_SECRET);
+
+    // 3. Define the result handler
     var onSucc = function () {
-      log.debug("Connected. Disabling connect button and enabling the disconnect");
+      console.log("Connected. Disabling connect button and enabling the disconnect");
       $('#disconnectBtn').click(disconnect).removeClass('disabled');
       $('#localUserIdLbl').html(connDescriptor.authDetails.userId);
       connected = true;
     };
 
-//  4. Define the error handler
+    // 4. Define the error handler
     var onErr = function (errCode, errMessage) {
-      log.error("Failed to establish the connection due to: " + errMessage +
+      console.error("Failed to establish the connection due to: " + errMessage +
           '(err code: ' + errCode + ')');
-//    Enable the connect button again
+      // Enable the connect button again
       $('#connectBtn').click(connect).removeClass('disabled');
     };
 
-//  5. Request the SDK to establish the connection
+    // 5. Request the SDK to establish the connection
     ADL.getService().connect(ADL.createResponder(onSucc, onErr), connDescriptor);
   }
 
   function disconnect() {
-    log.debug("Terminating the connection");
+    console.log("Terminating the connection");
 
-//  1. Define the result handler
+    // 1. Define the result handler
     var onSucc = function () {
-      log.debug("Connection terminated");
+      console.log("Connection terminated");
       $('#connectBtn').click(connect).removeClass('disabled');
       $('#disconnectBtn').unbind('click').addClass('disabled');
       $('#renderRemoteUser').empty();
@@ -196,7 +195,7 @@
       connected = false;
     };
 
-//  2. Request the SDK to terminate the connection.
+    // 2. Request the SDK to terminate the connection.
     ADL.getService().disconnect(ADL.createResponder(onSucc), SCOPE_ID);
   }
 
@@ -204,4 +203,4 @@
    * Register the document ready handler.
    */
   $(onDomReady);
-})(window);
+})();

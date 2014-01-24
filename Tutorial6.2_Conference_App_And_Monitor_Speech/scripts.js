@@ -201,6 +201,8 @@
       renderer.find('.muted-indicator').show();
       renderer.find('.allowReceiveAudioChckbx').hide();
     }
+
+    ADL.getService().monitorSpeechActivity(ADL.createResponder(onMonitorSpeech), scopeId, true);
   }
 
   function onRemoteVideoStreamStatusChanged(e) {
@@ -444,6 +446,13 @@
     }
 
   }
+
+  /**
+   * Prepare the monitor speech success handler
+   */
+  var onMonitorSpeech = function (e) {
+      console.log("Monitor speech successfully requested");
+  };
 
   function genAuthDetails(scopeId, userId) {
 

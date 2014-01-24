@@ -5,108 +5,116 @@
  * @author Tadeusz Kozak
  * @date 26-06-2012 10:37
  */
-(function (w) {
+(function () {
   'use strict';
-
-  var ADLT = w.ADLT,
-      log = ADLT.log;
 
   /**
    * Document ready callback - starts the AddLive platform initialization.
    */
-  ADLT.onDomReady = function () {
-    log.debug('DOM loaded');
+  function onDomReady () {
+    console.log('DOM loaded');
+
+    // assuming the initDevicesSelects is exposed via ADLT namespace. (check shared-assets/scripts.js)
     ADLT.initDevicesSelects();
-    ADLT.initUI();
+
+    initUI();
+
+    // assuming the initAddLiveLogging and initializeAddLiveQuick are exposed via ADLT namespace. (check shared-assets/scripts.js)
     ADLT.initAddLiveLogging();
-    ADLT.initializeAddLiveQuick(ADLT.onPlatformReady);
+    ADLT.initializeAddLiveQuick(onPlatformReady);
   };
 
 
-  ADLT.initUI = function () {
+  function initUI () {
     $('#volumeCtrlSlider').slider({
       min:0,
       max:255,
       animate:true,
       value:127,
-      slide:ADLT.onVolumeSlide
+      slide:onVolumeSlide
     });
     $('#micGainCtrlSlider').slider({
       min:0,
       max:255,
       animate:true,
       value:127,
-      slide:ADLT.onMicGainSlide
+      slide:onMicGainSlide
     });
     $('#micActivityBar').progressbar({value:50});
-    $('#playTestSoundBtn').click(ADLT.onPlayTestSoundBtnClicked);
-    $('#micActivityEnabledChckbx').change(ADLT.onMicActivityEnabledChckbxChange);
+    $('#playTestSoundBtn').click(onPlayTestSoundBtnClicked);
+    $('#micActivityEnabledChckbx').change(onMicActivityEnabledChckbxChange);
   };
 
 
-  ADLT.onPlatformReady = function () {
-    ADLT.initializeListener();
+  function onPlatformReady () {
+    initializeListener();
+
+    // assuming the populateDevicesQuick is exposed via ADLT namespace. (check shared-assets/scripts.js)
     ADLT.populateDevicesQuick();
-    ADLT.populateVolume();
-    ADLT.populateMicGain();
+
+    populateVolume();
+    populateMicGain();
     $('#playTestSoundBtn').
-        click(ADLT.onPlayTestSoundBtnClicked).
+        click(onPlayTestSoundBtnClicked).
         removeClass('disabled');
   };
 
-  ADLT.initializeListener = function () {
+  function initializeListener () {
     var listener = new ADL.AddLiveServiceListener();
     listener.onDeviceListChanged = function (e) {
-      log.debug("Got devices list changed");
+      console.log("Got devices list changed");
       if (e.audioInChanged) {
-        log.debug("Got new microphone plugged in");
+        console.log("Got new microphone plugged in");
+        // assuming the populateDevicesOfType is exposed via ADLT namespace. (check shared-assets/scripts.js)
         ADLT.populateDevicesOfType('#micSelect', 'AudioCapture');
       }
       if (e.audioOutChanged) {
-        log.debug("Got new speakers plugged in");
+        console.log("Got new speakers plugged in");
+        // assuming the populateDevicesOfType is exposed via ADLT namespace. (check shared-assets/scripts.js)
         ADLT.populateDevicesOfType('#spkSelect', 'AudioOutput');
       }
       if (e.videoInChanged) {
-        log.debug("Got new camera plugged in");
+        console.log("Got new camera plugged in");
+        // assuming the populateDevicesOfType is exposed via ADLT namespace. (check shared-assets/scripts.js)
         ADLT.populateDevicesOfType('#camSelect', 'VideoCapture');
       }
     };
 
     listener.onMicActivity = function (e) {
-      log.debug("Got mic activity: " + e.activity);
+      console.log("Got mic activity: " + e.activity);
       $('#micActivityBar').progressbar('value', e.activity / 255 * 100);
     };
 
     ADL.getService().addServiceListener(ADL.createResponder(), listener);
   };
 
-  ADLT.populateVolume = function () {
+  function populateVolume () {
     var resultHandler = function (volume) {
       $('#volumeCtrlSlider').slider('value', volume);
     };
     ADL.getService().getSpeakersVolume(ADL.createResponder(resultHandler));
   };
 
-  ADLT.populateMicGain = function () {
+  function populateMicGain () {
     var resultHandler = function (volume) {
       $('#micGainCtrlSlider').slider('value', volume);
     };
     ADL.getService().getMicrophoneVolume(ADL.createResponder(resultHandler));
   };
 
-  ADLT.onVolumeSlide = function (e, ui) {
+  function onVolumeSlide (e, ui) {
     ADL.getService().setSpeakersVolume(ADL.createResponder(), ui.value);
   };
 
-  ADLT.onMicGainSlide = function (e, ui) {
+  function onMicGainSlide (e, ui) {
     ADL.getService().setMicrophoneVolume(ADL.createResponder(), ui.value);
   };
 
-  ADLT.onPlayTestSoundBtnClicked = function () {
+  function onPlayTestSoundBtnClicked () {
     ADL.getService().startPlayingTestSound(ADL.createResponder());
   };
 
-  ADLT.onMicActivityEnabledChckbxChange = function () {
+  function onMicActivityEnabledChckbxChange () {
     var enabled = $(this).is(':checked');
     ADL.getService().monitorMicActivity(ADL.createResponder(), enabled);
   };
@@ -114,5 +122,5 @@
   /**
    * Register the document ready handler.
    */
-  $(ADLT.onDomReady);
-})(window);
+  $(onDomReady);
+})();
