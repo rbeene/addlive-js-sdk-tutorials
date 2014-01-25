@@ -87,8 +87,7 @@
 
     $('#camSelect').change(function () {
       var selectedDev = $(this).val();
-      ADL.getService().setVideoCaptureDevice(
-          ADL.r(startLocalVideoMaybe), selectedDev);
+      ADL.getService().setVideoCaptureDevice(ADL.r(startLocalVideoMaybe), selectedDev);
     });
 
     $('#micSelect').change(ADLT.getDevChangedHandler('AudioCapture'));
@@ -161,13 +160,24 @@
       tryReconnect();
     };
 
-    // 6. Prepare the success handler
+    // 6. Define the handler for the speech activity event
+    listener.onSpeechActivity = function (e) {
+      $.each(e.speechActivity, function(ev, item){
+        $("#progress"+item.userId).val(item.activity*100/255);
+        if(item.activity*100/255 > 0)
+          $("#renderer"+item.userId).attr('style', 'background:red');
+        else
+          $("#renderer"+item.userId).attr('style', 'background:rgb(153, 153, 153)');
+      });
+    };
+
+    // 7. Prepare the success handler
     var onSucc = function () {
       console.log("AddLive service listener registered");
       $('#connectBtn').click(connect).removeClass('disabled');
     };
 
-    // 7. Finally register the AddLive Service Listener
+    // 8. Finally register the AddLive Service Listener
     ADL.getService().addServiceListener(ADL.createResponder(onSucc), listener);
 
   }
@@ -202,6 +212,10 @@
       renderer.find('.allowReceiveAudioChckbx').hide();
     }
 
+    // 5. Prepare the progreess bar
+    renderer.find('.vertical-progress').attr('id', 'progress' + e.userId);
+
+    // 6 Add the new user id to the pool of user in the monitor speech activity
     ADL.getService().monitorSpeechActivity(ADL.createResponder(onMonitorSpeech), scopeId, true);
   }
 
