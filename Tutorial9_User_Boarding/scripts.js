@@ -10,6 +10,15 @@
 (function (w) {
   'use strict';
 
+  // IE shim - for IE 8+ the console object is defined only if the dev tools
+  // are acive
+  if (!window.console) {
+    console = {
+      log:function() {},
+      warn:function() {}
+    };
+  }
+
   /**
    * ===========================================================================
    * Consts
@@ -19,13 +28,15 @@
       /**
        * ID of an application - to be used with initialization
        */
-          APPLICATION_ID = NaN, // Put your app Id here;
+          // To set your own APP_ID (check shared-assets/scripts.js)
+          APPLICATION_ID = ADLT.APP_ID,
 
 
       /**
        * Shared secret to be used with authentication
        */
-          APP_SHARED_SECRET = '', // Put your API key here;
+          // To set your own API_KEY (check shared-assets/scripts.js)
+          APP_SHARED_SECRET = ADLT.API_KEY,
 
       /**
        * Minimal average round trip time to streaming server that makes the
@@ -62,7 +73,8 @@
   function onDomReady() {
     console.log('DOM loaded');
 
-    // assuming the initAddLiveLogging is exposed via ADLT namespace. (check shared-assets/scripts.js)
+    // assuming the initAddLiveLogging is exposed via ADLT namespace.
+    // (check shared-assets/scripts.js)
     ADLT.initAddLiveLogging();
     initUI();
     initializeAddLive();
@@ -154,7 +166,7 @@
           platformInitComplete();
         };
 
-        var responder = ADL.createResponder(getVersionResult);
+        var responder = ADL.r(getVersionResult);
         ADL.getService().getVersion(responder);
         break;
 
@@ -195,7 +207,8 @@
    */
   function platformInitComplete() {
 
-    // assuming the populateDevicesQuick is exposed via ADLT namespace. (check shared-assets/scripts.js)
+    // assuming the populateDevicesQuick is exposed via ADLT namespace.
+    // (check shared-assets/scripts.js)
     ADLT.populateDevicesQuick();
 
     // Define the AddLiveServiceListener
@@ -214,7 +227,7 @@
       });
     };
 
-//    Register the listener
+    // Register the listener
     ADL.getService().addServiceListener(ADL.r(onAddListenerSucc), listener);
   }
 
@@ -396,7 +409,8 @@
 
           };
 
-      ADL.getService().setVideoCaptureDevice(ADL.r(camSelectedSuccHandler, camSelectedErrHandler), selectedMic);
+      ADL.getService().setVideoCaptureDevice(ADL.r(camSelectedSuccHandler,
+                                           camSelectedErrHandler), selectedMic);
 
     };
 
@@ -458,7 +472,6 @@
     /Pentium II/
   ];
 
-
   function testCpu() {
     var $cpuTest = $('#cpuTest');
     var onHostDetails = function (info) {
@@ -498,10 +511,12 @@
   var testScopeId;
 
   function initTestConn() {
-    // assuming the genRandomUserId is exposed via ADLT namespace. (check shared-assets/scripts.js)
+    // assuming the genRandomUserId is exposed via ADLT namespace.
+    // (check shared-assets/scripts.js)
     var userId = ADLT.genRandomUserId();
     testScopeId = 'user_setup_scope_' + userId;
-    var authDetails = ADLT.genAuth(testScopeId, userId, APPLICATION_ID, APP_SHARED_SECRET);
+    var authDetails = ADLT.genAuth(testScopeId, userId, APPLICATION_ID,
+                                   APP_SHARED_SECRET);
 
     var connDescriptor = {
       scopeId:testScopeId,
@@ -630,5 +645,4 @@
    * Register the document ready handler.
    */
   $(onDomReady);
-
 }(window, jQuery));

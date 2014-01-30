@@ -10,12 +10,20 @@
 (function (w) {
   'use strict';
 
+  // IE shim - for IE 8+ the console object is defined only if the dev tools
+  // are acive
+  if (!window.console) {
+    console = {
+      log:function() {},
+      warn:function() {}
+    };
+  }
+
   /**
    * Configuration of the streams to publish upon connection established
    * @type {Object}
    */
   var CONNECTION_CONFIGURATION = {
-
 
     /**
      * Flags defining that both streams should be automatically published upon
@@ -23,12 +31,15 @@
      */
     autopublishVideo:false,
     autopublishAudio:false,
-    scopeId:''
+    // To set your own SCOPE_ID (check shared-assets/scripts.js)
+    scopeId:ADLT.SCOPE_ID
   };
 
-  var APPLICATION_ID = NaN; // Put your app Id here;
+  // To set your own APP_ID (check shared-assets/scripts.js)
+  var APPLICATION_ID = ADLT.APP_ID;
 
-  var APP_SHARED_SECRET = ''; // Put your API key here;
+  // To set your own API_KEY (check shared-assets/scripts.js)
+  var APP_SHARED_SECRET = ADLT.API_KEY;
 
 
   /**
@@ -38,26 +49,33 @@
     console.log('DOM loaded');
     ADL.initStdLogging(true);
 
-    // assuming the initAddLiveLogging and initializeAddLiveQuick are exposed via ADLT namespace. (check shared-assets/scripts.js)
+    // assuming the initAddLiveLogging and initializeAddLiveQuick are exposed
+    // via ADLT namespace. (check shared-assets/scripts.js)
     ADLT.initAddLiveLogging();
-    // Additional options for quick initialization - do not initialize the devices and do not update the plug-in
+    // Additional options for quick initialization - do not initialize the
+    // devices and do not update the plug-in
     ADLT.initializeAddLiveQuick(onPlatformReady,
         {initDevices:false,
           skipUpdate:true,
           applicationId: APPLICATION_ID
         });
-  };
+  }
 
   function onPlatformReady () {
     console.log("AddLive Platform ready.");
     var ADLListener = new ADL.AddLiveServiceListener();
     ADLListener.onUserEvent = function (e) {
       if (e.isConnected) {
-        $('<option id="user' + e.userId + 'Opt" value="' + e.userId + '">User ' + e.userId + '</option>').appendTo($('#targetSelect'));
-        appendMessage(e.userId, 'User with id ' + e.userId + ' just joined ' + 'the chat');
+        $('<option id="user' + e.userId + 'Opt" value="' + e.userId + '">User '
+         + e.userId + '</option>').appendTo($('#targetSelect'));
+
+        appendMessage(e.userId, 'User with id ' + e.userId + ' just joined '
+         + 'the chat');
       } else {
         $('#user' + e.userId + 'Opt').remove();
-        appendMessage(e.userId, 'User with id ' + e.userId + ' just left ' + 'the chat');
+
+        appendMessage(e.userId, 'User with id ' + e.userId + ' just left '
+         + 'the chat');
       }
     };
 
@@ -70,21 +88,26 @@
       var msg = JSON.parse(e.data);
       appendMessage(e.srcUserId, msg.text, msg.direct);
     };
-    ADL.getService().addServiceListener(ADL.createResponder(onListenerAdded), ADLListener);
-  };
+    ADL.getService().addServiceListener(ADL.r(onListenerAdded), ADLListener);
+  }
 
   function onListenerAdded () {
+    // Prepare the connection descriptor by cloning the configuration and
+    // updating the URL and the token.
     var connDescr = $.extend({}, CONNECTION_CONFIGURATION);
 
-    // assuming the genRandomUserId is exposed via ADLT namespace. (check shared-assets/scripts.js)
+    // assuming the genRandomUserId is exposed via ADLT namespace.
+    // (check shared-assets/scripts.js)
     ADLT._ownUserId = ADLT.genRandomUserId();
     connDescr.authDetails = genAuthDetails(connDescr.scopeId, ADLT._ownUserId);
 
-    ADL.getService().connect(ADL.createResponder(onConnected), connDescr);
-  };
+    ADL.getService().connect(ADL.r(onConnected), connDescr);
+  }
 
   function onConnected (connection) {
-    var welcomeMessage = "You've just joined the text chat. " + "You're personal id: " + ADLT._ownUserId;
+    var welcomeMessage = "You've just joined the text chat. " +
+    "You're personal id: " + ADLT._ownUserId;
+
     appendMessage(ADLT._ownUserId, welcomeMessage);
     $('#sendBtn').removeClass('disabled').click(sendMsg);
     /**
@@ -93,7 +116,7 @@
      * @private
      */
     ADLT._chatConnection = connection;
-  };
+  }
 
   function sendMsg () {
     var $msgInput = $('#msgInput');
@@ -108,9 +131,9 @@
       text:msgContent,
       direct:!!msgRecipient
     });
-    ADLT._chatConnection.sendMessage(ADL.createResponder(), msg, msgRecipient);
+    ADLT._chatConnection.sendMessage(ADL.r(), msg, msgRecipient);
 
-  };
+  }
 
   function appendMessage (sender, content, direct) {
     var msgClone = $('#msgTmpl').clone();
@@ -120,7 +143,7 @@
       msgClone.find('.direct-indicator').removeClass('hidden');
     }
     msgClone.appendTo('#msgsSink');
-  };
+  }
 
   function genAuthDetails (scopeId, userId) {
 
@@ -143,7 +166,7 @@
     authDetails.signature =
         w.CryptoJS.SHA256(signatureBody).toString(w.CryptoJS.enc.Hex).toUpperCase();
     return authDetails;
-  };
-  $(onDomReady);
+  }
 
+  $(onDomReady);
 })(window);

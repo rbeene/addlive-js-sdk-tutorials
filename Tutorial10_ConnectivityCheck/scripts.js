@@ -11,9 +11,20 @@
 (function () {
   'use strict';
 
+  // IE shim - for IE 8+ the console object is defined only if the dev tools
+  // are acive
+  if (!window.console) {
+    console = {
+      log:function() {},
+      warn:function() {}
+    };
+  }
+
   // Consts
-  var APPLICATION_ID = NaN, // Put your app Id here;
-      APP_SHARED_SECRET = ''; // Put your API key here;
+  // To set your own APP_ID (check shared-assets/scripts.js)
+  // To set your own API_KEY (check shared-assets/scripts.js)
+  var APPLICATION_ID = ADLT.APP_ID,
+      APP_SHARED_SECRET = ADLT.API_KEY;
 
   /**
    * Document ready callback - starts the AddLive platform initialization.
@@ -27,13 +38,17 @@
     ADL.getService().getVersion((ADL.r(function (version) {
       $('#sdkVersionLbl').text(version);
     })));
-    // assuming the genRandomUserId is exposed via ADLT namespace. (check shared-assets/scripts.js)
+    // assuming the genRandomUserId is exposed via ADLT namespace.
+    // (check shared-assets/scripts.js)
     var userId = ADLT.genRandomUserId();
     var connDescr = {
-      scope:''
-    };
-    // assuming the genAuth is exposed via ADLT namespace. (check shared-assets/scripts.js)
-    connDescr.authDetails = ADLT.genAuth('', userId, APPLICATION_ID, APP_SHARED_SECRET);
+      scope:ADLT.SCOPE_ID
+    }; // To set your own SCOPE_ID (check shared-assets/scripts.js)
+    // assuming the genAuth is exposed via ADLT namespace.
+    // (check shared-assets/scripts.js)
+    connDescr.authDetails = ADLT.genAuth('', userId, APPLICATION_ID,
+                                             APP_SHARED_SECRET);
+
     connDescr.highVideoStream = {maxBitRate:1024};
     $('#connQualityLbl').text('Testing...');
     ADL.getService().networkTest(ADL.r(_onNetworkTestResults), connDescr);
@@ -55,19 +70,6 @@
         lbl = 'Unknown';
     }
     $('#connQualityLbl').text(lbl);
-  }
-
-
-  function _platformReady() {
-    // assuming the genRandomUserId and genAuth are exposed via ADLT namespace. (check shared-assets/scripts.js)
-    var userId = ADLT.genRandomUserId();
-    var connDescr = {
-      scopeId:'',
-      authDetails:ADLT.genAuth('', userId, APPLICATION_ID, APP_SHARED_SECRET),
-      highVideoStream:{maxBitRate:1024}
-    };
-    $('#connQualityLbl').text('Testing...');
-    ADL.getService().networkTest(ADL.r(_onNetworkTestResults), connDescr);
   }
 
   function _onNetworkTestComplete(result) {
@@ -92,5 +94,4 @@
    * Register the document ready handler.
    */
   $(onDomReady);
-
 })();

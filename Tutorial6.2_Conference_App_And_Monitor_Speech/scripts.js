@@ -10,42 +10,25 @@
 (function (w) {
   'use strict';
 
-  // Scope constants
-  var APPLICATION_ID = NaN,
+  // IE shim - for IE 8+ the console object is defined only if the dev tools are acive
+  if (!window.console) {
+    console = {
+      log:function() {},
+      warn:function() {}
+    };
+  }
 
-      APP_SHARED_SECRET = '',
+  // Scope constants
+  // To set your own APP_ID (check shared-assets/scripts.js)
+  // To set your own API_KEY (check shared-assets/scripts.js)
+  var APPLICATION_ID = ADLT.APP_ID,
+      APP_SHARED_SECRET = ADLT.API_KEY,
 
         /**
          * Configuration of the streams to publish upon connection established
          * @type {Object}
          */
         CONNECTION_CONFIGURATION = {
-
-        /**
-         * Description of the base line video stream - the low layer. It's QVGA, with
-         * bitrate equal to 64kbps and 5 frames per second
-         */
-        lowVideoStream:{
-          publish:true,
-          receive:true,
-          maxWidth:320,
-          maxHeight:240,
-          maxBitRate:64,
-          maxFps:5
-        },
-
-        /**
-         * Description of the adaptive video stream - the high layer. It's QVGA, with
-         * 400kbps of bitrate and 15 frames per second
-         */
-        highVideoStream:{
-          publish:true,
-          receive:true,
-          maxWidth:320,
-          maxHeight:240,
-          maxBitRate:400,
-          maxFps:15
-        },
 
         /**
          * Flags defining that both streams should be automatically published upon
@@ -71,12 +54,14 @@
   function onDomReady() {
     console.log('DOM loaded');
 
-    // assuming the initAddLiveLogging is exposed via ADLT namespace. (check shared-assets/scripts.js)
+    // assuming the initAddLiveLogging is exposed via ADLT namespace.
+    // (check shared-assets/scripts.js)
     ADLT.initAddLiveLogging();
     initUI();
-    var initOptions = {applicationId:APPLICATION_ID};
+    var initOptions = {applicationId:APPLICATION_ID, enableReconnects:true};
 
-    // assuming the initializeAddLiveQuick is exposed via ADLT namespace. (check shared-assets/scripts.js)
+    // assuming the initializeAddLiveQuick is exposed via ADLT namespace.
+    // (check shared-assets/scripts.js)
     ADLT.initializeAddLiveQuick(onPlatformReady, initOptions);
   }
 
@@ -87,7 +72,8 @@
 
     $('#camSelect').change(function () {
       var selectedDev = $(this).val();
-      ADL.getService().setVideoCaptureDevice(ADL.r(startLocalVideoMaybe), selectedDev);
+      ADL.getService().setVideoCaptureDevice(ADL.r(startLocalVideoMaybe),
+                                            selectedDev);
     });
 
     $('#micSelect').change(ADLT.getDevChangedHandler('AudioCapture'));
@@ -101,7 +87,8 @@
     console.log("==============================================================");
     console.log("AddLive SDK ready - setting up the application");
 
-    // assuming the populateDevicesQuick is exposed via ADLT namespace. (check shared-assets/scripts.js)
+    // assuming the populateDevicesQuick is exposed via ADLT namespace.
+    // (check shared-assets/scripts.js)
     ADLT.populateDevicesQuick();
     startLocalVideoMaybe();
     initServiceListener();
@@ -143,7 +130,8 @@
           onRemoteVideoStreamStatusChanged(e);
           break;
         default :
-          console.warn('Got unsupported media type in media stream event: ' + e.mediaType);
+          console.warn('Got unsupported media type in media stream event: ' +
+                       e.mediaType);
       }
     };
 
@@ -157,28 +145,35 @@
     listener.onConnectionLost = function (e) {
       console.warn('Got connection lost notification: ' + JSON.stringify(e));
       disconnectHandler();
-      tryReconnect();
     };
 
-    // 6. Define the handler for the speech activity event
+    // 6. Define the handler for the reconnection event
+    listener.onSessionReconnected = function (e) {
+      console.log("Connection successfully reestablished!");
+      postConnectHandler();
+    };
+
+    // 7. Define the handler for the speech activity event
     listener.onSpeechActivity = function (e) {
       $.each(e.speechActivity, function(ev, item){
-        $("#progress"+item.userId).val(item.activity*100/255);
-        if(item.activity*100/255 > 0)
+        $("#progress" + item.userId).val(item.activity * 100 / 255);
+        if (item.activity * 100 / 255 > 0) {
           $("#renderer"+item.userId).attr('style', 'background:red');
-        else
+        }
+        else {
           $("#renderer"+item.userId).attr('style', 'background:rgb(153, 153, 153)');
+        }
       });
     };
 
-    // 7. Prepare the success handler
+    // 8. Prepare the success handler
     var onSucc = function () {
       console.log("AddLive service listener registered");
       $('#connectBtn').click(connect).removeClass('disabled');
     };
 
-    // 8. Finally register the AddLive Service Listener
-    ADL.getService().addServiceListener(ADL.createResponder(onSucc), listener);
+    // 9. Finally register the AddLive Service Listener
+    ADL.getService().addServiceListener(ADL.r(onSucc), listener);
 
   }
 
@@ -216,7 +211,7 @@
     renderer.find('.vertical-progress').attr('id', 'progress' + e.userId);
 
     // 6 Add the new user id to the pool of user in the monitor speech activity
-    ADL.getService().monitorSpeechActivity(ADL.createResponder(onMonitorSpeech), scopeId, true);
+    ADL.getService().monitorSpeechActivity(ADL.r(onMonitorSpeech), scopeId, true);
   }
 
   function onRemoteVideoStreamStatusChanged(e) {
@@ -228,14 +223,16 @@
     var renderingWidget = $('#renderingWidget' + e.userId);
 
     if (e.videoPublished) {
-      // 2a. If video was just published - render it and hide the "No video from user" indicator
+      // 2a. If video was just published - render it and hide the
+      // "No video from user" indicator
       ADL.renderSink({
         sinkId:e.videoSinkId,
         containerId:'renderer' + e.userId
       });
       renderingWidget.find('.no-video-text').hide();
     } else {
-      // 2b. If video was just unpublished - clear the renderer and show the "No video from user" indicator
+      // 2b. If video was just unpublished - clear the renderer and show the
+      // "No video from user" indicator
       renderingWidget.find('.render-wrapper').empty();
       renderingWidget.find('.no-video-text').show();
     }
@@ -256,37 +253,6 @@
       // 2.b Show it if audio was just unpublished
       muteIndicator.show();
     }
-  }
-
-  /**
-   * Tries to reestablish the connection to the AddLive Streaming Server in case
-   * of network-driven loss.
-   *
-   * It will retry the connect every 5 seconds.
-   */
-  function tryReconnect() {
-
-    // Register the reconnect handler to be triggered after 5 seconds
-    setTimeout(function () {
-      console.log("Trying to reestablish the connection to the AddLive Streaming " + "Server");
-
-      // 1. Define the result handler
-      var succHandler = function () {
-        console.log("Connection successfully reestablished!");
-        postConnectHandler();
-      };
-
-      // 2. Define the failure handler
-      var errHandler = function () {
-        console.warn("Failed to reconnect. Will try again in 5 secs");
-        tryReconnect();
-      };
-      // 3. Try to connect
-      var connDescriptor = genConnectionDescriptor(scopeId, userId);
-      ADL.getService().connect(ADL.createResponder(succHandler, errHandler),
-          connDescriptor);
-    }, 5000);
-
   }
 
   /**
@@ -313,7 +279,7 @@
     };
 
     // 2. Request the SDK to start capturing local user's preview
-    ADL.getService().startLocalVideo(ADL.createResponder(resultHandler));
+    ADL.getService().startLocalVideo(ADL.r(resultHandler));
   }
 
   /**
@@ -331,10 +297,12 @@
     // 2. Get the scope id and generate the user id.
     scopeId = $('#scopeIdTxtField').val();
 
-    // assuming the genRandomUserId is exposed via ADLT namespace. (check shared-assets/scripts.js)
+    // assuming the genRandomUserId is exposed via ADLT namespace.
+    // (check shared-assets/scripts.js)
     userId = ADLT.genRandomUserId();
 
-    // 3. Define the result handler - delegates the processing to the postConnectHandler
+    // 3. Define the result handler - delegates the processing to
+    // the postConnectHandler
     var connDescriptor = genConnectionDescriptor(scopeId, userId);
     var onSucc = function () {
       postConnectHandler();
@@ -346,7 +314,7 @@
     };
 
     // 5. Request the SDK to establish a connection
-    ADL.getService().connect(ADL.createResponder(onSucc, onErr), connDescriptor);
+    ADL.getService().connect(ADL.r(onSucc, onErr), connDescriptor);
   }
 
   function disconnect() {
@@ -360,7 +328,7 @@
     };
 
     // 2. Request the SDK to terminate the connection
-    ADL.getService().disconnect(ADL.createResponder(succHandler), scopeId);
+    ADL.getService().disconnect(ADL.r(succHandler), scopeId);
   }
 
   /**
@@ -397,13 +365,25 @@
     // 1. Enable the disconnect button
     $('#disconnectBtn').click(disconnect).removeClass('disabled');
 
-    // 2. Update the local user id label
+    // 2. Disable the connect button
+    $('#connectBtn').unbind('click').addClass('disabled');
+
+    // 3. Update the local user id label
     $('#localUserIdLbl').html(userId);
   }
 
   function genConnectionDescriptor(scopeId, userId) {
-    // Clone the video streaming configuration and create a connection descriptor using settings provided by the user
-    var connDescriptor = $.extend({}, CONNECTION_CONFIGURATION);
+    // Prepare the connection descriptor by cloning the configuration and
+    // updating the URL and the token.
+    var connDescriptor = {
+      videoStream:{
+        maxWidth:1280,
+        maxHeight:720,
+        maxFps:24,
+        useAdaptation:true
+      }
+    };
+    connDescriptor = $.extend({}, CONNECTION_CONFIGURATION);
     connDescriptor.scopeId = scopeId;
     connDescriptor.authDetails = genAuthDetails(scopeId, userId);
     connDescriptor.autopublishAudio = $('#publishAudioChckbx').is(':checked');
@@ -429,11 +409,13 @@
    */
   function onPublishAudioChanged() {
     if (!scopeId) {
-      // If the scope id is not defined, it means that we're not connected and thus there is nothing to do here.
+      // If the scope id is not defined, it means that we're not connected and
+      // thus there is nothing to do here.
       return;
     }
 
-    // Since we're connected we need to either start or stop publishing the audio stream, depending on the new state of the checkbox
+    // Since we're connected we need to either start or stop publishing the
+    // audio stream, depending on the new state of the checkbox
     if ($('#publishAudioChckbx').is(':checked')) {
       ADL.getService().publish(ADL.r(), scopeId, ADL.MediaType.AUDIO);
     } else {
@@ -448,11 +430,13 @@
   function onPublishVideoChanged() {
     if (!scopeId) {
 
-      // If the scope id is not defined, it means that we're not connected and thus there is nothing to do here.
+      // If the scope id is not defined, it means that we're not connected and
+      // thus there is nothing to do here.
       return;
     }
 
-    // Since we're connected we need to either start or stop publishing the audio stream, depending on the new state of the checkbox
+    // Since we're connected we need to either start or stop publishing the
+    // audio stream, depending on the new state of the checkbox
     if ($('#publishVideoChckbx').is(':checked')) {
       ADL.getService().publish(ADL.r(), scopeId, ADL.MediaType.VIDEO);
     } else {
@@ -503,5 +487,4 @@
    * Register the document ready handler.
    */
   $(onDomReady);
-
 })(window);

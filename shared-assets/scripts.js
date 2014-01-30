@@ -11,6 +11,12 @@
  */
 var ADLT = ADLT || {};
 
+ADLT.SCOPE_ID = 'MOmJ'; // Put your scope here;
+
+ADLT.APP_ID = '486'; // Put your app Id here;
+
+ADLT.API_KEY = 'ADL_M0QLrBEfSMR4w3cb2kwZtKgPumKGkbozk2k4SaHgqaOabexm8OmZ5uM'; // Put your API key here;
+
 (function (w) {
   'use strict';
 // Initialize the logging.
