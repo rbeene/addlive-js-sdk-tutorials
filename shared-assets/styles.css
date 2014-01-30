@@ -32,10 +32,10 @@ h2#tutorialSubTitle {
 }
 
 #installBtn {
-  margin: 10px auto;
+  margin: 30px auto;
+  padding: 10px;
   display: none;
   width: 200px;
-  height: 31px;
 }
 
 #initProgressBar {

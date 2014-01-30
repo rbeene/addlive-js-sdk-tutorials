@@ -23,12 +23,8 @@
    */
   function onDomReady() {
     console.log('DOM loaded');
-    $("#initProgressBar").
-        progressbar({
-          value:0
-        });
-    // assuming the initAddLiveLogging is exposed via ADLT namespace.
-    // (check shared-assets/scripts.js)
+    $("#initProgressBar").progressbar({value:0});
+    // Initializes the AddLive SDK.
     ADLT.initAddLiveLogging();
     initializeAddLive();
   }
