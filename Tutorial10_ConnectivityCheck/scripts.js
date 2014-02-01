@@ -25,7 +25,7 @@
     console.log('DOM loaded');
     var initOptions = {applicationId:APPLICATION_ID};
     // Initializes the AddLive SDK. Please refer to ../shared-assets/scripts.js
-    ADLT.initializeAddLiveQuick(_platformReady(), initOptions);
+    ADLT.initializeAddLiveQuick(_platformReady, initOptions);
   }
 
   function _platformReady() {
