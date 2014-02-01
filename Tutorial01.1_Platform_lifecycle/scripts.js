@@ -10,14 +10,13 @@
 
 (function (w) {
   'use strict';
-  var ADLT = w.ADLT,
-      log = ADLT.log;
+  var ADLT = w.ADLT;
 
   /**
    * Document ready callback - starts the AddLive platform initialization.
    */
   ADLT.onDomReady = function () {
-    log.debug('DOM loaded');
+    console.log('DOM loaded');
     $('#initProgressBar').
         progressbar({
           value:0
@@ -27,20 +26,19 @@
   };
 
   function initPlatform() {
-    log.debug('Initializing the AddLive SDK');
+    console.log('Initializing the AddLive SDK');
 
+    $('#initBtn').addClass('disabled');
     var initOptions = {applicationId:ADLT.APP_ID},
         onPlatformReady = function () {
           var getVersionResult = function (version) {
-            log.debug('AddLive service version: ' + version);
+            console.log('AddLive service version: ' + version);
             $('#sdkVersion').html(version);
           };
 
           var responder = ADL.createResponder(getVersionResult);
           ADL.getService().getVersion(responder);
           $('#disposeBtn').one('click', disposePlatform).removeClass('disabled');
-          $('#initBtn').addClass('disabled');
-
         };
     ADLT.initializeAddLiveQuick(onPlatformReady, initOptions);
   }
@@ -49,6 +47,7 @@
     ADL.disposePlatform();
     $('#initBtn').one('click', initPlatform).removeClass('disabled');
     $('#disposeBtn').addClass('disabled');
+    $('#initProgressBar').progressbar('value', 0);
 
   }
 

@@ -73,6 +73,14 @@
     ADLT.initAddLiveLogging();
     console.log('Initializing the AddLive SDK');
     var initListener = new ADL.PlatformInitListener();
+
+    // Define the handler for initialization progress changes - just in case
+    // the page has #initProgressBar progressbar
+    initListener.onInitProgressChanged = function (e) {
+      console.log('Platform init progress: ' + e.progress);
+      $('#initProgressBar').progressbar('value', e.progress);
+    };
+
     initListener.onInitStateChanged = function (e) {
       switch (e.state) {
         case ADL.InitState.ERROR:
