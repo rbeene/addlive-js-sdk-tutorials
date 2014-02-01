@@ -10,6 +10,15 @@
 (function (w) {
   'use strict';
 
+  // IE shim - for IE 8+ the console object is defined only if the dev tools
+  // are acive
+  if (!window.console) {
+    console = {
+      log:function() {},
+      warn:function() {}
+    };
+  }
+
   /**
    * ===========================================================================
    * Consts
@@ -19,13 +28,15 @@
       /**
        * ID of an application - to be used with initialization
        */
-          APPLICATION_ID = NaN, // Put your app Id here;
+          // To set your own APP_ID (check shared-assets/scripts.js)
+          APPLICATION_ID = ADLT.APP_ID,
 
 
       /**
        * Shared secret to be used with authentication
        */
-          APP_SHARED_SECRET = '', // Put your API key here;
+          // To set your own API_KEY (check shared-assets/scripts.js)
+          APP_SHARED_SECRET = ADLT.API_KEY,
 
       /**
        * Minimal average round trip time to streaming server that makes the
@@ -62,33 +73,88 @@
   function onDomReady() {
     console.log('DOM loaded');
 
-    // assuming the initAddLiveLogging is exposed via ADLT namespace. (check shared-assets/scripts.js)
+    // assuming the initAddLiveLogging is exposed via ADLT namespace.
+    // (check shared-assets/scripts.js)
     ADLT.initAddLiveLogging();
     initUI();
-    initializeAddLive();
+    // Initializes the AddLive SDK.
+    initializeAddLive(
+        {
+          initDevices:false,
+          applicationId:APPLICATION_ID
+        });
   }
 
   /**
    * Initializes the AddLive SDK.
    */
-  function initializeAddLive() {
+  function initializeAddLive(options) {
     console.log("Initializing the AddLive SDK");
 
-    // Step 1 - create the PlatformInitListener and init options.
-    var initListener = new ADL.PlatformInitListener(),
-        initOptions = {
-          initDevices:false,
-          applicationId:APPLICATION_ID
-        };
+    // Step 1 - create the PlatformInitListener and overwrite it's methods.
+    var initListener = new ADL.PlatformInitListener();
 
     // Define the handler for initialization progress changes
     initListener.onInitProgressChanged = initProgressChangedHandler;
 
     // Define the handler for initialization state changes
-    initListener.onInitStateChanged = initStateChangedHandler;
+    initListener.onInitStateChanged = function (e) {
+      switch (e.state) {
+
+        case ADL.InitState.ERROR:
+          // After receiving this status, the initialization is stopped as
+          // due tutorial a failure.
+          console.error("Failed to initialize the AddLive SDK");
+          console.error("Reason: " + e.errMessage + ' (' + e.errCode + ')');
+          break;
+
+        case ADL.InitState.INITIALIZED:
+          //This state flag indicates that the AddLive SDK is initialized and fully
+          //functional.
+          var getVersionResult = function (version) {
+            console.log("AddLive service version: " + version);
+            $('#sdkVersion').html(version);
+            platformInitComplete();
+          };
+
+          var responder = ADL.r(getVersionResult);
+          ADL.getService().getVersion(responder);
+          break;
+
+        case ADL.InitState.INSTALLATION_REQUIRED:
+          // Current user doesn't have the AddLive Plug-In installed and it is
+          // required - use provided URL to ask the user to install the Plug-in.
+          // Note that the initialization process is just frozen in this state -
+          // the SDK polls for plug-in availability and when it becomes available,
+          // continues with the initialization.
+          console.log("AddLive Plug-in installation required");
+          $('#installBtn').attr('href', e.installerURL).css('display', 'block');
+          break;
+        case ADL.InitState.INSTALLATION_COMPLETE:
+          console.log("AddLive Plug-in installation complete");
+          $('#installBtn').hide();
+          break;
+
+        case ADL.InitState.BROWSER_RESTART_REQUIRED:
+          // This state indicates that AddLive SDK performed auto-update and in
+          // order to accomplish this process, browser needs to be restarted.
+          console.log("Please restart your browser in order to complete platform auto-update");
+          break;
+
+        case ADL.InitState.DEVICES_INIT_BEGIN:
+          // This state indicates that AddLive SDK performed auto-update and
+          // in order to accomplish this process, browser needs to be restarted.
+          console.log("Devices initialization started");
+          break;
+
+        default:
+          // Default handler, just for sanity
+          console.log("Got unsupported init state: " + e.state);
+      }
+    };
 
     // Step 2. Actually trigger the asynchronous initialization of the AddLive SDK.
-    ADL.initPlatform(initListener, initOptions);
+    ADL.initPlatform(initListener, options);
   }
 
   function initUI() {
@@ -139,50 +205,6 @@
     $("#initProgressBar").progressbar('value', e.progress);
   }
 
-  function initStateChangedHandler(e) {
-    switch (e.state) {
-
-      case ADL.InitState.ERROR:
-        console.error("Failed to initialize the AddLive SDK");
-        console.error("Reason: " + e.errMessage + ' (' + e.errCode + ')');
-        break;
-
-      case ADL.InitState.INITIALIZED:
-        var getVersionResult = function (version) {
-          console.log("AddLive service version: " + version);
-          $('#sdkVersion').html(version);
-          platformInitComplete();
-        };
-
-        var responder = ADL.createResponder(getVersionResult);
-        ADL.getService().getVersion(responder);
-        break;
-
-      case ADL.InitState.INSTALLATION_REQUIRED:
-        console.log("AddLive Plug-in installation required");
-        $('#installBtn').
-            attr('href', e.installerURL).
-            css('display', 'block');
-        break;
-      case ADL.InitState.INSTALLATION_COMPLETE:
-        console.log("AddLive Plug-in installation complete");
-        $('#installBtn').hide();
-        break;
-
-      case ADL.InitState.BROWSER_RESTART_REQUIRED:
-        console.log("Please restart your browser in order to complete platform auto-update");
-        break;
-
-      case ADL.InitState.DEVICES_INIT_BEGIN:
-        console.log("Devices initialization started");
-        break;
-
-      default:
-        console.warn("Got unsupported init state: " + e.state);
-    }
-
-  }
-
   /**
    * ===========================================================================
    * Step 1. Platform init
@@ -195,7 +217,8 @@
    */
   function platformInitComplete() {
 
-    // assuming the populateDevicesQuick is exposed via ADLT namespace. (check shared-assets/scripts.js)
+    // assuming the populateDevicesQuick is exposed via ADLT namespace.
+    // (check shared-assets/scripts.js)
     ADLT.populateDevicesQuick();
 
     // Define the AddLiveServiceListener
@@ -214,7 +237,7 @@
       });
     };
 
-//    Register the listener
+    // Register the listener
     ADL.getService().addServiceListener(ADL.r(onAddListenerSucc), listener);
   }
 
@@ -396,7 +419,8 @@
 
           };
 
-      ADL.getService().setVideoCaptureDevice(ADL.r(camSelectedSuccHandler, camSelectedErrHandler), selectedMic);
+      ADL.getService().setVideoCaptureDevice(ADL.r(camSelectedSuccHandler,
+                                           camSelectedErrHandler), selectedMic);
 
     };
 
@@ -458,7 +482,6 @@
     /Pentium II/
   ];
 
-
   function testCpu() {
     var $cpuTest = $('#cpuTest');
     var onHostDetails = function (info) {
@@ -498,10 +521,12 @@
   var testScopeId;
 
   function initTestConn() {
-    // assuming the genRandomUserId is exposed via ADLT namespace. (check shared-assets/scripts.js)
+    // assuming the genRandomUserId is exposed via ADLT namespace.
+    // (check shared-assets/scripts.js)
     var userId = ADLT.genRandomUserId();
     testScopeId = 'user_setup_scope_' + userId;
-    var authDetails = ADLT.genAuth(testScopeId, userId, APPLICATION_ID, APP_SHARED_SECRET);
+    var authDetails = ADLT.genAuth(testScopeId, userId, APPLICATION_ID,
+                                   APP_SHARED_SECRET);
 
     var connDescriptor = {
       scopeId:testScopeId,
@@ -630,5 +655,4 @@
    * Register the document ready handler.
    */
   $(onDomReady);
-
 }(window, jQuery));

@@ -10,21 +10,28 @@
           src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
 
   <script type="text/javascript"
-          src="../shared-assets/log4javascript.js"></script>
-  <script type="text/javascript" src="../shared-assets/scripts.js"></script>
-  <script type="text/javascript" src="../shared-assets/sha256.js"></script>
-
+          src="../shared-assets/scripts.js"></script>
   <script type="text/javascript"
-          src="http://api.addlive.com/stable/addlive-sdk.js"></script>
+          src="../shared-assets/sha256.js"></script>
+
+  <!-- Development, non-minimised SDK -->
+ <script type="text/javascript"
+         src="//d36pfzlm4aixmv.cloudfront.net/stable/addlive-sdk.js"></script>
+
+ <!-- Production, minimised SDK -->
+ <!--<script type="text/javascript"-->
+         <!--src="//d36pfzlm4aixmv.cloudfront.net/stable/addlive-sdk.min.js"></script>-->
 
   <!-- Tutorial - specific script file -->
-  <script type="text/javascript" src="scripts.js"></script>
+  <script type="text/javascript"
+          src="scripts.js"></script>
 
 
   <!-- Shared stylesheet -->
-  <link href="../shared-assets/styles.css" rel="stylesheet" type="text/css"/>
-  <link href="../shared-assets/bootstrap.min.css" rel="stylesheet"
-        type="text/css"/>
+  <link href="../shared-assets/styles.css"
+        rel="stylesheet" type="text/css"/>
+  <link href="../shared-assets/bootstrap.min.css"
+        rel="stylesheet" type="text/css"/>
   <link href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css"
         rel="stylesheet" type="text/css"/>
 </head>
@@ -35,15 +42,15 @@
 
   <h2 id="tutorialSubTitle">User boarding widget</h2>
 
+  <a id="installBtn" href="#" class="btn btn-primary">Install AddLive
+    Plug-in</a>
+
   <div id="accordion">
     <h3>Platform initialization</h3>
 
     <div>
       <div id="platformInitStep" class="">
 
-        <div class="btn-wrapper">
-          <a id="installBtn" href="#">Install AddLive Plug-in</a>
-        </div>
         <div id="initProgressBar"></div>
         <p class="state-testing-msg state-msg">Initializing AddLive Platform</p>
 
@@ -57,8 +64,8 @@
         </p>
 
         <div class="next-wrapper">
-          <a id="platformInitNextBtn" class="next-btn" href="javascript://nop">Next
-            -></a>
+          <a id="platformInitNextBtn" class="next-btn" href="javascript://nop">
+            Next -></a>
         </div>
       </div>
     </div>

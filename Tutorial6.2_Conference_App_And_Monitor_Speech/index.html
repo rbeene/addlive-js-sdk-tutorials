@@ -1,32 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>AddLive SDK Tutorial 6 - Conference app</title>
+  <title>AddLive SDK Tutorial 6.2 - Conference app and monitor speech</title>
 
   <!--Common scripts for all AddLive tutorials -->
-  <script type="text/javascript" src="../shared-assets/log4javascript.js"></script>
-  <script type="text/javascript" src="http://code.jquery.com/jquery-1.8.3.js"></script>
-  <script type="text/javascript" src="../shared-assets/scripts.js"></script>
-  <script type="text/javascript" src="../shared-assets/sha256.js"></script>
+  <script type="text/javascript"
+          src="http://code.jquery.com/jquery-1.8.3.js"></script>
+  <script type="text/javascript"
+          src="../shared-assets/scripts.js"></script>
+  <script type="text/javascript"
+          src="../shared-assets/sha256.js"></script>
 
-  <!--<script type="text/javascript" src="http://api.addlive.com/stable/addlive-sdk.js"></script>-->
-  <script type="text/javascript" src="http://api.addlive.com/beta_v3/addlive-sdk.js"></script>
+  <!-- Development, non-minimised SDK -->
+ <!--<script type="text/javascript"-->
+         <!--src="//d36pfzlm4aixmv.cloudfront.net/stable/addlive-sdk.js"></script>-->
+
+ <!-- Production, minimised SDK -->
+ <!--<script type="text/javascript"-->
+         <!--src="//d36pfzlm4aixmv.cloudfront.net/stable/addlive-sdk.min.js"></script>-->
+
+  <!-- Monitor speech feature only available on V3 -->
+  <script type="text/javascript"
+          src="http://api.addlive.com/beta_v3/addlive-sdk.js"></script>
 
   <!-- Tutorial - specific script file -->
-  <script type="text/javascript" src="scripts.js"></script>
+  <script type="text/javascript"
+          src="scripts.js"></script>
 
 
   <!-- Shared stylesheet -->
-  <link rel="stylesheet" type="text/css" href="../shared-assets/styles.css"/>
+  <link rel="stylesheet" type="text/css"
+        href="../shared-assets/styles.css"/>
   <link rel="stylesheet" type="text/css"
         href="../shared-assets/bootstrap.min.css"/>
 
 </head>
 <body>
 <div class="main wide">
-  <h1 id="tutorialTitle">AddLive SDK Tutorial 6</h1>
+  <h1 id="tutorialTitle">AddLive SDK Tutorial 6.2</h1>
 
-  <h2 id="tutorialSubTitle">Conference app</h2>
+  <h2 id="tutorialSubTitle">Conference app and monitor speeching</h2>
+
+  <a id="installBtn" href="#" class="btn btn-primary">Install AddLive
+    Plug-in</a>
 
   <!-- Beginning of the video feeds rendering section -->
   <div id="renderingWrapper" class="rendering-wrapper">
@@ -111,7 +127,7 @@
      video feed renderer
 -->
 <div id="templatesContainer">
-  <div id="rendererTmpl" class="render-widget remote-renderer">
+  <div id="rendererTmpl" class="render-widget remote-renderer" style="margin: 0px 15px 10px;">
     <div>Remote user (user id: <span class="user-id-wrapper">undefined</span>).
       <span class="muted-indicator">Audio is muted</span>
     </div>

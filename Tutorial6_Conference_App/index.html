@@ -5,21 +5,28 @@
 
   <!--Common scripts for all AddLive tutorials -->
   <script type="text/javascript"
-          src="../shared-assets/log4javascript.js"></script>
-  <script type="text/javascript"
           src="http://code.jquery.com/jquery-1.8.3.js"></script>
-  <script type="text/javascript" src="../shared-assets/scripts.js"></script>
-  <script type="text/javascript" src="../shared-assets/sha256.js"></script>
-
   <script type="text/javascript"
-          src="http://api.addlive.com/stable/addlive-sdk.js"></script>
+          src="../shared-assets/scripts.js"></script>
+  <script type="text/javascript"
+          src="../shared-assets/sha256.js"></script>
+
+  <!-- Development, non-minimised SDK -->
+ <script type="text/javascript"
+         src="//d36pfzlm4aixmv.cloudfront.net/stable/addlive-sdk.js"></script>
+
+ <!-- Production, minimised SDK -->
+ <!--<script type="text/javascript"-->
+         <!--src="//d36pfzlm4aixmv.cloudfront.net/stable/addlive-sdk.min.js"></script>-->
 
   <!-- Tutorial - specific script file -->
-  <script type="text/javascript" src="scripts.js"></script>
+  <script type="text/javascript"
+          src="scripts.js"></script>
 
 
   <!-- Shared stylesheet -->
-  <link rel="stylesheet" type="text/css" href="../shared-assets/styles.css"/>
+  <link rel="stylesheet" type="text/css"
+        href="../shared-assets/styles.css"/>
   <link rel="stylesheet" type="text/css"
         href="../shared-assets/bootstrap.min.css"/>
 
@@ -29,6 +36,9 @@
   <h1 id="tutorialTitle">AddLive SDK Tutorial 6</h1>
 
   <h2 id="tutorialSubTitle">Conference app</h2>
+
+  <a id="installBtn" href="#" class="btn btn-primary">Install AddLive
+    Plug-in</a>
 
   <!-- Beginning of the video feeds rendering section -->
   <div id="renderingWrapper" class="rendering-wrapper">
