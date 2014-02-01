@@ -1,16 +1,6 @@
-
-
 (function (w) {
   'use strict';
 
-  // IE shim - for IE 8+ the console object is defined only if the dev tools
-  // are acive
-  if (!window.console) {
-    console = {
-      log:function() {},
-      warn:function() {}
-    };
-  }
 
   /**
    * Id of media scope to connect to upon user's request.
@@ -52,93 +42,30 @@
   /**
    * Document ready callback - starts the AddLive platform initialization.
    */
-  function onDomReady () {
+  function onDomReady() {
     console.log('DOM loaded');
 
     // assuming the initAddLiveLogging is exposed
     // via ADLT namespace. (check shared-assets/scripts.js)
     ADLT.initAddLiveLogging();
-    var initOptions = {applicationId: APPLICATION_ID};
-    // Initializes the AddLive SDK.
-    initializeAddLive(initOptions);
+    var initOptions = {applicationId:APPLICATION_ID};
+    // Initializes the AddLive SDK. Please refer to ../shared-assets/scripts.js
+    ADLT.initializeAddLiveQuick(onPlatformReady, initOptions);
     SCREEN_SHARING_ITM_WIDGET_TMPL = $(
         '<li class="scr-share-src-itm">' +
-        '<img src="/shared-assets/no_screenshot_available.png"/>' +
-        '<p><\/p>' +
-        '<\/li>');
+            '<img src="/shared-assets/no_screenshot_available.png"/>' +
+            '<p><\/p>' +
+            '<\/li>');
   }
 
-  /**
-   * Initializes the AddLive SDK.
-   */
-  function initializeAddLive(options) {
-    console.log("Initializing the AddLive SDK");
-
-    // Step 1 - create the PlatformInitListener and overwrite it's methods.
-    var initListener = new ADL.PlatformInitListener();
-
-    // Define the handler for initialization state changes
-    initListener.onInitStateChanged = function (e) {
-      switch (e.state) {
-
-        case ADL.InitState.ERROR:
-          // After receiving this status, the initialization is stopped as
-          // due tutorial a failure.
-          console.error("Failed to initialize the AddLive SDK");
-          console.error("Reason: " + e.errMessage + ' (' + e.errCode + ')');
-          break;
-
-        case ADL.InitState.INITIALIZED:
-          //This state flag indicates that the AddLive SDK is initialized and fully
-          //functional.
-          console.log("AddLive SDK fully functional");
-          onPlatformReady();
-          break;
-
-        case ADL.InitState.INSTALLATION_REQUIRED:
-          // Current user doesn't have the AddLive Plug-In installed and it is
-          // required - use provided URL to ask the user to install the Plug-in.
-          // Note that the initialization process is just frozen in this state -
-          // the SDK polls for plug-in availability and when it becomes available,
-          // continues with the initialization.
-          console.log("AddLive Plug-in installation required");
-          $('#installBtn').attr('href', e.installerURL).css('display', 'block');
-          break;
-        case ADL.InitState.INSTALLATION_COMPLETE:
-          console.log("AddLive Plug-in installation complete");
-          $('#installBtn').hide();
-          break;
-
-        case ADL.InitState.BROWSER_RESTART_REQUIRED:
-          // This state indicates that AddLive SDK performed auto-update and in
-          // order to accomplish this process, browser needs to be restarted.
-          console.log("Please restart your browser in order to complete platform auto-update");
-          break;
-
-        case ADL.InitState.DEVICES_INIT_BEGIN:
-          // This state indicates that AddLive SDK performed auto-update and
-          // in order to accomplish this process, browser needs to be restarted.
-          console.log("Devices initialization started");
-          break;
-
-        default:
-          // Default handler, just for sanity
-          console.log("Got unsupported init state: " + e.state);
-      }
-    };
-
-    // Step 2. Actually trigger the asynchronous initialization of the AddLive SDK.
-    ADL.initPlatform(initListener, options);
-  }
-
-  function onPlatformReady () {
+  function onPlatformReady() {
     console.log('AddLive Platform ready.');
     initServiceListener();
     refreshScreenShareSources();
     connect();
   }
 
-  function initServiceListener () {
+  function initServiceListener() {
     console.log('Initializing the AddLive Service Listener');
 
     // Instantiate the listener
@@ -164,8 +91,8 @@
     listener.onUserEvent = handlePublishEvent;
     listener.onMediaStreamEvent = handlePublishEvent;
 
-  //  Add handler for video frame size change, to ensure that the aspec ratio
-  //  is being maintained
+    //  Add handler for video frame size change, to ensure that the aspec ratio
+    //  is being maintained
     listener.onVideoFrameSizeChanged = function (e) {
       $('#renderRemoteUser').css(fitDims(e.width, e.height, 640, 480));
     };
@@ -175,7 +102,7 @@
 
   }
 
-  function connect () {
+  function connect() {
     console.log('Establishing a connection to the AddLive Streaming Server');
 
     // Prepare the connection descriptor by cloning the configuration and
@@ -193,7 +120,7 @@
     // Define the error handler
     var onErr = function (errCode, errMessage) {
       console.error('Failed to establish the connection due to: ' + errMessage +
-      '(err code: ' + errCode + ')');
+          '(err code: ' + errCode + ')');
     };
 
     // Request the SDK to establish the connection
@@ -203,7 +130,7 @@
   /**
    * Reloads the list of sources possible to be shared
    */
-  function refreshScreenShareSources () {
+  function refreshScreenShareSources() {
     $('#refreshBtn').unbind('click').addClass('disabled');
     ADL.getService().getScreenCaptureSources(
         ADL.r(showScreenShareSources), SCREEN_SHARING_SRC_PRV_WIDTH);
@@ -214,7 +141,7 @@
    *
    * @param shareItemId id of source to be shared
    */
-  function publishShareItem (shareItemId) {
+  function publishShareItem(shareItemId) {
     if (isConnected) {
       console.log('Publishing screen share: ' + shareItemId);
 
@@ -229,7 +156,7 @@
       ADL.getService().publish(ADL.r(onSucc, onErr),
           SCOPE_ID,
           ADL.MediaType.SCREEN,
-          {windowId:shareItemId, nativeWidth: 960});
+          {windowId:shareItemId, nativeWidth:960});
     } else {
       console.error('Connection needed to share screen.');
     }
@@ -240,7 +167,7 @@
    *
    * @param callback function to be called after successful unpublish
    */
-  function unpublishShareItem (callback) {
+  function unpublishShareItem(callback) {
     console.log('Unpublishing screen share');
     var onSucc = function () {
       console.log('Screen share source unpublished');
@@ -263,7 +190,7 @@
    *
    * @param sources array of sources to be listed
    */
-  function showScreenShareSources (sources) {
+  function showScreenShareSources(sources) {
     var $srcsList = $('#screenShareSources');
 
     // Remove the previous state
@@ -283,8 +210,8 @@
   /**
    *  Appends the screen sharing source widget to the screen sharing sources list.
    */
-  function screenSharingItemAppender (i, src) {
-  // Create a <li> wrapper for each one
+  function screenSharingItemAppender(i, src) {
+    // Create a <li> wrapper for each one
     var $srcWrapper = SCREEN_SHARING_ITM_WIDGET_TMPL.clone();
 
     // Mark as selected if was shared before
@@ -301,8 +228,8 @@
       $srcWrapper.find('img').
           attr('src', 'data:image/png;base64,' + src.image.base64).
           css(fitDims(src.image.width, src.image.height,
-              SCREEN_SHARING_SRC_PRV_WIDTH,
-              SCREEN_SHARING_SRC_PRV_HEIGHT));
+          SCREEN_SHARING_SRC_PRV_WIDTH,
+          SCREEN_SHARING_SRC_PRV_HEIGHT));
     }
     // Set the window title
     $srcWrapper.find('p').text(src.title);
@@ -321,7 +248,7 @@
   /**
    * Handler for the click event of the screen sharing item widget
    */
-  function screenSharingItmClickHandler () {
+  function screenSharingItmClickHandler() {
     var $this = $(this);
     if ($this.hasClass('selected')) {
       // Unpublishing
@@ -354,7 +281,7 @@
   }
 
 
-  function fitDims (srcW, srcH, targetW, targetH) {
+  function fitDims(srcW, srcH, targetW, targetH) {
     var srcAR = srcW / srcH;
     var targetAR = targetW / targetH;
     var width, height, padding;
@@ -398,7 +325,7 @@
     }
   }
 
-  function genAuthDetails (scopeId, userId) {
+  function genAuthDetails(scopeId, userId) {
 
     // New Auth API
     var dateNow = new Date();
@@ -410,7 +337,7 @@
       salt:ADLT.randomString(100)
     };
     var signatureBody =
-            APPLICATION_ID +
+        APPLICATION_ID +
             scopeId +
             userId +
             authDetails.salt +

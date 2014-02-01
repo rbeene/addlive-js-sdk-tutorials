@@ -1,35 +1,22 @@
 /**
  * @fileoverview
- * @TODO file description
+ *
+ * Contains implementation of logic required by the Tutorial 1.
  *
  * @author Tadeusz Kozak
  * @date 26-06-2012 10:37
  */
-
 (function () {
   'use strict';
-
-  // IE shim - for IE 8+ the console object is defined only if the dev tools
-  // are acive
-  if (!window.console) {
-    console = {
-      log:function() {},
-      warn:function() {}
-    };
-  }
 
   /**
    * Document ready callback - starts the AddLive platform initialization.
    */
-  function onDomReady () {
+  function onDomReady() {
     console.log('DOM loaded');
-
-    // assuming the initAddLiveLogging and initDevicesSelects
-    // are exposed via ADLT namespace.
-    // (check shared-assets/scripts.js)
-    ADLT.initAddLiveLogging();
-    ADLT.initDevicesSelects();
+    $('#initProgressBar').progressbar({value:0});
     // Initializes the AddLive SDK.
+    ADLT.initAddLiveLogging();
     initializeAddLive();
   }
 
@@ -37,10 +24,16 @@
    * Initializes the AddLive SDK.
    */
   function initializeAddLive() {
-    console.log("Initializing the AddLive SDK");
+    console.log('Initializing the AddLive SDK');
 
     // Step 1 - create the PlatformInitListener and overwrite it's methods.
     var initListener = new ADL.PlatformInitListener();
+
+    // Define the handler for initialization progress changes
+    initListener.onInitProgressChanged = function (e) {
+      console.log('Platform init progress: ' + e.progress);
+      $('#initProgressBar').progressbar('value', e.progress);
+    };
 
     // Define the handler for initialization state changes
     initListener.onInitStateChanged = function (e) {
@@ -49,15 +42,24 @@
         case ADL.InitState.ERROR:
           // After receiving this status, the initialization is stopped as
           // due tutorial a failure.
-          console.error("Failed to initialize the AddLive SDK");
-          console.error("Reason: " + e.errMessage + ' (' + e.errCode + ')');
+          var msg = e.errMessage + ' (' + e.errCode + ')';
+          console.error('Failed to initialize the AddLive SDK');
+          console.error('Reason: ' + msg);
+          window.alert('There was an error loading the AddLive plug-in: ' +
+              msg + '. Please reinstall the plug-in');
           break;
 
         case ADL.InitState.INITIALIZED:
           //This state flag indicates that the AddLive SDK is initialized and fully
-          //functional.
-          console.log("AddLive SDK fully functional");
-          onPlatformReady();
+          //functional. In this tutorial, we will just perform sample call to
+          //retrieve the current version of the SDK
+          var getVersionResult = function (version) {
+            console.log('AddLive service version: ' + version);
+            $('#sdkVersion').html(version);
+          };
+
+          var responder = ADL.createResponder(getVersionResult);
+          ADL.getService().getVersion(responder);
           break;
 
         case ADL.InitState.INSTALLATION_REQUIRED:
@@ -66,29 +68,31 @@
           // Note that the initialization process is just frozen in this state -
           // the SDK polls for plug-in availability and when it becomes available,
           // continues with the initialization.
-          console.log("AddLive Plug-in installation required");
-          $('#installBtn').attr('href', e.installerURL).css('display', 'block');
+          console.log('AddLive Plug-in installation required');
+          $('#installBtn').
+              attr('href', e.installerURL).
+              css('display', 'block');
           break;
         case ADL.InitState.INSTALLATION_COMPLETE:
-          console.log("AddLive Plug-in installation complete");
+          console.log('AddLive Plug-in installation complete');
           $('#installBtn').hide();
           break;
 
         case ADL.InitState.BROWSER_RESTART_REQUIRED:
           // This state indicates that AddLive SDK performed auto-update and in
           // order to accomplish this process, browser needs to be restarted.
-          console.log("Please restart your browser in order to complete platform auto-update");
+          console.log('Please restart your browser in order to complete platform auto-update');
           break;
 
         case ADL.InitState.DEVICES_INIT_BEGIN:
           // This state indicates that AddLive SDK performed auto-update and
           // in order to accomplish this process, browser needs to be restarted.
-          console.log("Devices initialization started");
+          console.log('Devices initialization started');
           break;
 
         default:
           // Default handler, just for sanity
-          console.log("Got unsupported init state: " + e.state);
+          console.warn('Got unsupported init state: ' + e.state);
       }
     };
 
@@ -96,45 +100,9 @@
     ADL.initPlatform(initListener, {applicationId:1});
   }
 
-  function onPlatformReady () {
-    // assuming the populateDevicesOfType is exposed via ADLT namespace.
-    // (check shared-assets/scripts.js)
-    ADLT.populateDevicesOfType('#camSelect', 'VideoCapture');
-    startLocalVideo();
-  }
-
-  function startLocalVideo () {
-    var resultHandler = function (sinkId) {
-      console.log("Local preview started. Rendering the sink with id: " + sinkId);
-      ADL.renderSink({
-        sinkId:sinkId,
-        containerId:'renderContainer'
-      });
-
-      ADL.renderSink({
-        sinkId:sinkId,
-        containerId:'renderContainerWindowed',
-        windowless:false
-      });
-
-
-      ADL.renderSink({
-        sinkId:sinkId,
-        containerId:'renderContainerMirror',
-        mirror:true
-      });
-
-      ADL.renderSink({
-        sinkId:sinkId,
-        containerId:'renderContainerBicubic',
-        filterType:ADL.VideoScalingFilter.BICUBIC
-      });
-    };
-    ADL.getService().startLocalVideo(ADL.createResponder(resultHandler));
-  }
-
   /**
    * Register the document ready handler.
    */
   $(onDomReady);
+
 })();

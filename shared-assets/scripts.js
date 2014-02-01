@@ -9,37 +9,34 @@
 /**
  * @namespace Namespace for all AddLive tutorials definitions.
  */
-var ADLT = ADLT || {};
-
-ADLT.SCOPE_ID = 'MOmJ'; // Put your scope here;
-
-ADLT.APP_ID = '486'; // Put your app Id here;
-
-ADLT.API_KEY = 'ADL_M0QLrBEfSMR4w3cb2kwZtKgPumKGkbozk2k4SaHgqaOabexm8OmZ5uM'; // Put your API key here;
 
 (function (w) {
   'use strict';
-// Initialize the logging.
+  var ADLT = w.ADLT || {};
+
+// IE shim - for IE 8+ the console object is defined only if the dev tools
+// are acive
+  if (!window.console) {
+    window.console = {
+      log:function () {
+      },
+      error:function () {
+      },
+      warn:function () {
+      }
+    };
+  }
+
+  ADLT.SCOPE_ID = 'SomeScopePlsChangeMe'; // Put your scope here;
+
+  ADLT.APP_ID = -1; // Put your app Id here;
+
+  ADLT.API_KEY = ''; // Put your API key here;
 
   function _nop() {
   }
 
 
-  if (w.console === undefined) {
-    ADLT.log = w.log4javascript.getLogger();
-    window.log = ADLT.log;
-    ADLT.logsAppender = new w.log4javascript.PopUpAppender();
-    ADLT.log.addAppender(ADLT.logsAppender);
-  } else {
-    ADLT.log = w.console;
-    if(ADLT.log.debug === undefined) {
-      ADLT.log.debug = function(msg){
-        ADLT.log.log(msg);
-      };
-    }
-  }
-
-  var log = ADLT.log;
   /**
    * @const
    * @type {String}
@@ -51,19 +48,19 @@ ADLT.API_KEY = 'ADL_M0QLrBEfSMR4w3cb2kwZtKgPumKGkbozk2k4SaHgqaOabexm8OmZ5uM'; //
     ADL.initLogging(function (lev, msg) {
       switch (lev) {
         case ADL.LogLevel.DEBUG:
-          log.debug("[ADL] " + msg);
+          console.log('[ADL] ' + msg);
           break;
         case ADL.LogLevel.WARN:
-          log.warn("[ADL] " + msg);
+          console.warn('[ADL] ' + msg);
           break;
         case ADL.LogLevel.ERROR:
-          log.error("[ADL] " + msg);
+          console.error('[ADL] ' + msg);
           break;
         case ADL.LogLevel.INFO:
-          log.debug("[ADL] " + msg);
+          console.log('[ADL] ' + msg);
           break;
         default:
-          log.warn("Got unsupported log level: " + lev + ". Message: " +
+          console.warn('Got unsupported log level: ' + lev + '. Message: ' +
               msg);
       }
     }, true);
@@ -74,22 +71,42 @@ ADLT.API_KEY = 'ADL_M0QLrBEfSMR4w3cb2kwZtKgPumKGkbozk2k4SaHgqaOabexm8OmZ5uM'; //
    */
   ADLT.initializeAddLiveQuick = function (completeHandler, options) {
     ADLT.initAddLiveLogging();
-    log.debug("Initializing the AddLive SDK");
+    console.log('Initializing the AddLive SDK');
     var initListener = new ADL.PlatformInitListener();
     initListener.onInitStateChanged = function (e) {
       switch (e.state) {
         case ADL.InitState.ERROR:
-          log.error("Failed to initialize the AddLive SDK");
-          log.error("Reason: " + e.errMessage + ' (' + e.errCode + ')');
+          console.error('Failed to initialize the AddLive SDK');
+          var msg = e.errMessage + ' (' + e.errCode + ')';
+          console.error('Reason: ' + msg);
+          window.alert('There was an error initialising the media plug-in: ' +
+              msg + ' Please reinstall it.');
           break;
         case ADL.InitState.INITIALIZED:
           completeHandler();
           break;
         case ADL.InitState.DEVICES_INIT_BEGIN:
-          log.debug("Devices initialization started");
+          console.log('Devices initialization started');
           break;
+        case ADL.InitState.INSTALLATION_REQUIRED:
+          console.log('AddLive Plug-in installation required');
+          $('#installBtn').
+              attr('href', e.installerURL).
+              css('display', 'block');
+          break;
+        case ADL.InitState.INSTALLATION_COMPLETE:
+          console.log('AddLive Plug-in installation complete');
+          $('#installBtn').hide();
+          break;
+        case ADL.InitState.BROWSER_RESTART_REQUIRED:
+          // This state indicates that AddLive SDK performed auto-update and in
+          // order to accomplish this process, browser needs to be restarted.
+          console.log('Please restart your browser in order to complete platform auto-update');
+          break;
+
+
         default:
-          log.warn("Got unsupported init state: " + e.state);
+          console.warn('Got unsupported init state: ' + e.state);
       }
     };
     ADL.initPlatform(initListener, options);
@@ -161,7 +178,7 @@ ADLT.API_KEY = 'ADL_M0QLrBEfSMR4w3cb2kwZtKgPumKGkbozk2k4SaHgqaOabexm8OmZ5uM'; //
    * Generates sample authentication details. For more info about authentication,
    * please refer to: http://www.addlive.com/docs.html#authentication
    */
-  ADLT.genAuth = function (scopeId, userId, appId, appSecret) {
+  ADLT.genAuth = function (scopeId, userId) {
 
     // New Auth API
     var dateNow = new Date();
@@ -173,16 +190,18 @@ ADLT.API_KEY = 'ADL_M0QLrBEfSMR4w3cb2kwZtKgPumKGkbozk2k4SaHgqaOabexm8OmZ5uM'; //
       salt:ADLT.randomString(100)
     };
     var signatureBody =
-        appId +
+        ADLT.APP_ID +
             scopeId +
             userId +
             authDetails.salt +
             authDetails.expires +
-            appSecret;
+            ADLT.API_KEY;
     authDetails.signature =
         w.CryptoJS.SHA256(signatureBody).toString(w.CryptoJS.enc.Hex).toUpperCase();
     return authDetails;
   };
 
+  // Export the ADLT namespace
+  w.ADLT = ADLT;
 
 })(window);

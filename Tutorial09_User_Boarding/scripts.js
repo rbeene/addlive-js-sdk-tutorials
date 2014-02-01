@@ -10,14 +10,6 @@
 (function (w) {
   'use strict';
 
-  // IE shim - for IE 8+ the console object is defined only if the dev tools
-  // are acive
-  if (!window.console) {
-    console = {
-      log:function() {},
-      warn:function() {}
-    };
-  }
 
   /**
    * ===========================================================================
@@ -28,14 +20,14 @@
       /**
        * ID of an application - to be used with initialization
        */
-          // To set your own APP_ID (check shared-assets/scripts.js)
+        // To set your own APP_ID (check shared-assets/scripts.js)
           APPLICATION_ID = ADLT.APP_ID,
 
 
       /**
        * Shared secret to be used with authentication
        */
-          // To set your own API_KEY (check shared-assets/scripts.js)
+        // To set your own API_KEY (check shared-assets/scripts.js)
           APP_SHARED_SECRET = ADLT.API_KEY,
 
       /**
@@ -77,19 +69,20 @@
     // (check shared-assets/scripts.js)
     ADLT.initAddLiveLogging();
     initUI();
-    // Initializes the AddLive SDK.
-    initializeAddLive(
-        {
-          initDevices:false,
-          applicationId:APPLICATION_ID
-        });
+    var initOptions = {
+      // Here we're telling the SDK not to initialize media devices
+      // automatically to some sane defaults, as we'd like to go through this
+      // process manually with the end user
+      initDevices:false,
+      applicationId:APPLICATION_ID};
+    initializeAddLive(initOptions);
   }
 
   /**
    * Initializes the AddLive SDK.
    */
   function initializeAddLive(options) {
-    console.log("Initializing the AddLive SDK");
+    console.log('Initializing the AddLive SDK');
 
     // Step 1 - create the PlatformInitListener and overwrite it's methods.
     var initListener = new ADL.PlatformInitListener();
@@ -104,15 +97,15 @@
         case ADL.InitState.ERROR:
           // After receiving this status, the initialization is stopped as
           // due tutorial a failure.
-          console.error("Failed to initialize the AddLive SDK");
-          console.error("Reason: " + e.errMessage + ' (' + e.errCode + ')');
+          console.error('Failed to initialize the AddLive SDK');
+          console.error('Reason: ' + e.errMessage + ' (' + e.errCode + ')');
           break;
 
         case ADL.InitState.INITIALIZED:
           //This state flag indicates that the AddLive SDK is initialized and fully
           //functional.
           var getVersionResult = function (version) {
-            console.log("AddLive service version: " + version);
+            console.log('AddLive service version: ' + version);
             $('#sdkVersion').html(version);
             platformInitComplete();
           };
@@ -127,29 +120,29 @@
           // Note that the initialization process is just frozen in this state -
           // the SDK polls for plug-in availability and when it becomes available,
           // continues with the initialization.
-          console.log("AddLive Plug-in installation required");
+          console.log('AddLive Plug-in installation required');
           $('#installBtn').attr('href', e.installerURL).css('display', 'block');
           break;
         case ADL.InitState.INSTALLATION_COMPLETE:
-          console.log("AddLive Plug-in installation complete");
+          console.log('AddLive Plug-in installation complete');
           $('#installBtn').hide();
           break;
 
         case ADL.InitState.BROWSER_RESTART_REQUIRED:
           // This state indicates that AddLive SDK performed auto-update and in
           // order to accomplish this process, browser needs to be restarted.
-          console.log("Please restart your browser in order to complete platform auto-update");
+          console.log('Please restart your browser in order to complete platform auto-update');
           break;
 
         case ADL.InitState.DEVICES_INIT_BEGIN:
           // This state indicates that AddLive SDK performed auto-update and
           // in order to accomplish this process, browser needs to be restarted.
-          console.log("Devices initialization started");
+          console.log('Devices initialization started');
           break;
 
         default:
           // Default handler, just for sanity
-          console.log("Got unsupported init state: " + e.state);
+          console.log('Got unsupported init state: ' + e.state);
       }
     };
 
@@ -164,7 +157,7 @@
     $('#spkSelect').change(onSpkSelected);
 
     // Create the platform init progress bar
-    $("#initProgressBar").
+    $('#initProgressBar').
         progressbar({
           value:0
         });
@@ -201,8 +194,8 @@
   }
 
   function initProgressChangedHandler(e) {
-    console.log("Platform init progress: " + e.progress);
-    $("#initProgressBar").progressbar('value', e.progress);
+    console.log('Platform init progress: ' + e.progress);
+    $('#initProgressBar').progressbar('value', e.progress);
   }
 
   /**
@@ -255,7 +248,7 @@
   var micActivitySamples = [];
 
   function startMicTest() {
-    console.log("Starting microphone test");
+    console.log('Starting microphone test');
     micActivitySamples = [];
     var selectedMic = $('#micSelect').val();
     var $micSetupStepWrapper = $('#micSetupStepWrapper');
@@ -309,7 +302,7 @@
   }
 
   function onMicActivity(e) {
-    console.log("Got mic activity: " + e.activity);
+    console.log('Got mic activity: ' + e.activity);
     $('#micActivityBar').progressbar('value', e.activity / 255 * 100);
     micActivitySamples.push(e.activity);
   }
@@ -383,7 +376,7 @@
   }
 
   function startCamTest() {
-    console.log("Starting camera test");
+    console.log('Starting camera test');
     var $camSetupStepWrapper = $('#camSetupStepWrapper');
 
     var localPrevStarted = function (sinkId) {
@@ -420,7 +413,7 @@
           };
 
       ADL.getService().setVideoCaptureDevice(ADL.r(camSelectedSuccHandler,
-                                           camSelectedErrHandler), selectedMic);
+          camSelectedErrHandler), selectedMic);
 
     };
 
@@ -511,7 +504,7 @@
       $cpuTest.find('.hw-conn-' + cpuStatus).show();
       setConnHwTestStatus(cpuStatus);
     }, onHostDetailsErr = function () {
-      $cpuTest.find('.info').html("Failed to identify CPU").show();
+      $cpuTest.find('.info').html('Failed to identify CPU').show();
       $cpuTest.find('.hw-conn-warn').show();
       setConnHwTestStatus(ConnHwItemStatus.WARN);
     };
@@ -526,7 +519,7 @@
     var userId = ADLT.genRandomUserId();
     testScopeId = 'user_setup_scope_' + userId;
     var authDetails = ADLT.genAuth(testScopeId, userId, APPLICATION_ID,
-                                   APP_SHARED_SECRET);
+        APP_SHARED_SECRET);
 
     var connDescriptor = {
       scopeId:testScopeId,
@@ -566,14 +559,14 @@
 
   function onConnected(mediaConn) {
     var $connTest = $('#connTest');
-    $connTest.find('.info').html("Connection established").show();
+    $connTest.find('.info').html('Connection established').show();
     $connTest.find('.hw-conn-ok').show();
     ADL.getService().startMeasuringStatistics(ADL.r(), testScopeId, 2);
   }
 
   function onConnErr(errCode, errMsg) {
     var $connTest = $('#connTest');
-    $connTest.find('.info').html("Failed to connect due to:<br/>" +
+    $connTest.find('.info').html('Failed to connect due to:<br/>' +
         errMsg + ' (errCode: ' + errCode + ')').addClass('hw-conn-bad').show();
     $('.conn-test-itm .hw-conn-bad').show();
     setConnHwTestStatus(ConnHwItemStatus.BAD);
@@ -584,7 +577,7 @@
    * @param {ADL.MediaConnTypeChangedEvent}e
    */
   function onMediaConnTypeChanged(e) {
-    console.log("Got media connection type changed: " + JSON.stringify(e));
+    console.log('Got media connection type changed: ' + JSON.stringify(e));
     var $infoContainer, status, connTypeString;
     if (e.mediaType === ADL.MediaType.AUDIO) {
       $infoContainer = $('#connTypeAudioTest');
@@ -615,7 +608,7 @@
    * @param {ADL.MediaStatsEvent} e
    */
   function onMediaStats(e) {
-    console.log("Got Media Stats event");
+    console.log('Got Media Stats event');
     if (e.mediaType === ADL.MediaType.AUDIO) {
       rtts.push(e.stats.rtt);
     }
@@ -636,17 +629,17 @@
    */
 
   function onDeviceListChanged(e) {
-    console.log("Got devices list changed");
+    console.log('Got devices list changed');
     if (e.audioInChanged) {
-      console.log("Got new microphone plugged in");
+      console.log('Got new microphone plugged in');
       ADLT.populateDevicesOfType('#micSelect', 'AudioCapture');
     }
     if (e.audioOutChanged) {
-      console.log("Got new speakers plugged in");
+      console.log('Got new speakers plugged in');
       ADLT.populateDevicesOfType('#spkSelect', 'AudioOutput');
     }
     if (e.videoInChanged) {
-      console.log("Got new camera plugged in");
+      console.log('Got new camera plugged in');
       ADLT.populateDevicesOfType('#camSelect', 'VideoCapture');
     }
   }

@@ -6,6 +6,7 @@
  * @date 26-06-2012 10:37
  */
 
+
 (function (w) {
   'use strict';
 
@@ -23,11 +24,11 @@
   var APPLICATION_ID = ADLT.APP_ID,
       APP_SHARED_SECRET = ADLT.API_KEY,
 
-      /**
-      * Configuration of the streams to publish upon connection established
-      * @type {Object}
-      */
-      CONNECTION_CONFIGURATION = {
+        /**
+         * Configuration of the streams to publish upon connection established
+         * @type {Object}
+         */
+        CONNECTION_CONFIGURATION = {
 
         /**
          * Flags defining that both streams should be automatically published upon
@@ -44,12 +45,6 @@
   mediaConnType2Label[ADL.ConnectionType.UDP_RELAY] = 'RTP/UDP relayed';
   mediaConnType2Label[ADL.ConnectionType.UDP_P2P] = 'RTP/UDP in P2P';
 
-  //User ID's array to allow video input
-  var allowedVideoSenders = [];
-
-  //User ID's array to allow video input
-  var allowedAudioSenders = [];
-
   // Scope variables
   var scopeId, userId, localVideoStarted = false;
 
@@ -64,94 +59,31 @@
     ADLT.initAddLiveLogging();
     initUI();
     var initOptions = {applicationId:APPLICATION_ID, enableReconnects:true};
-    // Initializes the AddLive SDK.
-    initializeAddLive(initOptions);
-  }
-
-  /**
-   * Initializes the AddLive SDK.
-   */
-  function initializeAddLive(options) {
-    console.log("Initializing the AddLive SDK");
-
-    // Step 1 - create the PlatformInitListener and overwrite it's methods.
-    var initListener = new ADL.PlatformInitListener();
-
-    // Define the handler for initialization state changes
-    initListener.onInitStateChanged = function (e) {
-      switch (e.state) {
-
-        case ADL.InitState.ERROR:
-          // After receiving this status, the initialization is stopped as
-          // due tutorial a failure.
-          console.error("Failed to initialize the AddLive SDK");
-          console.error("Reason: " + e.errMessage + ' (' + e.errCode + ')');
-          break;
-
-        case ADL.InitState.INITIALIZED:
-          //This state flag indicates that the AddLive SDK is initialized and fully
-          //functional.
-          console.log("AddLive SDK fully functional");
-          onPlatformReady();
-          break;
-
-        case ADL.InitState.INSTALLATION_REQUIRED:
-          // Current user doesn't have the AddLive Plug-In installed and it is
-          // required - use provided URL to ask the user to install the Plug-in.
-          // Note that the initialization process is just frozen in this state -
-          // the SDK polls for plug-in availability and when it becomes available,
-          // continues with the initialization.
-          console.log("AddLive Plug-in installation required");
-          $('#installBtn').attr('href', e.installerURL).css('display', 'block');
-          break;
-        case ADL.InitState.INSTALLATION_COMPLETE:
-          console.log("AddLive Plug-in installation complete");
-          $('#installBtn').hide();
-          break;
-
-        case ADL.InitState.BROWSER_RESTART_REQUIRED:
-          // This state indicates that AddLive SDK performed auto-update and in
-          // order to accomplish this process, browser needs to be restarted.
-          console.log("Please restart your browser in order to complete platform auto-update");
-          break;
-
-        case ADL.InitState.DEVICES_INIT_BEGIN:
-          // This state indicates that AddLive SDK performed auto-update and
-          // in order to accomplish this process, browser needs to be restarted.
-          console.log("Devices initialization started");
-          break;
-
-        default:
-          // Default handler, just for sanity
-          console.log("Got unsupported init state: " + e.state);
-      }
-    };
-
-    // Step 2. Actually trigger the asynchronous initialization of the AddLive SDK.
-    ADL.initPlatform(initListener, options);
+    // Initializes the AddLive SDK. Please refer to ../shared-assets/scripts.js
+    ADLT.initializeAddLiveQuick(onPlatformReady, initOptions);
   }
 
   function initUI() {
-    console.log("Initializing the UI");
+    console.log('Initializing the UI');
     $('#publishAudioChckbx').change(onPublishAudioChanged);
     $('#publishVideoChckbx').change(onPublishVideoChanged);
 
     $('#camSelect').change(function () {
       var selectedDev = $(this).val();
-      ADL.getService().setVideoCaptureDevice(
-          ADL.r(startLocalVideoMaybe), selectedDev);
+      ADL.getService().setVideoCaptureDevice(ADL.r(startLocalVideoMaybe),
+                                            selectedDev);
     });
 
     $('#micSelect').change(ADLT.getDevChangedHandler('AudioCapture'));
     $('#spkSelect').change(ADLT.getDevChangedHandler('AudioOutput'));
 
-    console.log("UI initialized");
+    console.log('UI initialized');
   }
 
   function onPlatformReady() {
-    console.log("==============================================================");
-    console.log("==============================================================");
-    console.log("AddLive SDK ready - setting up the application");
+    console.log('==============================================================');
+    console.log('==============================================================');
+    console.log('AddLive SDK ready - setting up the application');
 
     // assuming the populateDevicesQuick is exposed via ADLT namespace.
     // (check shared-assets/scripts.js)
@@ -168,7 +100,7 @@
 
 
   function initServiceListener() {
-    console.log("Initializing the AddLive Service Listener");
+    console.log('Initializing the AddLive Service Listener');
 
     // 1. Instantiate the listener
     var listener = new ADL.AddLiveServiceListener();
@@ -176,18 +108,18 @@
 
     // 2. Define the handler for the user event
     listener.onUserEvent = function (e) {
-      console.log("Got new user event: " + e.userId);
+      console.log('Got new user event: ' + e.userId);
       if (e.isConnected) {
         onUserJoined(e);
       } else {
-        console.log("User with id: " + e.userId + ' left the media scope');
+        console.log('User with id: ' + e.userId + ' left the media scope');
         $('#renderingWidget' + e.userId).html('').remove();
       }
     };
 
     // 3. Define the handler for streaming status changed event
     listener.onMediaStreamEvent = function (e) {
-      console.log("Got new media streaming status changed event");
+      console.log('Got new media streaming status changed event');
       switch (e.mediaType) {
         case ADL.MediaType.AUDIO:
           onRemoteAudioStreamStatusChanged(e);
@@ -197,13 +129,13 @@
           break;
         default :
           console.warn('Got unsupported media type in media stream event: ' +
-                        e.mediaType);
+                       e.mediaType);
       }
     };
 
     // 4. Define the handler for the media connection type changed event
     listener.onMediaConnTypeChanged = function (e) {
-      console.log("Got new media connection type: " + e.connectionType);
+      console.log('Got new media connection type: ' + e.connectionType);
       $('#connTypeLbl').html(mediaConnType2Label[e.connectionType]);
     };
 
@@ -215,30 +147,42 @@
 
     // 6. Define the handler for the reconnection event
     listener.onSessionReconnected = function (e) {
-      console.log("Connection successfully reestablished!");
+      console.log('Connection successfully reestablished!');
       postConnectHandler();
     };
 
-    // 7. Prepare the success handler
+    // 7. Define the handler for the speech activity event
+    listener.onSpeechActivity = function (e) {
+      $.each(e.speechActivity, function(ev, item){
+        $('#progress' + item.userId).val(item.activity * 100 / 255);
+        if (item.activity * 100 / 255 > 0) {
+          $('#renderer'+item.userId).attr('style', 'background:red');
+        }
+        else {
+          $('#renderer'+item.userId).attr('style', 'background:rgb(153, 153, 153)');
+        }
+      });
+    };
+
+    // 8. Prepare the success handler
     var onSucc = function () {
-      console.log("AddLive service listener registered");
+      console.log('AddLive service listener registered');
       $('#connectBtn').click(connect).removeClass('disabled');
     };
 
-    // 8. Finally register the AddLive Service Listener
+    // 9. Finally register the AddLive Service Listener
     ADL.getService().addServiceListener(ADL.r(onSucc), listener);
 
   }
 
   function onUserJoined(e) {
-    console.log("Got new user with id: " + e.userId);
+    console.log('Got new user with id: ' + e.userId);
 
     // 1. Prepare a rendering widget for the user.
     var renderer = $('#rendererTmpl').clone();
     renderer.attr('id', 'renderingWidget' + e.userId);
     renderer.find('.render-wrapper').attr('id', 'renderer' + e.userId);
     renderer.find('.user-id-wrapper').html(e.userId);
-    renderer.find('.user-id-wrapper').attr('id', e.videoSinkId);
 
     // 2. Append it to the rendering area.
     $('#renderingWrapper').append(renderer);
@@ -255,35 +199,21 @@
       renderer.find('.allowReceiveVideoChckbx').hide();
     }
 
-    // 4. Show the "audio muted" indicator if user does not publish audio stream
+    // 4. Show the 'audio muted' indicator if user does not publish audio stream
     if (!e.audioPublished) {
       renderer.find('.muted-indicator').show();
       renderer.find('.allowReceiveAudioChckbx').hide();
     }
 
-    // Add the new user id to the arrays of allowed input of audio and video
-    allowedAudioSenders.push(parseInt(e.userId,10));
-    allowedVideoSenders.push(parseInt(e.userId,10));
+    // 5. Prepare the progreess bar
+    renderer.find('.vertical-progress').attr('id', 'progress' + e.userId);
 
-    // Add the new user id to the pool of user allowed to send audio and video
-    ADL.getService().setAllowedSenders(ADL.r(onAudioSilenced), scopeId,
-                                      ADL.MediaType.AUDIO, allowedAudioSenders);
-    ADL.getService().setAllowedSenders(ADL.r(onVideoSilenced), scopeId,
-                                      ADL.MediaType.VIDEO, allowedVideoSenders);
-
-    renderer.find('.allowReceiveAudioChckbx').attr('id', 'allowReceiveAudio' +
-                                                          e.userId);
-    renderer.find('.allowReceiveVideoChckbx').attr('id', 'allowReceiveVideo' +
-                                                           e.userId);
-
-    $('#allowReceiveAudio' + e.userId).change({rend: renderer},
-                                              onAllowedAudioChanged);
-    $('#allowReceiveVideo' + e.userId).change({rend: renderer},
-                                              onAllowedVideoChanged);
+    // 6 Add the new user id to the pool of user in the monitor speech activity
+    ADL.getService().monitorSpeechActivity(ADL.r(onMonitorSpeech), scopeId, true);
   }
 
   function onRemoteVideoStreamStatusChanged(e) {
-    console.log("Got change in video streaming for user with id: " + e.userId +
+    console.log('Got change in video streaming for user with id: ' + e.userId +
         ' user just ' +
         (e.videoPublished ? 'published' : 'stopped publishing') +
         ' the stream');
@@ -292,7 +222,7 @@
 
     if (e.videoPublished) {
       // 2a. If video was just published - render it and hide the
-      // "No video from user" indicator
+      // 'No video from user' indicator
       ADL.renderSink({
         sinkId:e.videoSinkId,
         containerId:'renderer' + e.userId
@@ -300,19 +230,19 @@
       renderingWidget.find('.no-video-text').hide();
     } else {
       // 2b. If video was just unpublished - clear the renderer and show the
-      // "No video from user" indicator
+      // 'No video from user' indicator
       renderingWidget.find('.render-wrapper').empty();
       renderingWidget.find('.no-video-text').show();
     }
   }
 
   function onRemoteAudioStreamStatusChanged(e) {
-    console.log("Got change in audio streaming for user with id: " + e.userId +
+    console.log('Got change in audio streaming for user with id: ' + e.userId +
         ' user just ' +
         (e.audioPublished ? 'published' : 'stopped publishing') +
         ' the stream');
 
-    // 1. Find the "Audio is muted" indicator corresponding to the user
+    // 1. Find the 'Audio is muted' indicator corresponding to the user
     var muteIndicator = $('#renderingWidget' + e.userId).find('.muted-indicator');
     if (e.audioPublished) {
       // 2a. Hide it if audio stream was just published
@@ -329,14 +259,15 @@
    * ==========================================================================
    */
 
+
   function startLocalVideoMaybe() {
     if (localVideoStarted) {
       return;
     }
-    console.log("Starting local preview of current user");
+    console.log('Starting local preview of current user');
     // 1. Define the result handler
     var resultHandler = function (sinkId) {
-      console.log("Local preview started. Rendering the sink with id: " + sinkId);
+      console.log('Local preview started. Rendering the sink with id: ' + sinkId);
       ADL.renderSink({
         sinkId:sinkId,
         containerId:'renderLocalPreview',
@@ -356,7 +287,7 @@
    */
 
   function connect() {
-    console.log("Establishing a connection to the AddLive Streaming Server");
+    console.log('Establishing a connection to the AddLive Streaming Server');
 
     // 1. Disable the connect button to avoid a cascade of connect requests
     $('#connectBtn').unbind('click').addClass('disabled');
@@ -368,8 +299,8 @@
     // (check shared-assets/scripts.js)
     userId = ADLT.genRandomUserId();
 
-    // 3. Define the result handler - delegates the processing to the
-    // postConnectHandler
+    // 3. Define the result handler - delegates the processing to
+    // the postConnectHandler
     var connDescriptor = genConnectionDescriptor(scopeId, userId);
     var onSucc = function () {
       postConnectHandler();
@@ -385,7 +316,7 @@
   }
 
   function disconnect() {
-    console.log("Terminating a connection to the AddLive Streaming Server");
+    console.log('Terminating a connection to the AddLive Streaming Server');
 
     // 1. Define the result handler
     var succHandler = function () {
@@ -427,7 +358,7 @@
    *
    */
   function postConnectHandler() {
-    console.log("Connected. Disabling connect button and enabling the disconnect");
+    console.log('Connected. Disabling connect button and enabling the disconnect');
 
     // 1. Enable the disconnect button
     $('#disconnectBtn').click(disconnect).removeClass('disabled');
@@ -472,7 +403,7 @@
    */
 
   /**
-   * Handles the change of the "Publish Audio" checkbox
+   * Handles the change of the 'Publish Audio' checkbox
    */
   function onPublishAudioChanged() {
     if (!scopeId) {
@@ -492,7 +423,7 @@
   }
 
   /**
-   * Handles the change of the "Publish Audio" checkbox
+   * Handles the change of the 'Publish Audio' checkbox
    */
   function onPublishVideoChanged() {
     if (!scopeId) {
@@ -513,75 +444,11 @@
   }
 
   /**
-   * Prepare the handler when using setAllowedSenders
+   * Prepare the monitor speech success handler
    */
-  var onAudioSilenced = function (e) {
-    console.warn('Audio responder callback successfully called');
+  var onMonitorSpeech = function (e) {
+      console.log('Monitor speech successfully requested');
   };
-  var onVideoSilenced = function (e) {
-    console.warn('Video responder callback successfully called');
-  };
-
-  /**
-   * Handles the change of the "Allowed Audio" checkbox
-   */
-  function onAllowedAudioChanged(e) {
-    userId = parseInt(e.data.rend.find('.user-id-wrapper').html());
-
-    // Since we're connected we need to either start or stop publishing the
-    // audio stream, depending on the new state of the checkbox
-    if ($('#allowReceiveAudio'+userId).is(':checked')) {
-      // Add the User ID to the array of users allowed to send audio
-      allowedAudioSenders.push(userId);
-      ADL.getService().setAllowedSenders(ADL.r(onAudioSilenced), scopeId,
-                                        ADL.MediaType.AUDIO, allowedAudioSenders);
-    } else {
-      // Remove the User ID to the array of users allowed to send audio
-      var index = allowedAudioSenders.indexOf(userId);
-      if(index != -1) {
-        allowedAudioSenders.splice(index, 1);
-      }
-      ADL.getService().setAllowedSenders(ADL.r(onAudioSilenced), scopeId,
-                                        ADL.MediaType.AUDIO, allowedAudioSenders);
-    }
-  }
-
-  /**
-   * Handles the change of the "Allowed Audio" checkbox
-   */
-  function onAllowedVideoChanged(e) {
-    userId = parseInt(e.data.rend.find('.user-id-wrapper').html());
-
-    // Getting the renderer ID so we can dispose it properly
-    var rendererId = e.data.rend.find('.render-wrapper').attr('id');
-
-    // Getting the Video Sink ID so we can set it properly again
-    var videoSinkId = e.data.rend.find('.user-id-wrapper').attr('id');
-
-    // Since we're connected we need to either start or stop publishing the
-    // audio stream, depending on the new state of the checkbox
-    if ($('#allowReceiveVideo'+userId).is(':checked')) {
-      // Add the User ID to the array of users allowed to send video
-      allowedVideoSenders.push(userId);
-      ADL.getService().setAllowedSenders(ADL.r(onVideoSilenced), scopeId,
-                                        ADL.MediaType.VIDEO, allowedVideoSenders);
-      // Set the video renderer object
-      ADL.renderSink({
-        sinkId:videoSinkId,
-        containerId:rendererId
-      });
-    } else {
-      // Remove the User ID to the array of users allowed to send video
-      var index = allowedVideoSenders.indexOf(userId);
-      if(index != -1) {
-        allowedVideoSenders.splice(index, 1);
-      }
-      ADL.getService().setAllowedSenders(ADL.r(onVideoSilenced), scopeId,
-                                        ADL.MediaType.VIDEO, allowedVideoSenders);
-      // Dispose video renderer object
-      ADL.disposeRenderer(rendererId);
-    }
-  }
 
   function genAuthDetails(scopeId, userId) {
 

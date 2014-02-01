@@ -9,15 +9,6 @@
 (function (w) {
   'use strict';
 
-  // IE shim - for IE 8+ the console object is defined only if the dev tools
-  // are acive
-  if (!window.console) {
-    console = {
-      log:function() {},
-      warn:function() {}
-    };
-  }
-
   /**
    * Id of media scope to connect to upon user's request.
    * @type {String}
@@ -34,83 +25,20 @@
   /**
    * Document ready callback - starts the AddLive platform initialization.
    */
-  function onDomReady () {
+  function onDomReady() {
     console.log('DOM loaded');
 
     // assuming the initAddLiveLogging and initDevicesSelects are exposed
     // via ADLT namespace. check shared-assets/scripts.js)
     ADLT.initAddLiveLogging();
     ADLT.initDevicesSelects();
-    var initOptions = {applicationId: APPLICATION_ID};
-    // Initializes the AddLive SDK.
-    initializeAddLive(initOptions);
+    var initOptions = {applicationId:APPLICATION_ID};
+    // Initializes the AddLive SDK. Please refer to ../shared-assets/scripts.js
+    ADLT.initializeAddLiveQuick(onPlatformReady, initOptions);
   }
 
-  /**
-   * Initializes the AddLive SDK.
-   */
-  function initializeAddLive(options) {
-    console.log("Initializing the AddLive SDK");
-
-    // Step 1 - create the PlatformInitListener and overwrite it's methods.
-    var initListener = new ADL.PlatformInitListener();
-
-    // Define the handler for initialization state changes
-    initListener.onInitStateChanged = function (e) {
-      switch (e.state) {
-
-        case ADL.InitState.ERROR:
-          // After receiving this status, the initialization is stopped as
-          // due tutorial a failure.
-          console.error("Failed to initialize the AddLive SDK");
-          console.error("Reason: " + e.errMessage + ' (' + e.errCode + ')');
-          break;
-
-        case ADL.InitState.INITIALIZED:
-          //This state flag indicates that the AddLive SDK is initialized and fully
-          //functional.
-          console.log("AddLive SDK fully functional");
-          onPlatformReady();
-          break;
-
-        case ADL.InitState.INSTALLATION_REQUIRED:
-          // Current user doesn't have the AddLive Plug-In installed and it is
-          // required - use provided URL to ask the user to install the Plug-in.
-          // Note that the initialization process is just frozen in this state -
-          // the SDK polls for plug-in availability and when it becomes available,
-          // continues with the initialization.
-          console.log("AddLive Plug-in installation required");
-          $('#installBtn').attr('href', e.installerURL).css('display', 'block');
-          break;
-        case ADL.InitState.INSTALLATION_COMPLETE:
-          console.log("AddLive Plug-in installation complete");
-          $('#installBtn').hide();
-          break;
-
-        case ADL.InitState.BROWSER_RESTART_REQUIRED:
-          // This state indicates that AddLive SDK performed auto-update and in
-          // order to accomplish this process, browser needs to be restarted.
-          console.log("Please restart your browser in order to complete platform auto-update");
-          break;
-
-        case ADL.InitState.DEVICES_INIT_BEGIN:
-          // This state indicates that AddLive SDK performed auto-update and
-          // in order to accomplish this process, browser needs to be restarted.
-          console.log("Devices initialization started");
-          break;
-
-        default:
-          // Default handler, just for sanity
-          console.log("Got unsupported init state: " + e.state);
-      }
-    };
-
-    // Step 2. Actually trigger the asynchronous initialization of the AddLive SDK.
-    ADL.initPlatform(initListener, options);
-  }
-
-  function onPlatformReady () {
-    console.log("AddLive Platform ready.");
+  function onPlatformReady() {
+    console.log('AddLive Platform ready.');
 
     // assuming the populateDevicesQuick is exposed via ADLT namespace.
     // (check shared-assets/scripts.js)
@@ -119,11 +47,11 @@
     initServiceListener();
   }
 
-  function startLocalVideo () {
-    console.log("Starting local preview video feed");
+  function startLocalVideo() {
+    console.log('Starting local preview video feed');
     //1. Prepare the result handler
     var resultHandler = function (sinkId) {
-      console.log("Local preview started. Rendering the sink with id: " + sinkId);
+      console.log('Local preview started. Rendering the sink with id: ' + sinkId);
       ADL.renderSink({
         sinkId:sinkId,
         containerId:'renderLocalPreview',
@@ -135,8 +63,8 @@
     ADL.getService().startLocalVideo(ADL.r(resultHandler));
   }
 
-  function initServiceListener () {
-    console.log("Initializing the AddLive Service Listener");
+  function initServiceListener() {
+    console.log('Initializing the AddLive Service Listener');
 
     //1. Instantiate the listener
     var listener = new ADL.AddLiveServiceListener();
@@ -147,7 +75,7 @@
      * @param {ADL.UserStateChangedEvent} e
      */
     listener.onUserEvent = function (e) {
-      console.log("Got new user event: " + e.userId);
+      console.log('Got new user event: ' + e.userId);
       if (e.isConnected) {
         ADL.renderSink({
           sinkId:e.videoSinkId,
@@ -171,8 +99,8 @@
 
   }
 
-  function connect () {
-    console.log("Establishing a connection to the AddLive Streaming Server");
+  function connect() {
+    console.log('Establishing a connection to the AddLive Streaming Server');
 
     //1. Disable the connect button to avoid connects cascade
     $('#connectBtn').unbind('click').addClass('disabled');
@@ -192,14 +120,14 @@
 
     //3. Define the result handler
     var onSucc = function () {
-      console.log("Connected. Disabling connect button and enabling the disconnect");
+      console.log('Connected. Disabling connect button and enabling the disconnect');
       $('#disconnectBtn').click(disconnect).removeClass('disabled');
       $('#localUserIdLbl').html(connDescriptor.token);
     };
 
     //4. Define the error handler
     var onErr = function (errCode, errMessage) {
-      console.error("Failed to establish the connection due to: " + errMessage +
+      console.error('Failed to establish the connection due to: ' + errMessage +
           '(err code: ' + errCode + ')');
       //Enable the connect button again
       $('#connectBtn').click(connect).removeClass('disabled');
@@ -209,12 +137,12 @@
     ADL.getService().connect(ADL.r(onSucc, onErr), connDescriptor);
   }
 
-  function disconnect () {
-    console.log("Terminating the connection");
+  function disconnect() {
+    console.log('Terminating the connection');
 
     //1. Define the result handler
     var onSucc = function () {
-      console.log("Connection terminated");
+      console.log('Connection terminated');
       $('#connectBtn').click(connect).removeClass('disabled');
       $('#disconnectBtn').unbind('click').addClass('disabled');
       $('#renderRemoteUser').empty();
@@ -234,7 +162,7 @@
    * @return {Object}
    *        Generated authentication details object.
    */
-  function genAuthDetails (userId) {
+  function genAuthDetails(userId) {
 
     // New Auth API
     var dateNow = new Date();
@@ -246,7 +174,7 @@
       salt:ADLT.randomString(100)
     };
     var signatureBody =
-            APPLICATION_ID +
+        APPLICATION_ID +
             SCOPE_ID +
             userId +
             authDetails.salt +
