@@ -78,7 +78,10 @@
     // the page has #initProgressBar progressbar
     initListener.onInitProgressChanged = function (e) {
       console.log('Platform init progress: ' + e.progress);
-      $('#initProgressBar').progressbar('value', e.progress);
+      var $pBar = $('#initProgressBar');
+      if($pBar.length) {
+        $('#initProgressBar').progressbar('value', e.progress);
+      }
     };
 
     initListener.onInitStateChanged = function (e) {
