@@ -137,6 +137,30 @@ Within this tutorial, we will create a sample application that:
 - Allows the user to terminate previously established connection to the AddLive Streaming Server.
 - Renders single remote participants.
 
+Tutorial 5.1 - Basic connectivity & video reconfiguration
+-------------------------------
+
+About the tutorial
+
+The tutorial covers the basics of establishing and terminating a
+connection to the AddLive Streaming Server. Also we will learn how to handle
+user notifications to render video feeds showing remote users and how to
+reconfigure the video making use of reconfigureVideo.
+
+Within this tutorial, we will create a sample application that:
+
+- Loads the AddLive SDK.
+- Initializes the AddLive Logging (for development purposes).
+- Initializes the AddLive Platform.
+- Starts local user's preview video feed.
+- Renders local user's preview video feed.
+- Fetches the list of plugged in media devices of all types.
+- Allows the user to select media device of any type.
+- Allows the user to establish a connection to the AddLive Streaming Server, using fixed scope id.
+- Allows the user to terminate previously established connection to the AddLive Streaming Server.
+- Allows the user to change the video resolution.
+- Renders single remote participants.
+
 Tutorial 6 - Conference app
 ---------------------------
 
@@ -157,6 +181,59 @@ Within this tutorial, we will create a sample application that:
 - Allows a user to terminate previously established connection to the AddLive Streaming Server.
 - Allows a user to start and stop publishing video and audio stream.
 - Allows multiple participants to join a room with the same media scope id.
+- Shows current type of the media connection.
+- Shows the streaming state of every remote participant.
+- Tries to reconnect a user in case of connection lost due to Internet connectivity issues.
+
+Tutorial 6.1 - Conference app & allowed senders
+---------------------------
+
+This tutorial covers implementation of more advanced video conferencing
+application, employs all of the connectivity-related features of the AddLive
+SDK and makes use of our setAllowedSenders feature where you can choose from
+whom you will receive audio/video.
+
+Within this tutorial, we will create a sample application that:
+
+- Loads the AddLive SDK.
+- Initializes the AddLive Logging (for development purposes).
+- Initializes the AddLive Platform.
+- Starts local user's preview video feed.
+- Renders local user's preview video feed.
+- Fetches the list of plugged in media devices of all types.
+- Allows a user to select media device of any type.
+- Allows a user to establish a connection to the AddLive Streaming Server, using user-defined scope (aka 'room') id.
+- Allows a user to terminate previously established connection to the AddLive Streaming Server.
+- Allows a user to start and stop publishing video and audio stream.
+- Allows multiple participants to join a room with the same media scope id.
+- Allows you to disable audio or video or both from a specific user(s).
+- Shows current type of the media connection.
+- Shows the streaming state of every remote participant.
+- Tries to reconnect a user in case of connection lost due to Internet connectivity issues.
+
+Tutorial 6.2 - Conference app & speech activity
+---------------------------
+
+This tutorial covers implementation of more advanced video conferencing
+application, employs all of the connectivity-related features of the AddLive
+SDK and makes use of our monitorSpeechActivity and onSpeechActivity listener
+to show you the speech activity of each user in the session.
+
+Within this tutorial, we will create a sample application that:
+
+- Loads the AddLive SDK.
+- Initializes the AddLive Logging (for development purposes).
+- Initializes the AddLive Platform.
+- Starts local user's preview video feed.
+- Renders local user's preview video feed.
+- Fetches the list of plugged in media devices of all types.
+- Allows a user to select media device of any type.
+- Allows a user to establish a connection to the AddLive Streaming Server, using user-defined scope (aka 'room') id.
+- Allows a user to terminate previously established connection to the AddLive Streaming Server.
+- Allows a user to start and stop publishing video and audio stream.
+- Allows multiple participants to join a room with the same media scope id.
+- Allows you to disable audio or video or both from a specific user(s).
+- Shows the speech activity of each user connected.
 - Shows current type of the media connection.
 - Shows the streaming state of every remote participant.
 - Tries to reconnect a user in case of connection lost due to Internet connectivity issues.
@@ -193,7 +270,6 @@ Within this tutorial we've create an application that:
 - allows one to change the screen (window) shared (again click to select
   different source)
 
-
 Tutorial 9 - User boarding
 --------------------------
 
@@ -201,3 +277,21 @@ In Tutorial 9 we'll be focusing on user landing process. It provides an example
 implementation of a widget that takes the users through all the steps required
 to setup the AddLive platform in the browser and also to make sure that the
 environment in which user operates allows the platform to function properly.
+
+Tutorial 10 - Connectivity checks
+--------------------------
+
+The tutorial will show you how to use our networkTest feature in order to
+evaluate the connection's quality between the values Bad, Average or Good.
+
+Within this tutorial we've create an application that:
+
+- Loads the AddLive SDK.
+- Initializes the AddLive Platform.
+- Shows the connection's quality making use of networkTest.
+
+Tutorial 11 - Loading with AMD
+--------------------------
+
+In this tutorial we will be showing you how to load the SDK using AMD
+(Asynchronous Module Definition).
