@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>AddLive SDK Tutorial 10 - Connectivity checks</title>
+  <title>AddLive SDK Tutorial 1 - Initializing the platform</title>
 
   <!--Common scripts for all AddLive tutorials -->
-
   <script type="text/javascript"
           src="http://code.jquery.com/jquery-1.8.3.js"></script>
   <script type="text/javascript"
           src="../shared-assets/scripts.js"></script>
-  <script type="text/javascript"
-          src="../shared-assets/sha256.js"></script>
 
-<!-- Development, non-minimised SDK -->
+  <!-- Development, non-minimised SDK -->
  <script type="text/javascript"
          src="//d36pfzlm4aixmv.cloudfront.net/stable_v3/addlive-sdk.js"></script>
 
@@ -23,6 +20,8 @@
   <!-- Tutorial - specific script file -->
   <script type="text/javascript"
           src="scripts.js"></script>
+  <script type="text/javascript"
+          src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
 
 
   <!-- Shared stylesheet -->
@@ -30,21 +29,23 @@
         href="../shared-assets/styles.css"/>
   <link rel="stylesheet" type="text/css"
         href="../shared-assets/bootstrap.min.css"/>
-
+  <link rel="stylesheet" type="text/css"
+        href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css"/>
 </head>
 <body>
 <div class="main">
-  <h1 id="tutorialTitle">AddLive SDK Tutorial 10 - Connectivity checks</h1>
+  <h1 id="tutorialTitle">AddLive SDK Tutorial 1</h1>
 
   <h2 id="tutorialSubTitle">Initializing the platform</h2>
 
-  <a id="installBtn" href="#" class="btn btn-primary">Install AddLive
+  <a id="installBtn" href="#" class="btn btn-primary btn-large">Install AddLive
     Plug-in</a>
 
-  <p>AddLive SDK version: <span id="sdkVersionLbl">SDK not initialized...</span>
-  <p>Connection quality: <span id="connQualityLbl">SDK not initialized...</span>
+  <div id="initProgressBar"></div>
+  <p>AddLive SDK version: <span id="sdkVersion">SDK not initialized...</span>
   </p>
 </div>
+
 
 
 </body>

@@ -12,11 +12,18 @@ from BaseHTTPServer import BaseHTTPRequestHandler
 import os.path
 import sys
 
+import socket, os
+from SocketServer import BaseServer
+from BaseHTTPServer import HTTPServer
+from SimpleHTTPServer import SimpleHTTPRequestHandler
+import ssl
+
+_USE_SSL = False
+
 class myHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/kill.html":
             exit(0)
-
 
         truepath = os.path.join(os.path.dirname(__file__), self.path[1:])
         if self.path.endswith('/'):
@@ -68,11 +75,30 @@ class myHandler(BaseHTTPRequestHandler):
     def log_request(self, code='-', size='-'):
         pass
 
+
+class SecureHTTPServer(HTTPServer):
+    def __init__(self, server_address, HandlerClass):
+        BaseServer.__init__(self, server_address, HandlerClass)
+        ctx = SSL.Context(SSL.SSLv23_METHOD)
+        #server.pem's location (containing the server private key and
+        #the server certificate).
+        ctx.use_privatekey_file('server.key')
+        ctx.use_certificate_file('server.crt')
+        self.socket = SSL.Connection(ctx, socket.socket(self.address_family,
+            self.socket_type))
+        self.server_bind()
+        self.server_activate()
+
 if __name__ == "__main__":
     port = 8080
     if len(sys.argv) > 1:
         port = int(sys.argv[1])
     server = HTTPServer(('', port), myHandler)
+
+    # Optionally use the SSL sockets - required for e.g. webrtc screen sharing.
+    if _USE_SSL:
+        server.socket = ssl.wrap_socket (server.socket,keyfile='server.key',
+            certfile='server.crt', server_side=True)
     print "AddLive JavaScript Tutorials local server started"
     print "Go to http://localhost:{0}/ to start using the tutorials.".format(port)
     while True:

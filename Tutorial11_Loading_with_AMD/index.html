@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AddLive SDK Tutorial 1 - Initializing the platform</title>
+
+  <!--Common scripts for all AddLive tutorials -->
+
+  <script
+      src="http://requirejs.org/docs/release/2.1.5/comments/require.js"></script>
+  <script type="text/javascript">
+    require.config({
+      paths:{
+        'addlive-sdk':'http://api.addlive.com/stable_v3/addlive-sdk',
+        jquery: 'https://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min'
+      },
+      waitSeconds:40
+    });
+  </script>
+
+  <script type="text/javascript">
+    require(['addlive-sdk', 'jquery'],
+        function (ADL, $) {
+
+          ADL.initStdLogging(true);
+          var onVersion = function (version) {
+            $('#sdkVersionLbl').text(version);
+          };
+
+          var initListener = new ADL.PlatformInitListener();
+          initListener.onInitStateChanged = function (e) {
+            if(e.state === ADL.InitState.INITIALIZED) {
+              ADL.getService().getVersion(ADL.r(onVersion))
+            }
+          };
+
+          ADL.initPlatform(initListener);
+        }
+    );
+  </script>
+
+
+  <!-- Shared stylesheet -->
+  <link rel="stylesheet" type="text/css" href="../shared-assets/styles.css"/>
+  <link rel="stylesheet" type="text/css"
+        href="../shared-assets/bootstrap.min.css"/>
+  <link rel="stylesheet" type="text/css"
+        href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css"/>
+</head>
+<body>
+<div class="main">
+  <h1 id="tutorialTitle">AddLive SDK Tutorial 12</h1>
+
+  <h2 id="tutorialSubTitle">Using the AMD</h2>
+
+
+  <p>AddLive SDK version: <span id="sdkVersionLbl">SDK not initialized...</span>
+  </p>
+</div>
+
+
+
+</body>
+</html>
