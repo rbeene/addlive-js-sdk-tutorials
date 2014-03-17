@@ -166,6 +166,8 @@
       }
     };
     connDescriptor.scopeId = SCOPE_ID;
+    connDescriptor.autopublishAudio = true;
+    connDescriptor.autopublishVideo = true;
 
     // assuming the genRandomUserId is exposed via ADLT namespace.
     // (check shared-assets/scripts.js)

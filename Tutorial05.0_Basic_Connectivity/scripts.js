@@ -116,6 +116,8 @@
       }
     };
     connDescriptor.scopeId = SCOPE_ID;
+    connDescriptor.autopublishAudio = true;
+    connDescriptor.autopublishVideo = true;
     connDescriptor.authDetails = genAuthDetails(ADLT.genRandomUserId());
 
     //3. Define the result handler
