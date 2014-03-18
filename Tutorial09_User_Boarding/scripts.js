@@ -523,7 +523,9 @@
 
     var connDescriptor = {
       scopeId:testScopeId,
-      authDetails:authDetails
+      authDetails:authDetails,
+      autopublishAudio:true,
+      autopublishVideo:false
     };
     ADL.getService().connect(ADL.r(onConnected, onConnErr), connDescriptor);
     setTimeout(hwConnTestComplete, CONNECTIVITY_TEST_DURATION);
