@@ -142,6 +142,35 @@ h2#tutorialSubTitle {
 
 /**
 
+Tutorial 5.2
+
+*/
+
+#tut52CtrlWrapper {
+  width: 840px;
+  margin: 0 auto 20px;
+  position: relative;
+}
+
+table{
+  width: 100%;
+}
+
+table th{
+  background-color: lightgray;
+}
+
+table,th,td{
+  border:1px solid black;
+  border-collapse:collapse;
+}
+
+th,td{
+  padding:5px;
+}
+
+/**
+
 Tutorial 6.2
 
 */

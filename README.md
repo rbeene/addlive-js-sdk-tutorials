@@ -161,6 +161,30 @@ Within this tutorial, we will create a sample application that:
 - Allows the user to change the video resolution.
 - Renders single remote participants.
 
+Tutorial 5.2 - Basic connectivity & media stats
+-------------------------------
+
+About the tutorial
+
+This tutorial covers the basics of establishing and terminating a
+connection to the AddLive Streaming Server. Also we will learn how to handle
+user notifications to render video feeds showing remote users and how to receive
+statistics related to audio and video communication for each user in the session.
+
+Within this tutorial, we will create a sample application that:
+
+- Loads the AddLive SDK.
+- Initializes the AddLive Logging (for development purposes).
+- Initializes the AddLive Platform.
+- Starts local user's preview video feed.
+- Renders local user's preview video feed.
+- Fetches the list of plugged in media devices of all types.
+- Allows the user to select media device of any type.
+- Allows the user to establish a connection to the AddLive Streaming Server, using fixed scope id.
+- Allows the user to terminate previously established connection to the AddLive Streaming Server.
+- Receives the communications statistics through the listener onMediaStats.
+- Renders single remote participants.
+
 Tutorial 6 - Conference app
 ---------------------------
 
