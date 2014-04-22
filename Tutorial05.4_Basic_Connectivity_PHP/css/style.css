@@ -1,0 +1,141 @@
+html,
+body {
+  height: 100%;
+  color: #666;
+  background-color: transparent;
+  /* The html and body elements cannot have any padding or margin. */
+}
+
+/* Wrapper for page content to push down footer */
+#bodyWrapper {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+  /* Negative indent footer by it's height */
+  margin: 0 auto -40px;
+  width: 960px;
+  overflow: hidden;
+}
+
+/* Set the fixed height of the footer here */
+#push,
+#footer {
+  height: 40px;
+}
+
+#footer {
+  padding: 10px;
+  background-color: #f5f5f5;
+}
+
+/* Lastly, apply responsive CSS fixes as necessary */
+@media (max-width: 767px) {
+  #footer {
+    margin-left: -20px;
+    margin-right: -20px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+/* Layout.html stuff */
+
+.header {
+  font: 48px/52px Futura, Arial, Helvetica, sans-serif;
+  color: #999999;
+  margin: 25px 0 17px;
+  text-align: center;
+
+}
+
+/* index.html stuff */
+
+.main {
+  width: 960px;
+  min-height: 300px;
+  margin: 0 auto;
+  padding: 30px 0 30px;;
+}
+
+.main.wide {
+  width: 1026px;
+
+}
+
+#installBtn {
+  margin: 30px auto;
+  padding: 10px;
+  display: none;
+  width: 200px;
+}
+
+.clearer {
+  clear: both;
+}
+
+.allowed-senders-wrapper{
+  margin-top: 10px;
+  display: inline-flex;
+}
+
+.ctrl-wrapper {
+  margin-left: 10px;
+  margin-bottom: 10px;
+}
+
+.ctrl-wrapper input {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  -webkit-transition: none;
+  transition: none;
+}
+
+.ctrl-wrapper label, .ctrl-wrapper .ctrl {
+  float: left;
+  margin-right: 5px;
+
+}
+
+.ctrl-wrapper label {
+  width: 180px;
+  display: block;
+  padding-top: 3px;
+}
+
+.ctrl-wrapper .ctrl {
+  width: 300px;
+}
+
+.render-widget {
+  margin: 0 5px 10px;
+  float: left;
+  width: 332px;
+}
+
+.render-wrapper {
+  width: 320px;
+  height: 240px;
+  padding: 5px;
+  border: 1px solid #333;
+  background: #999;
+}
+
+.rendering-wrapper, #tut4CtrlWrapper {
+  width: 684px;
+  margin: 0 auto 20px;
+  position: relative;
+}
+
+.main.wide .rendering-wrapper {
+  width: 1026px;
+}
+
+.windowed-windowless-showcase {
+  position: absolute;
+  width: 128px;
+  height: 128px;
+  background: rgba(255, 0, 0, 0.5);
+  z-index: 100;
+  top: 225px;
+  left: 280px;
+}
