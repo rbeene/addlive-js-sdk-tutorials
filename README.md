@@ -185,6 +185,55 @@ Within this tutorial, we will create a sample application that:
 - Receives the communications statistics through the listener onMediaStats.
 - Renders single remote participants.
 
+Tutorial 5.3 - Basic connectivity with Flask & Jinja2
+-------------------------------
+
+About the tutorial
+
+This tutorial covers the basics of establishing and terminating a
+connection to the AddLive Streaming Server in presence of Flask and Jinja2.
+Also we will learn how to handle user notifications to render video feeds
+showing remote users.
+
+Within this tutorial, we will create a sample application that:
+
+- Installs the necessary modules.
+- Uses Flask to load the SDK credentials
+- Uses Flask templates with Jinja2
+- Loads the AddLive SDK.
+- Initializes the AddLive Logging (for development purposes).
+- Initializes the AddLive Platform.
+- Starts local user's preview video feed.
+- Renders local user's preview video feed.
+- Fetches the list of plugged in media devices of all types.
+- Allows the user to select media device of any type.
+- Allows the user to establish a connection to the AddLive Streaming Server, using fixed scope id.
+- Allows the user to terminate previously established connection to the AddLive Streaming Server.
+- Renders single remote participants.
+
+Tutorial 5.4 - Basic connectivity with PHP
+-------------------------------
+
+About the tutorial
+
+This tutorial covers the basics of establishing and terminating a
+connection to the AddLive Streaming Server all this using php. Also we will
+learn how to handle user notifications to render video feeds showing remote users.
+
+Within this tutorial, we will create a sample application that:
+
+- Uses main.php to load the SDK credentials
+- Loads the AddLive SDK.
+- Initializes the AddLive Logging (for development purposes).
+- Initializes the AddLive Platform.
+- Starts local user's preview video feed.
+- Renders local user's preview video feed.
+- Fetches the list of plugged in media devices of all types.
+- Allows the user to select media device of any type.
+- Allows the user to establish a connection to the AddLive Streaming Server, using fixed scope id.
+- Allows the user to terminate previously established connection to the AddLive Streaming Server.
+- Renders single remote participants.
+
 Tutorial 6 - Conference app
 ---------------------------
 
