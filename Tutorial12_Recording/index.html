@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recording sample app</title>
+  <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+<div class="container">
+  <h1>Recording sample app</h1>
+
+  <h4>
+    <a href="docs/sample_app.html">sample app description</a>
+    |
+    <a href="docs/api.html">API documentation</a>
+  </h4>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">Settings</div>
+        <div class="panel-body">
+          <form role="form" class="form-horizontal">
+            <div class="form-group">
+              <label for="urlRootInput" class="control-label col-sm-2">API root</label>
+              <div class="col-sm-10">
+                <input type="url" class="form-control" id="urlRootInput" value="http://recording-beta.addlive.io/recordings/">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="appIdInput" class="control-label col-sm-2">App ID</label>
+              <div class="col-sm-10">
+                <input type="number" class="form-control" id="appIdInput">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="apiKeyInput" class="control-label col-sm-2">API key</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control" id="apiKeyInput" placeholder="ADL_MyAPIkey">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="scopeIdInput" class="control-label col-sm-2">Scope ID</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control" id="scopeIdInput" placeholder="SomeScopeID">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="userIdInput" class="control-label col-sm-2">User ID</label>
+              <div class="col-sm-10">
+                <input type="number" class="form-control" id="userIdInput" value="1">
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">Controls</div>
+        <div class="panel-body">
+          <pre id="recordingCode">...</pre>
+          <div role="form" class="form-horizontal">
+            <div class="form-group">
+              <label for="recIdInput" class="control-label col-sm-2">REC ID</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control" id="recIdInput" placeholder="Press REC or enter recording ID">
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="col-sm-offset-2 col-sm-10">
+                <button class="btn btn-danger" id="recButton">REC</button>
+                <button class="btn btn-info" id="getButton">STATUS</button>
+                <button class="btn btn-success" id="descriptionButton">DESCRIPTION</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel panel-default">
+        <div class="panel-heading">Activity</div>
+        <table class="table table-bordered">
+          <thead>
+            <tr id="activityTableHeader"></tr>
+          </thead>
+          <tbody id="activityTableBody">
+            <tr><td colspan="99" style="text-align: center">Press DESCRIPTION to load activity</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script src="https://bitwiseshiftleft.github.io/sjcl/sjcl.js"></script>   <!-- SHA256 implementation -->
+<script>
+  $(function () {
+    // consts
+    var ACTIVITY_FIELDS = ['userId', 'audioPublished', 'videoPublished', 'screenPublished',
+                           'isConnected', 'eventName', 'mediaType', 'filePath'];
+
+    // simple console.log shim
+    var console = window.console || {};
+    console.log = console.log || function () {};
+
+    // helpers
+    function generateSalt () {
+      return Math.random().toString(36).substring(2, 7)
+    }
+
+    function sha256() {
+      var data = '';
+      // we are joining it like this because arguments is not a real Array
+      for (var i = 0; i < arguments.length; i++) {
+        data += arguments[i];
+      }
+      return sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(data));
+    }
+
+    function getApiUrl (uri) {
+      var url = $('#urlRootInput').val();
+      uri = uri || '';
+      if (url.slice(-1) != '/') {
+        return url + '/' + uri;
+      }
+      return url + uri;
+    }
+
+    function now () {
+      return Math.floor(new Date().getTime() / 1000);
+    }
+
+    // handlers
+    function showRecording (recording) {
+      $('#recordingCode').text(JSON.stringify(recording, undefined, 2));
+      $('#recIdInput').val(recording.id);
+      if (recording.status == 'READY') {
+        $('#descriptionButton').removeAttr('disabled');
+      } else {
+        $('#descriptionButton').attr('disabled', 'disabled');
+      }
+    }
+
+    function onRecordingStarted (result) {
+      console.log('Recording started: ' + JSON.stringify(result));
+      showRecording(result.result);
+      $('#recButton').removeClass('btn-danger').addClass('btn-warning').removeAttr('disabled').text('STOP');
+    }
+
+    function startRecording () {
+      console.log('Starting...');
+      var appId = $('#appIdInput').val();
+      var scopeId = $('#scopeIdInput').val();
+      var userId = $('#userIdInput').val();
+      var expires = now() + 3600;
+      var salt = generateSalt();
+      var signature = sha256(appId, scopeId, userId, salt, expires, $('#apiKeyInput').val());
+      $.post(getApiUrl(), {
+        app_id: appId,
+        scope_id: scopeId,
+        user_id: userId,
+        expires: expires,
+        salt: salt,
+        signature: signature
+      }).success(onRecordingStarted);
+    }
+
+    function onRecordingStopped (result) {
+      console.log('Recording stopped: ' + JSON.stringify(result));
+      showRecording(result.result);
+      $('#recButton').removeClass('btn-warning').addClass('btn-danger').removeAttr('disabled').text('REC');
+    }
+
+    function stopRecording () {
+      console.log('Stopping...');
+      $.post(getApiUrl($('#recIdInput').val() + '/stop', '')).success(onRecordingStopped);
+    }
+
+    function onRecordingDescription (result) {
+      console.log('Got description: ' + JSON.stringify(result));
+      var $tableBody = $('#activityTableBody');
+      $tableBody.html('');
+      $.each(result.result, function (i, row) {
+        var tr = $('<tr></tr>');
+        $.each(ACTIVITY_FIELDS, function (j, field) {
+          if (field == 'filePath') {
+            tr.append($('<td><a target="_blank" href="' + row[field] + '">open</a></td>'));
+          } else {
+            tr.append($('<td>' + row[field] + '</td>'));
+          }
+        });
+        $tableBody.append(tr);
+      });
+    }
+
+    //init
+    $('#recButton').click(function () {
+      var $btn = $('#recButton');
+      $btn.attr('disabled', 'disabled');
+      if ($btn.text() == 'REC') {
+        startRecording();
+      } else {
+        stopRecording();
+      }
+    });
+
+    $('#getButton').click(function () {
+      var recordingId = $('#recIdInput').val();
+      if (recordingId) {
+        var appId = $('#appIdInput').val();
+        var scopeId = $('#scopeIdInput').val();
+        var expires = now() + 3600;
+        var salt = generateSalt();
+        var signature = sha256(appId, scopeId, salt, expires, $('#apiKeyInput').val());
+        $.get(getApiUrl(recordingId), {
+          expires: expires,
+          salt: salt,
+          signature: signature
+        }, function (result) {
+          console.log('Got status: ' + JSON.stringify(result));
+          showRecording(result.result);
+        }, 'json');
+      } else {
+        console.log('No recordingId!');
+      }
+    });
+
+    $('#descriptionButton').click(function () {
+      var recordingId = $('#recIdInput').val();
+      if (recordingId) {
+        var appId = $('#appIdInput').val();
+        var scopeId = $('#scopeIdInput').val();
+        var expires = now() + 3600;
+        var salt = generateSalt();
+        var signature = sha256(appId, scopeId, salt, expires, $('#apiKeyInput').val());
+        $.get(getApiUrl(recordingId + '/description'), {
+          expires: expires,
+          salt: salt,
+          signature: signature
+        }).success(onRecordingDescription);
+      } else {
+        console.log('No recordingId!');
+      }
+    }).attr('disabled', 'disabled');
+
+    // fill in activity table header
+    var $tableHeader = $('#activityTableHeader');
+    $.each(ACTIVITY_FIELDS, function (i, field) {
+      $tableHeader.append($('<th>' + field + '</th>'));
+    });
+  });
+</script>
+</body>
+</html>
