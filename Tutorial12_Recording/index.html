@@ -76,6 +76,7 @@
                 <button class="btn btn-danger" id="recButton">REC</button>
                 <button class="btn btn-info" id="getButton">STATUS</button>
                 <button class="btn btn-success" id="descriptionButton">DESCRIPTION</button>
+                <button class="btn btn-danger" id="deleteButton">DELETE</button>
               </div>
             </div>
           </div>
@@ -147,7 +148,7 @@
     function showRecording (recording) {
       $('#recordingCode').text(JSON.stringify(recording, undefined, 2));
       $('#recIdInput').val(recording.id);
-      if (recording.status == 'READY') {
+      if (recording.status != 'RECORDING') {
         $('#descriptionButton').removeAttr('disabled');
       } else {
         $('#descriptionButton').attr('disabled', 'disabled');
@@ -197,9 +198,19 @@
         var tr = $('<tr></tr>');
         $.each(ACTIVITY_FIELDS, function (j, field) {
           if (field == 'filePath') {
-            tr.append($('<td><a target="_blank" href="' + row[field] + '">open</a></td>'));
+            if (row[field]) {
+              tr.append($('<td><a target="_blank" href="' + row[field] + '">open</a></td>'));
+            } else {
+              tr.append($('<td></td>'));
+            }
           } else {
-            tr.append($('<td>' + row[field] + '</td>'));
+            var v = row[field];
+            if (row[field] === true) {
+              v = '<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>';
+            } else if (row[field] === false) {
+              v = '<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>';
+            }
+            tr.append($('<td>' + v + '</td>'));
           }
         });
         $tableBody.append(tr);
@@ -255,6 +266,27 @@
         console.log('No recordingId!');
       }
     }).attr('disabled', 'disabled');
+
+    $('#deleteButton').click(function () {
+      var recordingId = $('#recIdInput').val();
+      if (recordingId) {
+        var appId = $('#appIdInput').val();
+        var scopeId = $('#scopeIdInput').val();
+        var expires = now() + 3600;
+        var salt = generateSalt();
+        var signature = sha256(appId, scopeId, salt, expires, $('#apiKeyInput').val());
+        $.post(getApiUrl(recordingId + '/delete'), {
+          expires: expires,
+          salt: salt,
+          signature: signature
+        }, function (result) {
+          console.log('Got status: ' + JSON.stringify(result));
+          showRecording(result.result);
+        }, 'json');
+      } else {
+        console.log('No recordingId!');
+      }
+    });
 
     // fill in activity table header
     var $tableHeader = $('#activityTableHeader');

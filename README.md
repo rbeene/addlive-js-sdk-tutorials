@@ -368,3 +368,8 @@ Tutorial 11 - Loading with AMD
 
 In this tutorial we will be showing you how to load the SDK using AMD
 (Asynchronous Module Definition).
+
+Tutorial 12 - Recording
+--------------------------
+
+This tutorial is an example application that uses Recording API.
