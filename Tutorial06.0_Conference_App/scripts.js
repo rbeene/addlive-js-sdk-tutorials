@@ -273,33 +273,34 @@
     // 1. Disable the connect button to avoid a cascade of connect requests
     $('#connectBtn').unbind('click').addClass('disabled');
 
-    // 2. Get the scope id and generate the user id.
-    scopeId = $('#scopeIdTxtField').val();
-
-    // assuming the genRandomUserId is exposed via ADLT namespace.
-    // (check shared-assets/scripts.js)
     userId = ADLT.genRandomUserId();
+    // 2. Get the scope id and generate the user id.
+    var scopeId = $.getJSON("http://localhost:3000/conferences/1", function(data) {
+      scopeId = data.data.uuid;
+      $("#scopeIdTxtField").val(scopeId);
+      var connDescriptor =  genConnectionDescriptor(scopeId, userId);
 
-    // 3. Define the result handler - delegates the processing to
-    // the postConnectHandler
-    var connDescriptor = genConnectionDescriptor(scopeId, userId);
+      /**
+       *
+       * @param {ADL.MediaConnection} mConn
+       */
+      var onSucc = function (mConn) {
+        mediaConnection = mConn;
+        postConnectHandler();
+      };
 
-    /**
-     *
-     * @param {ADL.MediaConnection} mConn
-     */
-    var onSucc = function (mConn) {
-      mediaConnection = mConn;
-      postConnectHandler();
-    };
+      // 4. Define the error handler - enabled the connect button again
+      var onErr = function () {
+        $('#connectBtn').click(connect).removeClass('disabled');
+      };
 
-    // 4. Define the error handler - enabled the connect button again
-    var onErr = function () {
-      $('#connectBtn').click(connect).removeClass('disabled');
-    };
+      // 5. Request the SDK to establish a connection
+      debugger;
+      ADL.getService().connect(ADL.r(onSucc, onErr), connDescriptor);
+    });
 
-    // 5. Request the SDK to establish a connection
-    ADL.getService().connect(ADL.r(onSucc, onErr), connDescriptor);
+      // 3. Define the result handler - delegates the processing to
+      // the postConnectHandler
   }
 
   function disconnect() {
@@ -360,11 +361,10 @@
   function genConnectionDescriptor(scopeId, userId) {
     // Prepare the connection descriptor by cloning the configuration and
     // updating the URL and the token.
-    var connDescriptor = $.extend({}, CONNECTION_CONFIGURATION);
-    connDescriptor.scopeId = scopeId;
-    connDescriptor.authDetails = ADLT.genAuth(scopeId, userId);
-    connDescriptor.autopublishAudio = $('#publishAudioChckbx').is(':checked');
-    connDescriptor.autopublishVideo = $('#publishVideoChckbx').is(':checked');
+    $.getJSON(("http://localhost:3000/attendances/" + userId), function(data){
+      debugger;
+      return data;
+    });
     return connDescriptor;
   }
 

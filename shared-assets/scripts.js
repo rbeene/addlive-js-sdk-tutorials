@@ -27,11 +27,11 @@
     };
   }
 
-  ADLT.SCOPE_ID = 'SomeScopePlsChangeMe'; // Put your scope here;
+  ADLT.SCOPE_ID = 'real'; // Put your scope here;
 
-  ADLT.APP_ID = -1; // Put your app Id here;
+  ADLT.APP_ID = 629; // Put your app Id here;
 
-  ADLT.API_KEY = ''; // Put your API key here;
+  ADLT.API_KEY = 'ADL_YfSWPRZrfZRQn8kpex5NOIedWdukRuNEETDZwnyIu3ufVGbThZ7FYic'; // Put your API key here;
 
   function _nop() {
   }
@@ -170,7 +170,7 @@
   };
 
   ADLT.genRandomUserId = function () {
-    return Math.floor(Math.random() * 10000);
+    return 1;
   };
 
   ADLT.randomString = function (len, charSet) {
@@ -190,26 +190,10 @@
    * please refer to: http://www.addlive.com/docs.html#authentication
    */
   ADLT.genAuth = function (scopeId, userId) {
-
-    // New Auth API
-    var dateNow = new Date();
-    var now = Math.floor((dateNow.getTime() / 1000));
-    var authDetails = {
-      // Token valid 5 mins
-      expires:now + (5 * 60),
-      userId:userId,
-      salt:ADLT.randomString(100)
-    };
-    var signatureBody =
-        ADLT.APP_ID +
-            scopeId +
-            userId +
-            authDetails.salt +
-            authDetails.expires +
-            ADLT.API_KEY;
-    authDetails.signature =
-        w.CryptoJS.SHA256(signatureBody).toString(w.CryptoJS.enc.Hex).toUpperCase();
-    return authDetails;
+    $.getJSON(("http://localhost:3000/attendances/" + userId), function(data){
+      debugger;
+      return data;
+    });
   };
 
   // Export the ADLT namespace
